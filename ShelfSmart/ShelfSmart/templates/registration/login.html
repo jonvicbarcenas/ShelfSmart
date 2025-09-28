@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookWorm Library - Sign In</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="logo">
+                <div class="logo-dots">
+                    <div class="dot dot-1"></div>
+                    <div class="dot dot-2"></div>
+                    <div class="dot dot-3"></div>
+                    <div class="dot dot-4"></div>
+                    <div class="dot dot-5"></div>
+                    <div class="dot dot-6"></div>
+                    <div class="dot dot-7"></div>
+                </div>
+            </div>
+            
+            <h1 class="welcome-title">Welcome Back !!</h1>
+            <p class="welcome-subtitle">Please enter your credentials to log in</p>
+            
+            <form id="loginForm" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" class="form-input" name="username" placeholder="Username" required>
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" class="form-input" name="password" placeholder="Password" required>
+                </div>
+
+                <div class="forgot-password-container">
+                    <a href="{% url 'password_reset' %}" class="forgot-password">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="btn-signin">SIGN IN</button>
+            </form>
+        </div>
+        
+        <div class="right-panel">
+            <div class="logo">
+                <div class="logo-dots">
+                    <div class="dot dot-1"></div>
+                    <div class="dot dot-2"></div>
+                    <div class="dot dot-3"></div>
+                    <div class="dot dot-4"></div>
+                    <div class="dot dot-5"></div>
+                    <div class="dot dot-6"></div>
+                    <div class="dot dot-7"></div>
+                </div>
+            </div>
+            
+            <h2 class="brand-title">ShelfSmart</h2>
+            <p class="brand-subtitle">LIBRARY</p>
+            
+            <p class="signup-text">New to our platform? Sign Up now.</p>
+            
+            <button class="btn-signup">SIGN UP</button>
+        </div>
+    </div>
+
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+.left-panel {
+    flex: 1;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.right-panel {
+    flex: 1;
+    background: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    border-radius: 2rem 0 0 2rem;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.logo-dots {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.dot {
+    position: absolute;
+    background: #333;
+    border-radius: 50%;
+}
+
+.right-panel .dot {
+    background: #fff;
+}
+
+/* Logo dot positions */
+.dot-1 { width: 20px; height: 20px; top: 20px; left: 20px; }
+.dot-2 { width: 12px; height: 12px; top: 15px; left: 45px; }
+.dot-3 { width: 8px; height: 8px; top: 35px; left: 50px; }
+.dot-4 { width: 14px; height: 14px; top: 45px; left: 25px; }
+.dot-5 { width: 10px; height: 10px; top: 10px; left: 10px; }
+.dot-6 { width: 6px; height: 6px; top: 50px; left: 45px; }
+.dot-7 { width: 8px; height: 8px; top: 5px; left: 35px; }
+
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-subtitle {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.form-group {
+    width: 320px;
+    margin-bottom: 1.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background: #fff;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #333;
+}
+
+.form-input::placeholder {
+    color: #999;
+}
+
+.forgot-password-container {
+    width: 320px;
+    text-align: right;
+    margin-bottom: 2rem;
+}
+
+.forgot-password {
+    color: #333;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-block;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.btn-signin {
+    width: 320px;
+    padding: 1rem;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-signin:hover {
+    background: #333;
+}
+
+.brand-title {
+    font-size: 3rem;
+    font-weight: 300;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.brand-subtitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.2em;
+    margin-bottom: 3rem;
+}
+
+.signup-text {
+    color: #ccc;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.btn-signup {
+    padding: 1rem 6rem;
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-signup:hover {
+    background: white;
+    color: #1a1a1a;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .right-panel {
+        border-radius: 0;
+        order: -1;
+        flex: 0.4;
+    }
+    
+    .left-panel {
+        flex: 0.6;
+    }
+    
+    .welcome-title {
+        font-size: 2rem;
+    }
+    
+    .brand-title {
+        font-size: 2rem;
+    }
+}
