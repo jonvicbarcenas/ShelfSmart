@@ -17,7 +17,7 @@
       .then(r=>r.json())
       .then(data=>{
         if(data.success){
-          window.location.href = data.redirect_url || '../login/';
+          window.location.href = data.redirect_url || '/login/'; // updated login redirect URL
         } else {
           alert(data.error || 'Signup failed. Please try again.');
         }
@@ -52,7 +52,7 @@
       e.preventDefault();
       if (rightPanel) rightPanel.classList.add('animate__animated','animate__fadeOutRight');
       if (leftPanel) leftPanel.classList.add('animate__animated','animate__fadeOutLeft');
-      setTimeout(()=>{ window.location.href = '../login/'; }, 450);
+      setTimeout(()=>{ window.location.href = '/login/'; }, 450);
     });
   }
 })();
