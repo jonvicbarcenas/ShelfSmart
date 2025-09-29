@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+<div class="dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">BookWorm<br><small>Library</small></div>
+    <nav>
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Catalog</a>
+      <a href="#">Books</a>
+      <a href="#">Users</a>
+      <a href="#">Branches</a>
+    </nav>
+    <div class="logout">Log Out</div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div class="user-info">
+        <span class="user">{{ user_name }}</span>
+        <span class="role">{{ role }}</span>
+      </div>
+      <div class="datetime">12:30 PM <br> Sep 30, 2025</div>
+    </header>
+
+    <section class="content">
+      <div class="chart"></div>
+
+      <div class="stats">
+        {% if role == "Admin" or role == "User" %}
+          <div class="card">👥 <strong>{{ total_users }}</strong><br>Total User Base</div>
+          <div class="card">📚 <strong>{{ total_books }}</strong><br>Total Book Count</div>
+          <div class="card">🏢 <strong>{{ branch_count }}</strong><br>Branch Count</div>
+        {% endif %}
+      </div>
+
+      <div class="widgets">
+        <div class="widget">
+          <h3>Overdue Borrowers</h3>
+          <ul>
+            {% for borrower in overdue_borrowers %}
+              <li>👤 {{ borrower }}</li>
+            {% empty %}
+              <li>No overdue borrowers.</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        {% if role == "Admin" %}
+        <div class="widget">
+          <h3>BookWorm Admins</h3>
+          <ul>
+            {% for admin in admins %}
+              <li>👤 {{ admin }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div class="widget">
+          <h3>Branch Network</h3>
+          <ul>
+            {% for branch in branches %}
+              <li>🏢 {{ branch }}</li>
+            {% empty %}
+              <li>No branches available.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>
