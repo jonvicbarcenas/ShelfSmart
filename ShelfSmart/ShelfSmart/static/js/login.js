@@ -53,3 +53,8 @@ document.querySelectorAll('.form-input').forEach(input => {
         this.style.boxShadow = 'none';
     });
 });
+
+// Add signup button functionality
+document.querySelector('.btn-signup').addEventListener('click', function() {
+    window.location.href = '/accounts/signup/';
+});
