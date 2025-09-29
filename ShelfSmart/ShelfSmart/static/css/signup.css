@@ -1,0 +1,66 @@
+@import url('login.css');
+
+/* Tweaks for the signup composition and animation */
+.container {
+  overflow: hidden;
+}
+
+/* Make the dark panel (placed first) rounded on its right side */
+.right-panel.dark { border-radius: 0 2rem 2rem 0; }
+
+/* Two-column form layout on desktop */
+.signup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 320px);
+  gap: 1rem 2rem;
+  justify-content: center;
+  margin: 2rem 0 1rem;
+}
+
+.btn-primary-wide {
+  width: 540px;
+  max-width: calc(100vw - 4rem);
+  padding: 1rem;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .3s ease, transform .3s ease;
+}
+
+.btn-primary-wide:hover { background:#333; }
+
+/* Outline button to match preview for switch panel */
+.btn-signin-outline {
+  padding: 1rem 6rem;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.btn-signin-outline:hover{ background:#fff; color:#1a1a1a; }
+
+/* Title row */
+.top-title{
+  display:flex; align-items:center; gap:1rem; justify-content:center;
+}
+.logo.small{ width:48px; height:48px; margin:0; }
+
+/* Animation: slide from right when opening signup */
+@keyframes slideInRight { from { opacity:.0; transform: translateX(40px);} to { opacity:1; transform: translateX(0);} }
+.slide-from-right { animation: slideInRight .45s ease-out both; }
+
+/* Exit animation when going back to login */
+@keyframes slideOutRight { from { opacity:1; transform: translateX(0);} to { opacity:0; transform: translateX(40px);} }
+.slide-out-right { animation: slideOutRight .35s ease-in forwards; }
+
+/* Responsive: stack fields on small screens */
+@media(max-width: 900px){
+  .signup-grid{ grid-template-columns: 1fr; justify-items:center; }
+  .signup-grid .form-group{ width: 320px; }
+  .btn-primary-wide{ width: 320px; }
+}
