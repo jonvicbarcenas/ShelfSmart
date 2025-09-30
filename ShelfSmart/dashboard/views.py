@@ -1,5 +1,8 @@
 from django.shortcuts import render
 
+def userborrow(request):
+    return render(request, 'userborrow.html')
+
 def dashboard_view(request):
     # Simulate getting user role from DB (change this to "Admin" to test admin view)
     role = "User"
