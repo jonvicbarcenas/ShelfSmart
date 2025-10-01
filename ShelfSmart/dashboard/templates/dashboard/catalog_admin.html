@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog Admin | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/catalog_admin.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-dots">
+                <div class="dot dot-1"></div>
+                <div class="dot dot-2"></div>
+                <div class="dot dot-3"></div>
+                <div class="dot dot-4"></div>
+                <div class="dot dot-5"></div>
+                <div class="dot dot-6"></div>
+                <div class="dot dot-7"></div>
+            </div>
+            <h2 class="brand-title">ShelfSmart</h2>
+            <p class="brand-subtitle">LIBRARY</p>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'catalog_admin' %}" class="nav-link active">
+                <i class="fas fa-book-open"></i>
+                <span>Catalog</span>
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fas fa-book"></i>
+                <span>Books</span>
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+        </nav>
+
+        <div class="logout">
+            <a href="#" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name">Jascha B. Base</div>
+                    <div class="user-role">Admin</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="time">12:29 PM</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <h1 class="page-title">Catalog Management</h1>
+            
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="borrowed">Borrowed Books</button>
+                <button class="tab-btn" data-tab="overdue">Overdue Borrowers</button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search by ID">
+            </div>
+
+            <!-- Borrowed Books Table -->
+            <div class="table-container tab-content active" id="borrowed-tab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User ID</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Date & Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in borrowed_books %}
+                        <tr>
+                            <td>{{ book.id }}</td>
+                            <td>{{ book.user_id }}</td>
+                            <td>{{ book.amount }}</td>
+                            <td>{{ book.due_date }}</td>
+                            <td>{{ book.date_time }}</td>
+                            <td>
+                                <a href="#" class="delete-btn">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No borrowed books found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Overdue Borrowers Table -->
+            <div class="table-container tab-content" id="overdue-tab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User ID</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Date & Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in overdue_books %}
+                        <tr>
+                            <td>{{ book.id }}</td>
+                            <td>{{ book.user_id }}</td>
+                            <td>{{ book.amount }}</td>
+                            <td>{{ book.due_date }}</td>
+                            <td>{{ book.date_time }}</td>
+                            <td>
+                                <a href="#" class="delete-btn">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No overdue books found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/catalog_admin.js' %}"></script>
+</body>
+</html>
