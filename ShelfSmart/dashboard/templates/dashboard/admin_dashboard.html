@@ -27,7 +27,7 @@
                 <p class="brand-subtitle">LIBRARY</p>
             </div>
             <nav class="nav-menu">
-                <a href="#" class="nav-link active">
+                <a href="{% url 'dashboard' %}" class="nav-link active">
                     <i class="fas fa-chart-pie"></i>
                     <span>Dashboard</span>
                 </a>
@@ -35,7 +35,7 @@
                     <i class="fas fa-book-open"></i>
                     <span>Catalog</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="{% url 'book_management' %}" class="nav-link">
                     <i class="fas fa-book"></i>
                     <span>Books</span>
                 </a>
@@ -66,7 +66,10 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <div class="time">12:29 PM</div>
+                    <div class="time-date-container">
+                        <div class="time">12:29 PM</div>
+                        <div class="current-date">Oct 02, 2025</div>
+                    </div>
                 </div>
             </div>
 
