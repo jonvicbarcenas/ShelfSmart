@@ -17,3 +17,7 @@ def dashboard_view(request):
         "admins": ["Nisal Gunasekara (Active)", "Sithija Perera (Inactive)"],
     }
     return render(request, "dashboard/admin_dashboard.html", context)
+
+
+def catalog_admin(request):
+    return render(request, "dashboard/catalog_admin.html")
