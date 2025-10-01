@@ -12,12 +12,8 @@ def dashboard_view(request):
         "role": role,
         "total_users": "150",
         "total_books": "1500",
-        "branch_count": "10",
+        "books_in_circulation": "045",
         "overdue_borrowers": ["Sasmith Gunasekara (ID: 10)", "Dulani Perera (ID: 12)"],
         "admins": ["Nisal Gunasekara (Active)", "Sithija Perera (Inactive)"],
-        "branches": [
-            "BookWorm - Matara (ID:1)",
-            "BookWorm - Colombo (ID:2)"
-        ],
     }
-    return render(request, "dashboard/dashboard.html", context)
+    return render(request, "dashboard/admin_dashboard.html", context)
