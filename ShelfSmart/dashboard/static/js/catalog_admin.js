@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Tab Switching
     initializeTabs();
+    
+    // Initialize Current Date Display
+    initializeDateDisplay();
 });
 
 function initializeTimeUpdates() {
@@ -22,6 +25,24 @@ function initializeTimeUpdates() {
     // Update time immediately and then every minute
     updateTime();
     setInterval(updateTime, 60000);
+}
+
+function initializeDateDisplay() {
+    function updateDate() {
+        const now = new Date();
+        const dateElement = document.querySelector('.current-date');
+        if (dateElement) {
+            dateElement.textContent = now.toLocaleDateString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric'
+            });
+        }
+    }
+
+    // Update date immediately and then every minute
+    updateDate();
+    setInterval(updateDate, 60000);
 }
 
 function initializeTabs() {
