@@ -21,3 +21,6 @@ def dashboard_view(request):
 
 def catalog_admin(request):
     return render(request, "dashboard/catalog_admin.html")
+
+def book_management(request):
+    return render(request, "dashboard/book_management.html")

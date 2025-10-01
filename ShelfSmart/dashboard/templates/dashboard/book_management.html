@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Management | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-dots">
+                <div class="dot dot-1"></div>
+                <div class="dot dot-2"></div>
+                <div class="dot dot-3"></div>
+                <div class="dot dot-4"></div>
+                <div class="dot dot-5"></div>
+                <div class="dot dot-6"></div>
+                <div class="dot dot-7"></div>
+            </div>
+            <h2 class="brand-title">ShelfSmart</h2>
+            <p class="brand-subtitle">LIBRARY</p>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'catalog_admin' %}" class="nav-link">
+                <i class="fas fa-book-open"></i>
+                <span>Catalog</span>
+            </a>
+            <a href="{% url 'book_management' %}" class="nav-link active">
+                <i class="fas fa-book"></i>
+                <span>Books</span>
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+        </nav>
+
+        <div class="logout">
+            <a href="#" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name">Jascha B. Base</div>
+                    <div class="user-role">Admin</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="time">3:05 AM</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="content-header">
+                <h1 class="page-title">Book Management</h1>
+                <div class="header-actions">
+                    <div class="current-date"></div>
+                    <button class="add-book-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Book
+                    </button>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="search-input" placeholder="Search by ID or Type">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Books Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Language</th>
+                            <th>Availability</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in books %}
+                        <tr>
+                            <td>{{ book.id }}</td>
+                            <td>{{ book.name }}</td>
+                            <td>{{ book.type }}</td>
+                            <td>{{ book.language }}</td>
+                            <td>
+                                <span class="status-badge {% if book.availability == 'Available' %}available{% else %}borrowed{% endif %}">
+                                    {{ book.availability }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn edit-btn" title="Edit">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="action-btn save-btn" title="Save">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No books found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/book_management.js' %}"></script>
+</body>
+</html>
