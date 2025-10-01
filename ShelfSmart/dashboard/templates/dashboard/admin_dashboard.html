@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfSmart Library Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <!-- Add FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-dots">
+                    <div class="dot dot-1"></div>
+                    <div class="dot dot-2"></div>
+                    <div class="dot dot-3"></div>
+                    <div class="dot dot-4"></div>
+                    <div class="dot dot-5"></div>
+                    <div class="dot dot-6"></div>
+                    <div class="dot dot-7"></div>
+                </div>
+                <h2 class="brand-title">ShelfSmart</h2>
+                <p class="brand-subtitle">LIBRARY</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-link active">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>Catalog</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-book"></i>
+                    <span>Books</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+            </nav>
+            <div class="logout">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">Jascha B. Base</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="time">12:29 PM</div>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <!-- Left Section (Chart and Stats) -->
+                <div class="left-section">
+                    <!-- Chart -->
+                    <div class="chart-section">
+                        <canvas id="borrowChart"></canvas>
+                        <div class="chart-legend">
+                            <div class="legend-box">
+                                <div class="legend-left">
+                                    <div class="logo-dots small">
+                                    <div class="dot dot-1"></div>
+                                    <div class="dot dot-2"></div>
+                                    <div class="dot dot-3"></div>
+                                    <div class="dot dot-4"></div>
+                                    <div class="dot dot-5"></div>
+                                    <div class="dot dot-6"></div>
+                                    <div class="dot dot-7"></div>
+                                </div>
+                                </div>
+                                <div class="legend-divider"></div>
+                                <div class="legend-right">
+                                    <div class="legend-item">
+                                        <span class="legend-dot borrowed"></span>
+                                        <span>Total Borrowed Books</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-dot returned"></span>
+                                        <span>Total Returned Books</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Section (Stats and Lists) -->
+                <div class="right-section">
+                    <!-- Stats Cards -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-content">
+                                <div class="stat-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <h3>0150</h3>
+                                    <p>Total User Base</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-content">
+                                <div class="stat-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <h3>01500</h3>
+                                    <p>Total Book Count</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                    <!-- Main Sections -->
+                    <div class="main-sections">
+                        <!-- Overdue Borrowers -->
+                        <div class="section-container">
+                            <h2>Overdue Borrowers</h2>
+                            <div class="list">
+                                {% for i in '12345'|make_list %}
+                                <div class="list-item">
+                                    <div class="list-item-content">
+                                        <div class="user-avatar">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="info-text">
+                                            <h4>Person</h4>
+                                            <p>Borrowed ID : 10</p>
+                                        </div>
+                                    </div>
+                                    <button class="edit-btn" title="Edit">
+                                        <i class="fas fa-arrows-rotate"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- BookWorm Admins -->
+                        <div class="section-container">
+                            <h2>BookWorm Admins</h2>
+                            <div class="list">
+                                {% for i in '1234'|make_list %}
+                                <div class="list-item">
+                                    <div class="list-item-content">
+                                        <div class="admin-avatar">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="info-text">
+                                            <h4>Nisal Gunasekara</h4>
+                                            <p>Admin ID : 1</p>
+                                        </div>
+                                        <span class="status-dot active"></span>
+                                    </div>
+                                    <button class="edit-btn" title="Edit">
+                                        <i class="fas fa-arrows-rotate"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/admin_dashboard.js' %}"></script>
+</body>
+</html>
