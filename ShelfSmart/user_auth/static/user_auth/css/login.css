@@ -107,6 +107,25 @@ body {
     color: #999;
 }
 
+.form-errors {
+    width: 320px;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: #ffecec;
+    color: #b30019;
+    font-size: 0.95rem;
+}
+
+.field-error {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #b30019;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
 .forgot-password-container {
     width: 320px;
     text-align: right;

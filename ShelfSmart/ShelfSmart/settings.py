@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ShelfSmart',
     'dashboard',
+    'user_auth',
 ]
 
 MIDDLEWARE = [
@@ -80,13 +81,24 @@ WSGI_APPLICATION = 'ShelfSmart.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default="sqlite:///db.sqlite3",
-        conn_max_age=600,   # keep connections alive
-        ssl_require=True    # enforce SSL
-    )
-}
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=DATABASE_URL.startswith("postgres")
+        )
+    }
+else:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            "sqlite:///db.sqlite3",
+            conn_max_age=0,
+            ssl_require=False
+        )
+    }
 
 
 # Password validation
@@ -125,9 +137,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+STATICFILES_DIRS = []
+
+project_static_dir = BASE_DIR / 'static'
+if project_static_dir.exists():
+    STATICFILES_DIRS.append(project_static_dir)
+
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'user_auth:login'
+LOGIN_URL = 'user_auth:login'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
