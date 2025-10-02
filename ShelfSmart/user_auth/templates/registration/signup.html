@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShelfSmart Library - Sign Up</title>
+  <link rel="stylesheet" href="{% static 'user_auth/css/signup.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="right-panel dark">
+      <div class="logo">
+        <div class="logo-dots">
+          <div class="dot dot-1"></div>
+          <div class="dot dot-2"></div>
+          <div class="dot dot-3"></div>
+          <div class="dot dot-4"></div>
+          <div class="dot dot-5"></div>
+          <div class="dot dot-6"></div>
+          <div class="dot dot-7"></div>
+        </div>
+      </div>
+
+      <h2 class="brand-title">ShelfSmart</h2>
+      <p class="brand-subtitle">LIBRARY</p>
+
+      <p class="signup-text">Already have Account? Sign In now.</p>
+      <a class="btn-signin-outline" href="{% url 'user_auth:login' %}">SIGN IN</a>
+    </div>
+
+    <div class="left-panel light">
+      <div class="top-title">
+        <h1 class="welcome-title">Sign Up</h1>
+        <div class="logo small">
+          <div class="logo-dots">
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+            <div class="dot dot-3"></div>
+            <div class="dot dot-4"></div>
+            <div class="dot dot-5"></div>
+            <div class="dot dot-6"></div>
+            <div class="dot dot-7"></div>
+          </div>
+        </div>
+      </div>
+      <p class="welcome-subtitle center">Please provide your information to sign up.</p>
+
+      <form id="signupForm" method="post" class="signup-grid" novalidate>
+        {% csrf_token %}
+        <div class="form-errors" role="alert" {% if not form.errors %}hidden{% endif %}>
+          {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          {% elif form.errors %}
+            <p>Please correct the highlighted fields and try again.</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          {{ form.first_name }}
+          <div class="field-error" data-field="first_name">
+            {% for error in form.first_name.errors %}<span>{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          {{ form.last_name }}
+          <div class="field-error" data-field="last_name">
+            {% for error in form.last_name.errors %}<span>{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          {{ form.contact }}
+          <div class="field-error" data-field="contact">
+            {% for error in form.contact.errors %}<span>{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          {{ form.email }}
+          <div class="field-error" data-field="email">
+            {% for error in form.email.errors %}<span>{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          {{ form.username }}
+          <div class="field-error" data-field="username">
+            {% for error in form.username.errors %}<span>{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          {{ form.password1 }}
+          <div class="field-error" data-field="password1">
+            {% for error in form.password1.errors %}<span>{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          {{ form.password2 }}
+          <div class="field-error" data-field="password2">
+            {% for error in form.password2.errors %}<span>{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+      </form>
+
+      <button type="submit" form="signupForm" class="btn-primary-wide">SIGN UP</button>
+    </div>
+  </div>
+
+  <script src="{% static 'user_auth/js/signup.js' %}"></script>
+</body>
+</html>
