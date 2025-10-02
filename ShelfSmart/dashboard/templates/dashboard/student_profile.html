@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile - ShelfSmart Library</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-dots">
+                    <div class="dot dot-1"></div>
+                    <div class="dot dot-2"></div>
+                    <div class="dot dot-3"></div>
+                    <div class="dot dot-4"></div>
+                    <div class="dot dot-5"></div>
+                    <div class="dot dot-6"></div>
+                    <div class="dot dot-7"></div>
+                </div>
+                <h2 class="brand-title">ShelfSmart</h2>
+                <p class="brand-subtitle">LIBRARY</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="{% url 'student_dashboard' %}" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'catalog_student' %}" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>Catalog</span>
+                </a>
+                <a href="{% url 'student_profile' %}" class="nav-link active">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </nav>
+            <div class="logout">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">Nisal Gunasekara</div>
+                        <div class="user-role">Student</div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="time-date-container">
+                        <div class="time" id="currentTime">12:29 PM</div>
+                        <div class="current-date" id="currentDate">Sep 03, 2025</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <h1 class="profile-title">Student Profile</h1>
+
+                <div class="profile-card">
+                    <!-- Profile Header -->
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h2>Nisal Gunasekara</h2>
+                            <p><i class="fas fa-id-badge"></i> STU-2024-001</p>
+                        </div>
+                    </div>
+
+                    <!-- Profile Form -->
+                    <form id="profileForm" class="profile-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullName">
+                                    <i class="fas fa-user"></i> Full Name
+                                </label>
+                                <input type="text" id="fullName" name="fullName" value="Nisal Gunasekara" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="studentId">
+                                    <i class="fas fa-id-badge"></i> Student ID
+                                </label>
+                                <input type="text" id="studentId" name="studentId" value="STU-2024-001" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">
+                                    <i class="fas fa-envelope"></i> Email Address
+                                </label>
+                                <input type="email" id="email" name="email" value="nisal.gunasekara@bookworm.edu" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">
+                                    <i class="fas fa-phone"></i> Phone Number
+                                </label>
+                                <input type="tel" id="phone" name="phone" value="+1 (555) 123-4567" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="course">
+                                    <i class="fas fa-book"></i> Course
+                                </label>
+                                <input type="text" id="course" name="course" value="Computer Science" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="year">
+                                    <i class="fas fa-calendar"></i> Year
+                                </label>
+                                <input type="text" id="year" name="year" value="3rd Year" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="address">
+                                    <i class="fas fa-map-marker-alt"></i> Address
+                                </label>
+                                <input type="text" id="address" name="address" value="123 University Ave, Campus City" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="editBtn" class="btn btn-primary">Edit Profile</button>
+                            <button type="submit" id="saveBtn" class="btn btn-save" style="display: none;">Save Changes</button>
+                            <button type="button" id="cancelBtn" class="btn btn-cancel" style="display: none;">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/profile.js' %}"></script>
+</body>
+</html>
