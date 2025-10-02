@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'ShelfSmart',
     'dashboard',
     'user_auth',
+    'logout_app',
 ]
 
 MIDDLEWARE = [

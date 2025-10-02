@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Logout - ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'logout_app/css/logout.css' %}">
+</head>
+<body>
+    <main class="logout-confirm">
+        <section class="card">
+            <div class="logo">
+                <div class="logo-dots">
+                    <span class="dot dot-1"></span>
+                    <span class="dot dot-2"></span>
+                    <span class="dot dot-3"></span>
+                    <span class="dot dot-4"></span>
+                    <span class="dot dot-5"></span>
+                    <span class="dot dot-6"></span>
+                    <span class="dot dot-7"></span>
+                </div>
+                <h1 class="brand">ShelfSmart</h1>
+            </div>
+            <h2>Sign out of ShelfSmart?</h2>
+            <p>You're about to log out of your ShelfSmart account. You can always sign back in with your credentials.</p>
+
+            <form method="post" action="{% url 'logout_app:logout' %}" class="actions">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Yes, log me out</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
