@@ -28,5 +28,33 @@ def book_management(request):
 def user_management(request):
     return render(request, "dashboard/user_management.html")
 
+def admin_profile(request):
+    # You can fetch actual admin data from your database here
+    context = {
+        "user_name": "Jascha B. Base",
+        "role": "Admin",
+        "email": "jascha.base@shelfsmart.edu",
+        "phone": "+1 (555) 123-4567",
+        "year": "2025",
+        "address": "123 University Ave, Campus City"
+    }
+    return render(request, "dashboard/admin_profile.html", context)
+
+def student_profile(request):
+    # You can fetch actual student data from your database here
+    context = {
+        "user_name": "Nisal Gunasekara",
+        "student_id": "STU-2024-001",
+        "role": "Student",
+        "email": "nisal.gunasekara@bookworm.edu",
+        "phone": "+1 (555) 123-4567",
+        "course": "Computer Science",
+        "year": "3rd Year",
+        "address": "123 University Ave, Campus City"
+    }
+    return render(request, "dashboard/student_profile.html", context)
+
+
+
 def userborrow(request):
     return render(request, "dashboard/user_borrow.html")
