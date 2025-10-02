@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Management | ShelfSmart</title>
-    <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+    <title>User Management | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/user_management.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -35,11 +35,11 @@
                 <i class="fas fa-book-open"></i>
                 <span>Catalog</span>
             </a>
-            <a href="{% url 'book_management' %}" class="nav-link active">
+            <a href="{% url 'book_management' %}" class="nav-link">
                 <i class="fas fa-book"></i>
                 <span>Books</span>
             </a>
-            <a href="{% url 'user_management' %}" class="nav-link">
+            <a href="{% url 'user_management' %}" class="nav-link active">
                 <i class="fas fa-users"></i>
                 <span>Users</span>
             </a>
@@ -62,56 +62,55 @@
                     <i class="fas fa-user-circle"></i>
                 </div>
                 <div class="user-details">
-                    <div class="user-name">Jascha B. Base</div>
+                    <div class="user-name">Nisal Gunasekara</div>
                     <div class="user-role">Admin</div>
                 </div>
             </div>
             <div class="header-right">
-                <div class="time">3:05 AM</div>
+                <div class="time-date-container">
+                    <div class="time">12:29 PM</div>
+                    <div class="current-date">Sep 02, 2023</div>
+                </div>
+                <button class="settings-btn">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </div>
 
         <div class="content">
             <div class="content-header">
-                <h1 class="page-title">Book Management</h1>
+                <h1 class="page-title">User Management</h1>
                 <div class="header-actions">
-                    <div class="current-date"></div>
-                    <button class="add-book-btn">
+                    <button class="add-user-btn">
                         <i class="fas fa-plus"></i>
-                        Add Book
+                        Add User
                     </button>
                     <div class="search-container">
                         <i class="fas fa-search"></i>
-                        <input type="text" class="search-input" placeholder="Search by ID or Type">
+                        <input type="text" class="search-input" placeholder="Search by ID or Name">
                     </div>
                 </div>
             </div>
 
-            <!-- Books Table -->
+            <!-- Users Table -->
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Type</th>
-                            <th>Language</th>
-                            <th>Availability</th>
+                            <th>Email</th>
+                            <th>Username</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for book in books %}
+                        {% for user in users %}
                         <tr>
-                            <td>{{ book.id }}</td>
-                            <td>{{ book.name }}</td>
-                            <td>{{ book.type }}</td>
-                            <td>{{ book.language }}</td>
-                            <td>
-                                <span class="status-badge {% if book.availability == 'Available' %}available{% else %}borrowed{% endif %}">
-                                    {{ book.availability }}
-                                </span>
-                            </td>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.username }}</td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn edit-btn" title="Edit">
@@ -128,7 +127,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6">No books found.</td>
+                            <td colspan="5">No users found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -138,6 +137,6 @@
     </div>
 </div>
 
-<script src="{% static 'js/book_management.js' %}"></script>
+<script src="{% static 'js/user_management.js' %}"></script>
 </body>
 </html>
