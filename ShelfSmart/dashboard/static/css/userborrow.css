@@ -1,0 +1,119 @@
+/* userborrow.css - styles for userborrow.html page */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+.container {
+  margin: 20px auto;
+  max-width: 1200px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #dee2e6;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #495057;
+  border: 2px solid transparent;
+  border-bottom: none;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+
+.tab.active {
+  border: 2px solid #007bff;
+  border-bottom: none;
+  color: #007bff;
+  border-radius: 8px 8px 0 0;
+  background-color: #e9f0ff;
+}
+
+.search-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.search-container input[type="text"] {
+  padding: 8px 12px;
+  width: 250px;
+  border: 1px solid #ced4da;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-container input[type="text"]:focus {
+  border-color: #007bff;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+  white-space: nowrap;
+}
+
+th {
+  background-color: #f1f3f5;
+  font-weight: 700;
+  color: #495057;
+}
+
+tr:hover {
+  background-color: #f8f9fa;
+}
+
+.action-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.action-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Scrollbar for table wrapper */
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background-color: #ced4da;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background-color: #f1f3f5;
+}
