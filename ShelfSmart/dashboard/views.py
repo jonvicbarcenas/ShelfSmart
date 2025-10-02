@@ -27,3 +27,6 @@ def book_management(request):
 
 def user_management(request):
     return render(request, "dashboard/user_management.html")
+
+def userborrow(request):
+    return render(request, "dashboard/user_borrow.html")
