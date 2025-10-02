@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Time and Date Updates
     initializeTimeAndDateUpdates();
+    
+    // Initialize Logout Link
+    initializeLogoutLink();
 });
 
 function initializeBorrowChart() {
@@ -62,4 +65,14 @@ function initializeTimeAndDateUpdates() {
     // Update time and date immediately and then every minute
     updateTimeAndDate();
     setInterval(updateTimeAndDate, 60000);
+}
+
+function initializeLogoutLink() {
+    const logoutLink = document.querySelector('.logout .nav-link');
+    if (!logoutLink) {
+        return;
+    }
+
+    const logoutUrl = '/logout/';
+    logoutLink.setAttribute('href', logoutUrl);
 }
