@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .alert { padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; }
+        .alert-success { background-color: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
 </head>
 <body>
     <div class="dashboard">
@@ -58,14 +64,13 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Header -->
             <div class="header">
                 <div class="user-info">
                     <div class="user-avatar">
                         <i class="fas fa-user-circle"></i>
                     </div>
                     <div class="user-details">
-                        <div class="user-name">Jascha B. Base</div>
+                        <div class="user-name">{{ user_name|default:"Admin" }}</div>
                         <div class="user-role">Admin</div>
                     </div>
                 </div>
@@ -81,32 +86,42 @@
             <div class="profile-content">
                 <h1 class="profile-title">Admin Profile</h1>
 
+                <!-- Success/Error Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
                 <div class="profile-card">
-                    <!-- Profile Header -->
                     <div class="profile-header">
                         <div class="profile-avatar">
                             <i class="fas fa-user"></i>
                         </div>
                         <div class="profile-info">
-                            <h2>Jascha B. Base</h2>
+                            <h2>{{ user_name|default:"Admin" }}</h2>
                             <p><i class="fas fa-shield-alt"></i> Admin</p>
                         </div>
                     </div>
 
                     <!-- Profile Form -->
-                    <form id="profileForm" class="profile-form">
+                    <form id="profileForm" class="profile-form" method="POST" action="{% url 'admin_profile' %}">
+                        {% csrf_token %}
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="fullName">
                                     <i class="fas fa-user"></i> Full Name
                                 </label>
-                                <input type="text" id="fullName" name="fullName" value="Jascha B. Base" disabled>
+                                <input type="text" id="fullName" name="fullName" value="{{ user_name|default:'' }}" disabled required>
                             </div>
                             <div class="form-group">
                                 <label for="email">
                                     <i class="fas fa-envelope"></i> Email Address
                                 </label>
-                                <input type="email" id="email" name="email" value="jascha.base@shelfsmart.edu" disabled>
+                                <input type="email" id="email" name="email" value="{{ email|default:'' }}" disabled required>
                             </div>
                         </div>
 
@@ -115,13 +130,13 @@
                                 <label for="phone">
                                     <i class="fas fa-phone"></i> Phone Number
                                 </label>
-                                <input type="tel" id="phone" name="phone" value="+1 (555) 123-4567" disabled>
+                                <input type="tel" id="phone" name="phone" value="{{ phone|default:'' }}" disabled>
                             </div>
                             <div class="form-group">
                                 <label for="year">
                                     <i class="fas fa-calendar"></i> Year
                                 </label>
-                                <input type="text" id="year" name="year" value="2025" disabled>
+                                <input type="text" id="year" name="year" value="{{ year|default:'' }}" disabled>
                             </div>
                         </div>
 
@@ -130,14 +145,20 @@
                                 <label for="address">
                                     <i class="fas fa-map-marker-alt"></i> Address
                                 </label>
-                                <input type="text" id="address" name="address" value="123 University Ave, Campus City" disabled>
+                                <input type="text" id="address" name="address" value="{{ address|default:'' }}" disabled>
                             </div>
                         </div>
 
                         <div class="form-actions">
-                            <button type="button" id="editBtn" class="btn btn-primary">Edit Profile</button>
-                            <button type="submit" id="saveBtn" class="btn btn-save" style="display: none;">Save Changes</button>
-                            <button type="button" id="cancelBtn" class="btn btn-cancel" style="display: none;">Cancel</button>
+                            <button type="button" id="editBtn" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                            <button type="submit" id="saveBtn" class="btn btn-save" style="display: none;">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <button type="button" id="cancelBtn" class="btn btn-cancel" style="display: none;">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -145,6 +166,80 @@
         </div>
     </div>
 
-    <script src="{% static 'js/profile.js' %}"></script>
+    <script>
+        // Update time and date
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', minute: '2-digit', hour12: true 
+            });
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { 
+                month: 'short', day: '2-digit', year: 'numeric' 
+            });
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+
+        // Profile form handling
+        const form = document.getElementById('profileForm');
+        const editBtn = document.getElementById('editBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const inputs = form.querySelectorAll('input:not([type="hidden"])');
+        
+        let originalValues = {};
+
+        // Store original values
+        inputs.forEach(input => {
+            originalValues[input.name] = input.value;
+        });
+
+        // Edit button click
+        editBtn.addEventListener('click', function() {
+            inputs.forEach(input => input.disabled = false);
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-flex';
+            cancelBtn.style.display = 'inline-flex';
+        });
+
+        // Cancel button click
+        cancelBtn.addEventListener('click', function() {
+            inputs.forEach(input => {
+                input.value = originalValues[input.name];
+                input.disabled = true;
+            });
+            editBtn.style.display = 'inline-flex';
+            saveBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+        });
+
+        // Form validation
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            
+            if (!name || !email) {
+                e.preventDefault();
+                alert('Name and Email are required fields!');
+                return false;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Please enter a valid email address!');
+                return false;
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
 </body>
 </html>

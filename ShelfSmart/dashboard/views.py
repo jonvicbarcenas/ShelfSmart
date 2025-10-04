@@ -5,6 +5,17 @@ from datetime import datetime, date
 from .supabase_client import supabase
 import json
 
+def get_current_user_name(request):
+    """Helper function to get current user's name from session"""
+    user_id = request.session.get('user_id', 1)
+    try:
+        user = supabase.table("users").select("name").eq("id", user_id).execute()
+        if user.data:
+            return user.data[0].get("name", "Admin")
+    except:
+        pass
+    return "Admin"
+
 def dashboard_view(request):
     """Admin Dashboard with real-time data from Supabase"""
     try:
@@ -66,6 +77,46 @@ def dashboard_view(request):
 
 def catalog_admin(request):
     """Catalog management - Borrowed and Overdue books"""
+    if request.method == "POST":
+        action = request.POST.get("action")
+        
+        try:
+            if action == "return":
+                # Mark book as returned
+                borrow_id = request.POST.get("borrow_id")
+                from datetime import date
+                
+                # Update borrow record
+                supabase.table("borrow_records").update({
+                    "is_returned": True,
+                    "return_date": date.today().isoformat()
+                }).eq("id", borrow_id).execute()
+                
+                # Get the book_id to update availability
+                borrow_record = supabase.table("borrow_records")\
+                    .select("book_id")\
+                    .eq("id", borrow_id)\
+                    .execute()
+                
+                if borrow_record.data:
+                    book_id = borrow_record.data[0]['book_id']
+                    
+                    # Update book availability
+                    book = supabase.table("books").select("available_copies").eq("id", book_id).execute()
+                    if book.data:
+                        new_available = book.data[0]['available_copies'] + 1
+                        supabase.table("books").update({
+                            "available_copies": new_available,
+                            "availability": "Available"
+                        }).eq("id", book_id).execute()
+                
+                messages.success(request, "Book marked as returned successfully!")
+                
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
+        
+        return redirect("catalog_admin")
+    
     try:
         # Fetch borrowed books
         borrowed_books = supabase.table("borrow_records")\
@@ -73,15 +124,23 @@ def catalog_admin(request):
             .eq("is_returned", False)\
             .execute()
 
-        # Fetch overdue books
+        # Fetch overdue books with days overdue calculation
         today = date.today().isoformat()
         overdue_books = supabase.table("borrow_records")\
             .select("*, users(name, id), books(title, id)")\
             .lt("due_date", today)\
             .eq("is_returned", False)\
             .execute()
+        
+        # Calculate days overdue for each record
+        from datetime import datetime
+        for record in overdue_books.data if overdue_books.data else []:
+            due_date = datetime.fromisoformat(record['due_date'])
+            days_overdue = (datetime.now() - due_date).days
+            record['days_overdue'] = days_overdue
 
         context = {
+            "user_name": get_current_user_name(request),
             "borrowed_books": borrowed_books.data if borrowed_books.data else [],
             "overdue_books": overdue_books.data if overdue_books.data else [],
         }
@@ -91,6 +150,7 @@ def catalog_admin(request):
     except Exception as e:
         messages.error(request, f"Error loading catalog: {str(e)}")
         return render(request, "dashboard/catalog_admin.html", {
+            "user_name": get_current_user_name(request),
             "borrowed_books": [],
             "overdue_books": [],
         })
@@ -149,13 +209,17 @@ def book_management(request):
             book['availability'] = 'Available' if book.get('available_copies', 0) > 0 else 'Borrowed'
         
         context = {
+            "user_name": get_current_user_name(request),
             "books": books,
         }
         return render(request, "dashboard/book_management.html", context)
     
     except Exception as e:
         messages.error(request, f"Error loading books: {str(e)}")
-        return render(request, "dashboard/book_management.html", {"books": []})
+        return render(request, "dashboard/book_management.html", {
+            "user_name": get_current_user_name(request),
+            "books": []
+        })
 
 
 def user_management(request):
@@ -203,13 +267,17 @@ def user_management(request):
         users = users_response.data if users_response.data else []
         
         context = {
+            "user_name": get_current_user_name(request),
             "users": users,
         }
         return render(request, "dashboard/user_management.html", context)
     
     except Exception as e:
         messages.error(request, f"Error loading users: {str(e)}")
-        return render(request, "dashboard/user_management.html", {"users": []})
+        return render(request, "dashboard/user_management.html", {
+            "user_name": get_current_user_name(request),
+            "users": []
+        })
 
 
 def admin_profile(request):
@@ -358,6 +426,7 @@ def student_profile(request):
             "address": "",
         })
 
+
 def userborrow(request):
-    # Example placeholder code
-    return render(request, "dashboard/userborrow.html", {})
+    """User borrow records"""
+    return render(request, "dashboard/user_borrow.html")
