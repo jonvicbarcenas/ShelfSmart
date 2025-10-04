@@ -25,7 +25,6 @@
             <h2 class="brand-title">ShelfSmart</h2>
             <p class="brand-subtitle">LIBRARY</p>
         </div>
-
         <nav class="nav-menu">
             <a href="{% url 'dashboard' %}" class="nav-link">
                 <i class="fas fa-chart-pie"></i>
@@ -44,11 +43,10 @@
                 <span>Users</span>
             </a>
             <a href="{% url 'admin_profile' %}" class="nav-link">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </a>
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
         </nav>
-
         <div class="logout">
             <a href="#" class="nav-link">
                 <i class="fas fa-sign-out-alt"></i>
@@ -59,21 +57,20 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
         <div class="header">
             <div class="user-info">
                 <div class="user-avatar">
                     <i class="fas fa-user-circle"></i>
                 </div>
                 <div class="user-details">
-                    <div class="user-name">Jascha B. Base</div>
+                    <div class="user-name" id="headerUserName">{{ user_name|default:"Admin" }}</div>
                     <div class="user-role">Admin</div>
                 </div>
             </div>
             <div class="header-right">
                 <div class="time-date-container">
-                    <div class="time">12:29 PM</div>
-                    <div class="current-date">Oct 02, 2025</div>
+                    <div class="time" id="currentTime">12:29 PM</div>
+                    <div class="current-date" id="currentDate">Oct 02, 2025</div>
                 </div>
             </div>
         </div>
@@ -83,13 +80,13 @@
             
             <!-- Tabs -->
             <div class="tabs">
-                <button class="tab-btn active" data-tab="borrowed">Borrowed Books</button>
-                <button class="tab-btn" data-tab="overdue">Overdue Borrowers</button>
+                <button class="tab-btn active" data-tab="borrowed" onclick="switchTab('borrowed')">Borrowed Books</button>
+                <button class="tab-btn" data-tab="overdue" onclick="switchTab('overdue')">Overdue Borrowers</button>
             </div>
 
             <!-- Search Bar -->
             <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search by ID">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search by ID or User">
             </div>
 
             <!-- Borrowed Books Table -->
@@ -97,31 +94,31 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>User ID</th>
-                            <th>Amount</th>
+                            <th>Borrow ID</th>
+                            <th>User Name</th>
+                            <th>Book Title</th>
+                            <th>Borrowed Date</th>
                             <th>Due Date</th>
-                            <th>Date & Time</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for book in borrowed_books %}
+                        {% for record in borrowed_books %}
                         <tr>
-                            <td>{{ book.id }}</td>
-                            <td>{{ book.user_id }}</td>
-                            <td>{{ book.amount }}</td>
-                            <td>{{ book.due_date }}</td>
-                            <td>{{ book.date_time }}</td>
+                            <td>{{ record.id }}</td>
+                            <td>{{ record.users.name|default:"Unknown" }}</td>
+                            <td>{{ record.books.title|default:"Unknown Book" }}</td>
+                            <td>{{ record.borrowed_date }}</td>
+                            <td>{{ record.due_date }}</td>
                             <td>
-                                <a href="#" class="delete-btn">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                <button class="delete-btn" onclick="markAsReturned({{ record.id }})" title="Mark as Returned">
+                                    <i class="fas fa-check"></i>
+                                </button>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6">No borrowed books found.</td>
+                            <td colspan="6" style="text-align: center; padding: 40px;">No borrowed books found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -133,31 +130,37 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>User ID</th>
-                            <th>Amount</th>
+                            <th>Borrow ID</th>
+                            <th>User Name</th>
+                            <th>Book Title</th>
+                            <th>Borrowed Date</th>
                             <th>Due Date</th>
-                            <th>Date & Time</th>
+                            <th>Days Overdue</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for book in overdue_books %}
-                        <tr>
-                            <td>{{ book.id }}</td>
-                            <td>{{ book.user_id }}</td>
-                            <td>{{ book.amount }}</td>
-                            <td>{{ book.due_date }}</td>
-                            <td>{{ book.date_time }}</td>
+                        {% for record in overdue_books %}
+                        <tr style="background-color: #fff3cd;">
+                            <td>{{ record.id }}</td>
+                            <td>{{ record.users.name|default:"Unknown" }}</td>
+                            <td>{{ record.books.title|default:"Unknown Book" }}</td>
+                            <td>{{ record.borrowed_date }}</td>
+                            <td>{{ record.due_date }}</td>
                             <td>
-                                <a href="#" class="delete-btn">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                <span style="color: #d32f2f; font-weight: bold;">
+                                    {% widthratio record.days_overdue 1 1 %} days
+                                </span>
+                            </td>
+                            <td>
+                                <button class="delete-btn" onclick="markAsReturned({{ record.id }})" title="Mark as Returned">
+                                    <i class="fas fa-check"></i>
+                                </button>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6">No overdue books found.</td>
+                            <td colspan="7" style="text-align: center; padding: 40px;">No overdue books found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -167,6 +170,71 @@
     </div>
 </div>
 
-<script src="{% static 'js/catalog_admin.js' %}"></script>
+<script>
+    // Update time and date
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', minute: '2-digit', hour12: true 
+        });
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { 
+            month: 'short', day: '2-digit', year: 'numeric' 
+        });
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+
+    // Tab switching
+    function switchTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.tab === tabName) {
+                btn.classList.add('active');
+            }
+        });
+
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(tabName + '-tab').classList.add('active');
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const activeTab = document.querySelector('.tab-content.active');
+        const rows = activeTab.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Mark as returned
+    function markAsReturned(borrowId) {
+        if (confirm('Mark this book as returned?')) {
+            fetch('{% url "catalog_admin" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    action: 'return',
+                    borrow_id: borrowId
+                })
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Error marking as returned');
+                }
+            });
+        }
+    }
+</script>
 </body>
 </html>
