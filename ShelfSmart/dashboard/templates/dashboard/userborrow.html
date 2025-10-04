@@ -1,93 +1,150 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>User Borrowed Books</title>
-  <link rel="stylesheet" href="{% static 'css/userborrow.css' %}" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Borrow | ShelfSmart</title>
+  <link rel="stylesheet" href="{% static 'css/userborrow.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <div class="container">
-    <div class="tabs">
-      <div class="tab active" data-tab="borrowed">Borrowed Books</div>
-      <div class="tab" data-tab="returned">Returned Books</div>
+<div class="dashboard">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-dots">
+        <div class="dot dot-1"></div>
+        <div class="dot dot-2"></div>
+        <div class="dot dot-3"></div>
+        <div class="dot dot-4"></div>
+        <div class="dot dot-5"></div>
+        <div class="dot dot-6"></div>
+        <div class="dot dot-7"></div>
+      </div>
+      <h2 class="brand-title">ShelfSmart</h2>
+      <p class="brand-subtitle">LIBRARY</p>
     </div>
-    <div class="search-container">
-      <input type="text" id="search-input" placeholder="Search by ID or User ID" />
-    </div>
-    <div class="table-wrapper">
-      <table id="borrowed-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>User ID</th>
-            <th>Amount</th>
-            <th>Due Date</th>
-            <th>Date & Time</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>1</td>
-            <td>002 Books</td>
-            <td>13-03-2024</td>
-            <td>25-03-2024 16:09:45</td>
-            <td><button class="action-btn">Return</button></td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>1</td>
-            <td>002 Books</td>
-            <td>13-03-2024</td>
-            <td>25-03-2024 16:09:45</td>
-            <td><button class="action-btn">Return</button></td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>1</td>
-            <td>002 Books</td>
-            <td>13-03-2024</td>
-            <td>25-03-2024 16:09:45</td>
-            <td><button class="action-btn">Return</button></td>
-          </tr>
-          <!-- Add more rows as needed -->
-        </tbody>
-      </table>
-      <table id="returned-table" style="display:none;">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>User ID</th>
-            <th>Amount</th>
-            <th>Return Date</th>
-            <th>Date & Time</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>101</td>
-            <td>1</td>
-            <td>001 Book</td>
-            <td>10-03-2024</td>
-            <td>20-03-2024 14:00:00</td>
-            <td><button class="action-btn" disabled>Returned</button></td>
-          </tr>
-          <tr>
-            <td>102</td>
-            <td>2</td>
-            <td>003 Books</td>
-            <td>11-03-2024</td>
-            <td>21-03-2024 15:30:00</td>
-            <td><button class="action-btn" disabled>Returned</button></td>
-          </tr>
-          <!-- Add more rows as needed -->
-        </tbody>
-      </table>
+    <nav class="nav-menu">
+      <a href="{% url 'dashboard' %}" class="nav-link">
+        <i class="fas fa-chart-pie"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="{% url 'catalog_admin' %}" class="nav-link">
+        <i class="fas fa-book-open"></i>
+        <span>Catalog</span>
+      </a>
+      <a href="{% url 'book_management' %}" class="nav-link">
+        <i class="fas fa-book"></i>
+        <span>Books</span>
+      </a>
+      <a href="{% url 'user_management' %}" class="nav-link">
+        <i class="fas fa-users"></i>
+        <span>Users</span>
+      </a>
+      <a href="{% url 'admin_profile' %}" class="nav-link">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </a>
+    </nav>
+    <div class="logout">
+      <a href="#" class="nav-link">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Log Out</span>
+      </a>
     </div>
   </div>
-  <script src="{% static 'js/userborrow.js' %}"></script>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header">
+      <div class="user-info">
+        <div class="user-avatar">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="user-details">
+          <div class="user-name" id="headerUserName">{{ user_name|default:"User" }}</div>
+          <div class="user-role">User</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="time-date-container">
+          <div class="time" id="currentTime">12:29 PM</div>
+          <div class="current-date" id="currentDate">Sep 09, 2025</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="content-header">
+        <h1 class="page-title">Library Lane Books</h1>
+        <div class="header-actions">
+          <button class="acquire-btn" id="acquireBtn">
+            <i class="fas fa-shopping-basket"></i>
+            Acquire
+          </button>
+          <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search by ID or Type">
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Language</th>
+              <th>Availability</th>
+              <th>Add to Cart</th>
+            </tr>
+          </thead>
+          <tbody id="booksTableBody">
+            {% if books %}
+              {% for book in books %}
+              <tr data-id="{{ book.id }}">
+                <td>{{ book.id }}</td>
+                <td>{{ book.title|default:book.name }}</td>
+                <td>{{ book.type|default:"Educational" }}</td>
+                <td>{{ book.language|default:"English" }}</td>
+                <td>
+                  {% if book.availability %}
+                    <span class="status-badge {% if book.availability == 'Available' %}available{% else %}borrowed{% endif %}">{{ book.availability }}</span>
+                  {% else %}
+                    <span class="status-badge available">Available</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <input type="checkbox" class="cart-checkbox" {% if book.availability and book.availability != 'Available' %}disabled{% endif %}>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              {% comment %} Fallback demo rows to match the design {% endcomment %}
+              {% for i in "123456789012" %}
+              <tr>
+                <td>1</td>
+                <td>Hibernate Core - 7th</td>
+                <td>Educational</td>
+                <td>English</td>
+                <td><span class="status-badge available">Available</span></td>
+                <td><input type="checkbox" class="cart-checkbox"></td>
+              </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right spine decoration -->
+  <div class="bookworm-spine"><span>BOOK WORM</span></div>
+</div>
+
+<script src="{% static 'js/userborrow.js' %}"></script>
 </body>
 </html>

@@ -1,61 +1,56 @@
-// userborrow.js - JavaScript for userborrow.html page
+// userborrow.js - interactions for the User Borrow page
 
-document.addEventListener('DOMContentLoaded', () => {
-  const tabs = document.querySelectorAll('.tab');
-  const borrowedTable = document.getElementById('borrowed-table');
-  const returnedTable = document.getElementById('returned-table');
-  const searchInput = document.getElementById('search-input');
+(function() {
+  function updateDateTime() {
+    const now = new Date();
+    const timeEl = document.getElementById('currentTime');
+    const dateEl = document.getElementById('currentDate');
+    if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 60000);
 
-  // Tab switching logic
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      if (tab.dataset.tab === 'borrowed') {
-        borrowedTable.style.display = 'table';
-        returnedTable.style.display = 'none';
-      } else {
-        borrowedTable.style.display = 'none';
-        returnedTable.style.display = 'table';
-      }
-      searchInput.value = '';
-      filterTable('');
+  // Search filter
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+      const term = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#booksTableBody tr');
+      rows.forEach(row => {
+        const id = row.children[0]?.textContent.toLowerCase() || '';
+        const name = row.children[1]?.textContent.toLowerCase() || '';
+        const type = row.children[2]?.textContent.toLowerCase() || '';
+        const match = id.includes(term) || type.includes(term) || name.includes(term);
+        row.style.display = match ? '' : 'none';
+      });
     });
-  });
-
-  // Search filter logic
-  searchInput.addEventListener('input', (e) => {
-    const filter = e.target.value.toLowerCase();
-    filterTable(filter);
-  });
-
-  function filterTable(filter) {
-    let table;
-    if (document.querySelector('.tab.active').dataset.tab === 'borrowed') {
-      table = borrowedTable;
-    } else {
-      table = returnedTable;
-    }
-    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    for (let row of rows) {
-      const idCell = row.cells[0].textContent.toLowerCase();
-      const userIdCell = row.cells[1].textContent.toLowerCase();
-      if (idCell.includes(filter) || userIdCell.includes(filter)) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
-    }
   }
 
-  // Return button click handler
-  document.querySelectorAll('.action-btn').forEach(button => {
-    button.addEventListener('click', (e) => {
-      const row = e.target.closest('tr');
-      const bookId = row.cells[0].textContent;
-      alert(`Return action triggered for Book ID: ${bookId}`);
-      // Here you can add actual return logic, e.g., API call
+  // Acquire button - demo behaviour
+  const acquireBtn = document.getElementById('acquireBtn');
+  if (acquireBtn) {
+    acquireBtn.addEventListener('click', () => {
+      const selected = Array.from(document.querySelectorAll('.cart-checkbox:checked'))
+        .map(cb => cb.closest('tr')?.dataset.id || cb.closest('tr')?.children[0].textContent.trim());
+      if (!selected.length) {
+        alert('No books selected.');
+        return;
+      }
+      // Replace with real POST later
+      alert('Acquiring books: ' + selected.join(', '));
     });
+  }
+
+  // Disable checkbox if not available
+  document.querySelectorAll('#booksTableBody tr').forEach(row => {
+    const status = row.querySelector('.status-badge');
+    const checkbox = row.querySelector('.cart-checkbox');
+    if (status && checkbox) {
+      if (status.textContent.trim().toLowerCase() !== 'available') {
+        checkbox.disabled = true;
+        checkbox.title = 'Not available';
+      }
+    }
   });
-});
+})();
