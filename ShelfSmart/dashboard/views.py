@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
 from datetime import datetime, date
 from .supabase_client import supabase
 import json
@@ -16,6 +18,7 @@ def get_current_user_name(request):
         pass
     return "Admin"
 
+@login_required
 def dashboard_view(request):
     """Admin Dashboard with real-time data from Supabase"""
     try:
@@ -75,6 +78,7 @@ def dashboard_view(request):
         })
 
 
+@login_required
 def catalog_admin(request):
     """Catalog management - Borrowed and Overdue books"""
     if request.method == "POST":
@@ -156,6 +160,7 @@ def catalog_admin(request):
         })
 
 
+@login_required
 def book_management(request):
     """Book Management - CRUD operations"""
     if request.method == "POST":
@@ -222,6 +227,7 @@ def book_management(request):
         })
 
 
+@login_required
 def user_management(request):
     """User Management - CRUD operations"""
     if request.method == "POST":
@@ -280,6 +286,7 @@ def user_management(request):
         })
 
 
+@login_required
 def admin_profile(request):
     """Admin Profile with UPDATE functionality"""
     # Get admin ID from session (you should implement proper authentication)
@@ -353,6 +360,7 @@ def admin_profile(request):
         })
 
 
+@login_required
 def student_profile(request):
     """Student Profile with UPDATE functionality"""
     # Get student ID from session
@@ -427,6 +435,7 @@ def student_profile(request):
         })
 
 
+@login_required
 def userborrow(request):
     """User borrow records"""
     return render(request, "dashboard/user_borrow.html")
