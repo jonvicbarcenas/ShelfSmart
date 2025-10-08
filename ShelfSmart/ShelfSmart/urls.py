@@ -22,6 +22,7 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('settings/', include(('settings.urls', 'settings'), namespace='settings_app')),
     path('logout/', include(('logout_app.urls', 'logout_app'), namespace='logout_app')),
+    path('forgot-password/', include(('forgot_password.urls', 'forgot_password'), namespace='forgot_password')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include(('user_auth.urls', 'user_auth'), namespace='user_auth')),
 ]

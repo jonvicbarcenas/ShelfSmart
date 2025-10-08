@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'dashboard',
     'user_auth',
     'logout_app',
+    'forgot_password',
     'settings',
 ]
 
