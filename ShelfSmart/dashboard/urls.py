@@ -10,4 +10,6 @@ urlpatterns = [
     path("user_borrow/", views.userborrow, name="user_borrow"),
     path("admin_profile/", views.admin_profile, name="admin_profile"),
     path("student_profile/", views.student_profile, name="student_profile"),
+    path("student_dashboard/", views.student_dashboard, name="student_dashboard"),
+    path('student/catalog/', views.student_catalog, name='student_catalog'),
 ]

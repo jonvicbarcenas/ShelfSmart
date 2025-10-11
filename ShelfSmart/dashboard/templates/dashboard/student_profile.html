@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Profile - ShelfSmart Library</title>
+    <title>Profile | ShelfSmart</title>
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .alert { padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; }
         .alert-success { background-color: #d4edda; color: #155724; border-left: 4px solid #28a745; }
@@ -16,233 +16,168 @@
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <div class="sidebar">
-            <div class="logo">
-                <div class="logo-dots">
-                    <div class="dot dot-1"></div>
-                    <div class="dot dot-2"></div>
-                    <div class="dot dot-3"></div>
-                    <div class="dot dot-4"></div>
-                    <div class="dot dot-5"></div>
-                    <div class="dot dot-6"></div>
-                    <div class="dot dot-7"></div>
-                </div>
-                <h2 class="brand-title">ShelfSmart</h2>
-                <p class="brand-subtitle">LIBRARY</p>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-dots">
+                <div class="dot dot-1"></div>
+                <div class="dot dot-2"></div>
+                <div class="dot dot-3"></div>
+                <div class="dot dot-4"></div>
+                <div class="dot dot-5"></div>
+                <div class="dot dot-6"></div>
+                <div class="dot dot-7"></div>
             </div>
-            <nav class="nav-menu">
-                <a href="{% url 'student_dashboard' %}" class="nav-link">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="{% url 'catalog_student' %}" class="nav-link">
-                    <i class="fas fa-book-open"></i>
-                    <span>Catalog</span>
-                </a>
-                <a href="{% url 'student_profile' %}" class="nav-link active">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </a>
-                <a href="{% url 'settings_app:settings' %}" class="nav-link">
-                    <i class="fas fa-gear"></i>
-                    <span>Settings</span>
-                </a>
-            </nav>
-            <div class="logout">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Log Out</span>
-                </a>
-            </div>
+            <h2 class="brand-title">ShelfSmart</h2>
+            <p class="brand-subtitle">LIBRARY</p>
         </div>
-
-        <div class="main-content">
-            <div class="header">
-                <div class="user-info">
-                    <div class="user-avatar">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <div class="user-details">
-                        <div class="user-name">{{ user_name|default:"Student" }}</div>
-                        <div class="user-role">Student</div>
-                    </div>
-                </div>
-                <div class="header-right">
-                    <div class="time-date-container">
-                        <div class="time" id="currentTime">12:29 PM</div>
-                        <div class="current-date" id="currentDate">Oct 06, 2025</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="profile-content">
-                <h1 class="profile-title">Student Profile</h1>
-
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">
-                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="profile-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="profile-info">
-                            <h2>{{ user_name|default:"Student" }}</h2>
-                            <p><i class="fas fa-id-badge"></i> {{ student_id|default:"STU-001" }}</p>
-                        </div>
-                    </div>
-
-                    <form id="profileForm" class="profile-form" method="POST" action="{% url 'student_profile' %}">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="fullName">
-                                    <i class="fas fa-user"></i> Full Name
-                                </label>
-                                <input type="text" id="fullName" name="fullName" value="{{ user_name|default:'' }}" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="studentId">
-                                    <i class="fas fa-id-badge"></i> Student ID
-                                </label>
-                                <input type="text" id="studentId" name="studentId" value="{{ student_id|default:'STU-001' }}" disabled>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="email">
-                                    <i class="fas fa-envelope"></i> Email Address
-                                </label>
-                                <input type="email" id="email" name="email" value="{{ email|default:'' }}" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">
-                                    <i class="fas fa-phone"></i> Phone Number
-                                </label>
-                                <input type="tel" id="phone" name="phone" value="{{ phone|default:'' }}" disabled>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="course">
-                                    <i class="fas fa-book"></i> Course
-                                </label>
-                                <input type="text" id="course" name="course" value="{{ course|default:'' }}" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="year">
-                                    <i class="fas fa-calendar"></i> Year
-                                </label>
-                                <input type="text" id="year" name="year" value="{{ year|default:'' }}" disabled>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group full-width">
-                                <label for="address">
-                                    <i class="fas fa-map-marker-alt"></i> Address
-                                </label>
-                                <input type="text" id="address" name="address" value="{{ address|default:'' }}" disabled>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" id="editBtn" class="btn btn-primary">
-                                <i class="fas fa-edit"></i> Edit Profile
-                            </button>
-                            <button type="submit" id="saveBtn" class="btn btn-save" style="display: none;">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            <button type="button" id="cancelBtn" class="btn btn-cancel" style="display: none;">
-                                <i class="fas fa-times"></i> Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <nav class="nav-menu">
+            <a href="{% url 'student_dashboard' %}" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'student_catalog' %}" class="nav-link">
+                <i class="fas fa-book-open"></i>
+                <span>Catalog</span>
+            </a>
+            <a href="{% url 'userborrow' %}" class="nav-link">
+                <i class="fas fa-book"></i>
+                <span>Library Lane</span>
+            </a>
+            <a href="{% url 'student_profile' %}" class="nav-link active">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="{% url 'settings_app:settings' %}" class="nav-link">
+                <i class="fas fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="logout">
+            <a href="{% url 'logout_app:logout' %}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </a>
         </div>
     </div>
 
-    <script>
-        function updateDateTime() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { 
-                hour: '2-digit', minute: '2-digit', hour12: true 
-            });
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { 
-                month: 'short', day: '2-digit', year: 'numeric' 
-            });
-        }
-        updateDateTime();
-        setInterval(updateDateTime, 60000);
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name" id="headerUserName">{{ user_name|default:"Student" }}</div>
+                    <div class="user-role">User</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="time-date-container">
+                    <div class="time" id="currentTime">12:29 PM</div>
+                    <div class="current-date" id="currentDate">Oct 02, 2025</div>
+                </div>
+            </div>
+        </div>
 
-        const form = document.getElementById('profileForm');
-        const editBtn = document.getElementById('editBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const inputs = form.querySelectorAll('input:not([type="hidden"])');
-        
-        let originalValues = {};
+        <div class="profile-content">
+            <h1 class="page-title">Student Profile</h1>
 
-        inputs.forEach(input => {
-            originalValues[input.name] = input.value;
-        });
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
 
-        editBtn.addEventListener('click', function() {
-            inputs.forEach(input => {
-                if (input.id !== 'studentId') {
-                    input.disabled = false;
-                }
-            });
-            editBtn.style.display = 'none';
-            saveBtn.style.display = 'inline-flex';
-            cancelBtn.style.display = 'inline-flex';
-        });
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h2>{{ user_name|default:"Student" }}</h2>
+                        <p><i class="fas fa-id-badge"></i> {{ student_id|default:"STU-001" }}</p>
+                    </div>
+                </div>
 
-        cancelBtn.addEventListener('click', function() {
-            inputs.forEach(input => {
-                input.value = originalValues[input.name];
-                input.disabled = true;
-            });
-            editBtn.style.display = 'inline-flex';
-            saveBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
-        });
+                <form id="profileForm" class="profile-form" method="POST" action="{% url 'student_profile' %}">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">
+                                <i class="fas fa-user"></i> Full Name
+                            </label>
+                            <input type="text" id="fullName" name="fullName" value="{{ user_name|default:'' }}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentId">
+                                <i class="fas fa-id-badge"></i> Student ID
+                            </label>
+                            <input type="text" id="studentId" name="studentId" value="{{ student_id|default:'STU-001' }}" disabled>
+                        </div>
+                    </div>
 
-        form.addEventListener('submit', function(e) {
-            const name = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            
-            if (!name || !email) {
-                e.preventDefault();
-                alert('Name and Email are required fields!');
-                return false;
-            }
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                e.preventDefault();
-                alert('Please enter a valid email address!');
-                return false;
-            }
-        });
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            <input type="email" id="email" name="email" value="{{ email|default:'' }}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">
+                                <i class="fas fa-phone"></i> Phone Number
+                            </label>
+                            <input type="tel" id="phone" name="phone" value="{{ phone|default:'' }}" disabled>
+                        </div>
+                    </div>
 
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.animation = 'slideIn 0.3s ease reverse';
-                setTimeout(() => alert.remove(), 300);
-            });
-        }, 5000);
-    </script>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="course">
+                                <i class="fas fa-book"></i> Course
+                            </label>
+                            <input type="text" id="course" name="course" value="{{ course|default:'' }}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="year">
+                                <i class="fas fa-calendar"></i> Year
+                            </label>
+                            <input type="text" id="year" name="year" value="{{ year|default:'' }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="address">
+                                <i class="fas fa-map-marker-alt"></i> Address
+                            </label>
+                            <input type="text" id="address" name="address" value="{{ address|default:'' }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="editBtn" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                        <button type="submit" id="saveBtn" class="btn btn-save" style="display: none;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <button type="button" id="cancelBtn" class="btn btn-cancel" style="display: none;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/student_profile.js' %}"></script>
 </body>
 </html>

@@ -41,16 +41,17 @@
                 <a href="{% url 'user_management' %}" class="nav-link">
                     <i class="fas fa-users"></i>
                     <span>Users</span>
-                </a>
+              
+            <a href="{% url 'admin_profile' %}" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+              </a>
                 <a href="{% url 'settings_app:settings' %}" class="nav-link">
                     <i class="fas fa-gear"></i>
                     <span>Settings</span>
                 </a>
             </nav>
-            <a href="{% url 'admin_profile' %}" class="nav-link">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
             <div class="logout">
                 <a href="{% url 'logout_app:logout' %}" class="nav-link">
                     <i class="fas fa-sign-out-alt"></i>

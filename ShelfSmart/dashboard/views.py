@@ -439,3 +439,179 @@ def student_profile(request):
 def userborrow(request):
     """User borrow records"""
     return render(request, "dashboard/user_borrow.html")
+
+
+@login_required
+def student_catalog(request):
+    """Student Catalog - View borrowed and returned books"""
+    # Get student ID from session
+    student_id = request.session.get('user_id', 1)
+    
+    if request.method == "POST":
+        action = request.POST.get("action")
+        
+        try:
+            if action == "return":
+                # Mark book as returned
+                borrow_id = request.POST.get("book_id")
+                
+                # Update borrow record
+                supabase.table("borrow_records").update({
+                    "is_returned": True,
+                    "return_date": date.today().isoformat()
+                }).eq("id", borrow_id).eq("user_id", student_id).execute()
+                
+                # Get the book_id to update availability
+                borrow_record = supabase.table("borrow_records")\
+                    .select("book_id")\
+                    .eq("id", borrow_id)\
+                    .execute()
+                
+                if borrow_record.data:
+                    book_id = borrow_record.data[0]['book_id']
+                    
+                    # Update book availability
+                    book = supabase.table("books").select("available_copies").eq("id", book_id).execute()
+                    if book.data:
+                        new_available = book.data[0]['available_copies'] + 1
+                        supabase.table("books").update({
+                            "available_copies": new_available,
+                            "availability": "Available"
+                        }).eq("id", book_id).execute()
+                
+                messages.success(request, "Book returned successfully!")
+                
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
+        
+        return redirect("student_catalog")
+    
+    # GET request - fetch student's borrowed and returned books
+    try:
+        # Fetch borrowed books for this student
+        borrowed_books = supabase.table("borrow_records")\
+            .select("*, books(title, id)")\
+            .eq("user_id", student_id)\
+            .eq("is_returned", False)\
+            .execute()
+        
+        # Process borrowed books data
+        borrowed_list = []
+        if borrowed_books.data:
+            for record in borrowed_books.data:
+                borrowed_list.append({
+                    'id': record.get('id'),
+                    'user_id': student_id,
+                    'book_count': 1,  # You can modify this if you track book count
+                    'due_date': record.get('due_date'),
+                    'borrowed_date': record.get('borrowed_date'),
+                    'borrowed_time': '10:39:43',  # You can add time field to your database
+                })
+        
+        # Fetch returned books for this student
+        returned_books = supabase.table("borrow_records")\
+            .select("*, books(title, id)")\
+            .eq("user_id", student_id)\
+            .eq("is_returned", True)\
+            .execute()
+        
+        # Process returned books data
+        returned_list = []
+        if returned_books.data:
+            for record in returned_books.data:
+                returned_list.append({
+                    'id': record.get('id'),
+                    'user_id': student_id,
+                    'book_count': 1,
+                    'due_date': record.get('due_date'),
+                    'return_date': record.get('return_date'),
+                    'return_time': '10:39:43',  # You can add time field to your database
+                })
+        
+        # Get student name
+        student = supabase.table("users").select("name").eq("id", student_id).execute()
+        student_name = student.data[0].get("name", "Student") if student.data else "Student"
+        
+        context = {
+            "user_name": student_name,
+            "borrowed_books": borrowed_list,
+            "returned_books": returned_list,
+        }
+        
+        return render(request, "dashboard/catalog_student.html", context)
+    
+    except Exception as e:
+        messages.error(request, f"Error loading catalog: {str(e)}")
+        return render(request, "dashboard/catalog_student.html", {
+            "user_name": "Student",
+            "borrowed_books": [],
+            "returned_books": [],
+        })
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from dashboard.models import BorrowRecord  # Import your model
+from django.utils import timezone
+
+@login_required
+def student_dashboard(request):
+    """Student dashboard view"""
+    try:
+        # Get the current user's borrow records
+        user = request.user
+        
+        # Count borrowed books (not returned)
+        borrowed_books = BorrowRecord.objects.filter(
+            users=user,
+            return_date__isnull=True
+        )
+        total_borrowed = borrowed_books.count()
+        
+        # Count returned books
+        returned_books = BorrowRecord.objects.filter(
+            users=user,
+            return_date__isnull=False
+        )
+        total_returned = returned_books.count()
+        
+        # Count overdue books
+        today = timezone.now().date()
+        overdue_books = borrowed_books.filter(due_date__lt=today)
+        total_overdue = overdue_books.count()
+        
+        # Get recent activities (last 5 borrow records)
+        recent_activities = BorrowRecord.objects.filter(
+            users=user
+        ).select_related('books').order_by('-borrowed_date')[:5]
+        
+        # Add status to recent activities
+        for record in recent_activities:
+            if record.return_date:
+                record.status = 'returned'
+            elif record.due_date < today:
+                record.status = 'overdue'
+            else:
+                record.status = 'active'
+        
+        context = {
+            'user_name': user.name if hasattr(user, 'name') else user.username,
+            'total_borrowed': total_borrowed,
+            'total_returned': total_returned,
+            'total_overdue': total_overdue,
+            'recent_activities': recent_activities,
+        }
+        
+        return render(request, 'dashboard/student_dashboard.html', context)
+        
+    except Exception as e:
+        # Handle any errors gracefully
+        print(f"Error in student_dashboard: {str(e)}")
+        context = {
+            'user_name': request.user.username,
+            'total_borrowed': 0,
+            'total_returned': 0,
+            'total_overdue': 0,
+            'recent_activities': [],
+        }
+        return render(request, 'dashboard/student_dashboard.html', context)
