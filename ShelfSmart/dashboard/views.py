@@ -11,7 +11,7 @@ def get_current_user_name(request):
     """Helper function to get current user's name from session"""
     user_id = request.session.get('user_id', 1)
     try:
-        user = supabase.table("users").select("name").eq("id", user_id).execute()
+        user = supabase.table("dashboard_user").select("name").eq("id", user_id).execute()
         if user.data:
             return user.data[0].get("name", "Admin")
     except:
@@ -23,34 +23,34 @@ def dashboard_view(request):
     """Admin Dashboard with real-time data from Supabase"""
     try:
         # Fetch total users
-        users_response = supabase.table("users").select("*").execute()
+        users_response = supabase.table("dashboard_user").select("*").execute()
         total_users = len(users_response.data) if users_response.data else 0
 
         # Fetch total books
-        books_response = supabase.table("books").select("*").execute()
+        books_response = supabase.table("dashboard_book").select("*").execute()
         total_books = len(books_response.data) if books_response.data else 0
 
         # Fetch overdue borrowers
         today = date.today().isoformat()
-        overdue_response = supabase.table("borrow_records")\
-            .select("*, users(name, id), books(title)")\
+        overdue_response = supabase.table("dashboard_borrowrecord")\
+            .select("*, users:dashboard_user(name, id), books:dashboard_book(title)")\
             .lt("due_date", today)\
             .eq("is_returned", False)\
             .execute()
         
         # Fetch borrowed books stats for chart
-        borrowed_response = supabase.table("borrow_records")\
+        borrowed_response = supabase.table("dashboard_borrowrecord")\
             .select("*")\
             .eq("is_returned", False)\
             .execute()
         
-        returned_response = supabase.table("borrow_records")\
+        returned_response = supabase.table("dashboard_borrowrecord")\
             .select("*")\
             .eq("is_returned", True)\
             .execute()
         
         # Fetch active admins
-        admins_response = supabase.table("users")\
+        admins_response = supabase.table("dashboard_user")\
             .select("*")\
             .eq("role", "admin")\
             .execute()
@@ -91,13 +91,13 @@ def catalog_admin(request):
                 from datetime import date
                 
                 # Update borrow record
-                supabase.table("borrow_records").update({
+                supabase.table("dashboard_borrowrecord").update({
                     "is_returned": True,
                     "return_date": date.today().isoformat()
                 }).eq("id", borrow_id).execute()
                 
                 # Get the book_id to update availability
-                borrow_record = supabase.table("borrow_records")\
+                borrow_record = supabase.table("dashboard_borrowrecord")\
                     .select("book_id")\
                     .eq("id", borrow_id)\
                     .execute()
@@ -106,10 +106,10 @@ def catalog_admin(request):
                     book_id = borrow_record.data[0]['book_id']
                     
                     # Update book availability
-                    book = supabase.table("books").select("available_copies").eq("id", book_id).execute()
+                    book = supabase.table("dashboard_book").select("available_copies").eq("id", book_id).execute()
                     if book.data:
                         new_available = book.data[0]['available_copies'] + 1
-                        supabase.table("books").update({
+                        supabase.table("dashboard_book").update({
                             "available_copies": new_available,
                             "availability": "Available"
                         }).eq("id", book_id).execute()
@@ -123,15 +123,15 @@ def catalog_admin(request):
     
     try:
         # Fetch borrowed books
-        borrowed_books = supabase.table("borrow_records")\
-            .select("*, users(name, id), books(title, id)")\
+        borrowed_books = supabase.table("dashboard_borrowrecord")\
+            .select("*, users:dashboard_user(name, id), books:dashboard_book(title, id)")\
             .eq("is_returned", False)\
             .execute()
 
         # Fetch overdue books with days overdue calculation
         today = date.today().isoformat()
-        overdue_books = supabase.table("borrow_records")\
-            .select("*, users(name, id), books(title, id)")\
+        overdue_books = supabase.table("dashboard_borrowrecord")\
+            .select("*, users:dashboard_user(name, id), books:dashboard_book(title, id)")\
             .lt("due_date", today)\
             .eq("is_returned", False)\
             .execute()
@@ -177,7 +177,7 @@ def book_management(request):
                     "total_copies": int(request.POST.get("total_copies", 1)),
                     "available_copies": int(request.POST.get("available_copies", 1)),
                 }
-                supabase.table("books").insert(book_data).execute()
+                supabase.table("dashboard_book").insert(book_data).execute()
                 messages.success(request, "Book added successfully!")
                 
             elif action == "edit":
@@ -190,13 +190,13 @@ def book_management(request):
                     "total_copies": int(request.POST.get("total_copies", 1)),
                     "available_copies": int(request.POST.get("available_copies", 1)),
                 }
-                supabase.table("books").update(book_data).eq("id", book_id).execute()
+                supabase.table("dashboard_book").update(book_data).eq("id", book_id).execute()
                 messages.success(request, "Book updated successfully!")
                 
             elif action == "delete":
                 # Delete book
                 book_id = request.POST.get("book_id")
-                supabase.table("books").delete().eq("id", book_id).execute()
+                supabase.table("dashboard_book").delete().eq("id", book_id).execute()
                 messages.success(request, "Book deleted successfully!")
                 
         except Exception as e:
@@ -206,7 +206,7 @@ def book_management(request):
     
     # GET request - fetch all books
     try:
-        books_response = supabase.table("books").select("*").execute()
+        books_response = supabase.table("dashboard_book").select("*").execute()
         books = books_response.data if books_response.data else []
         
         # Add computed availability status for display
@@ -242,7 +242,7 @@ def user_management(request):
                     "username": request.POST.get("username"),
                     "role": request.POST.get("role", "student"),
                 }
-                supabase.table("users").insert(user_data).execute()
+                supabase.table("dashboard_user").insert(user_data).execute()
                 messages.success(request, "User added successfully!")
                 
             elif action == "edit":
@@ -253,13 +253,13 @@ def user_management(request):
                     "email": request.POST.get("email"),
                     "username": request.POST.get("username"),
                 }
-                supabase.table("users").update(user_data).eq("id", user_id).execute()
+                supabase.table("dashboard_user").update(user_data).eq("id", user_id).execute()
                 messages.success(request, "User updated successfully!")
                 
             elif action == "delete":
                 # Delete user
                 user_id = request.POST.get("user_id")
-                supabase.table("users").delete().eq("id", user_id).execute()
+                supabase.table("dashboard_user").delete().eq("id", user_id).execute()
                 messages.success(request, "User deleted successfully!")
                 
         except Exception as e:
@@ -269,7 +269,7 @@ def user_management(request):
     
     # GET request - fetch all users
     try:
-        users_response = supabase.table("users").select("*").execute()
+        users_response = supabase.table("dashboard_user").select("*").execute()
         users = users_response.data if users_response.data else []
         
         context = {
@@ -303,11 +303,11 @@ def admin_profile(request):
                 "year": request.POST.get("year"),
             }
             
-            supabase.table("users").update(profile_data).eq("id", admin_id).execute()
+            supabase.table("dashboard_user").update(profile_data).eq("id", admin_id).execute()
             messages.success(request, "Profile updated successfully!")
             
             # Fetch updated data
-            admin_response = supabase.table("users").select("*").eq("id", admin_id).execute()
+            admin_response = supabase.table("dashboard_user").select("*").eq("id", admin_id).execute()
             admin_data = admin_response.data[0] if admin_response.data else {}
             
         except Exception as e:
@@ -318,7 +318,7 @@ def admin_profile(request):
     
     # GET request - fetch admin data
     try:
-        admin_response = supabase.table("users")\
+        admin_response = supabase.table("dashboard_user")\
             .select("*")\
             .eq("id", admin_id)\
             .eq("role", "admin")\
@@ -378,7 +378,7 @@ def student_profile(request):
                 "year": request.POST.get("year"),
             }
             
-            supabase.table("users").update(profile_data).eq("id", student_id).execute()
+            supabase.table("dashboard_user").update(profile_data).eq("id", student_id).execute()
             messages.success(request, "Profile updated successfully!")
             
         except Exception as e:
@@ -388,7 +388,7 @@ def student_profile(request):
     
     # GET request - fetch student data
     try:
-        student_response = supabase.table("users")\
+        student_response = supabase.table("dashboard_user")\
             .select("*")\
             .eq("id", student_id)\
             .eq("role", "student")\
@@ -438,7 +438,7 @@ def student_profile(request):
 @login_required
 def userborrow(request):
     """User borrow records"""
-    return render(request, "dashboard/user_borrow.html")
+    return render(request, "dashboard/userborrow.html")
 
 
 @login_required
@@ -456,13 +456,13 @@ def student_catalog(request):
                 borrow_id = request.POST.get("book_id")
                 
                 # Update borrow record
-                supabase.table("borrow_records").update({
+                supabase.table("dashboard_borrowrecord").update({
                     "is_returned": True,
                     "return_date": date.today().isoformat()
                 }).eq("id", borrow_id).eq("user_id", student_id).execute()
                 
                 # Get the book_id to update availability
-                borrow_record = supabase.table("borrow_records")\
+                borrow_record = supabase.table("dashboard_borrowrecord")\
                     .select("book_id")\
                     .eq("id", borrow_id)\
                     .execute()
@@ -471,10 +471,10 @@ def student_catalog(request):
                     book_id = borrow_record.data[0]['book_id']
                     
                     # Update book availability
-                    book = supabase.table("books").select("available_copies").eq("id", book_id).execute()
+                    book = supabase.table("dashboard_book").select("available_copies").eq("id", book_id).execute()
                     if book.data:
                         new_available = book.data[0]['available_copies'] + 1
-                        supabase.table("books").update({
+                        supabase.table("dashboard_book").update({
                             "available_copies": new_available,
                             "availability": "Available"
                         }).eq("id", book_id).execute()
@@ -489,21 +489,21 @@ def student_catalog(request):
     # GET request - fetch student's borrowed and returned books
     try:
         # Fetch borrowed books for this student - FIXED VERSION
-        borrowed_books = supabase.table("borrow_records")\
-            .select("*, books(title, id)")\
+        borrowed_books = supabase.table("dashboard_borrowrecord")\
+            .select("*, books:dashboard_book(title, id)")\
             .eq("user_id", student_id)\
             .eq("is_returned", False)\
             .execute()
         
         # Fetch returned books for this student - FIXED VERSION
-        returned_books = supabase.table("borrow_records")\
-            .select("*, books(title, id)")\
+        returned_books = supabase.table("dashboard_borrowrecord")\
+            .select("*, books:dashboard_book(title, id)")\
             .eq("user_id", student_id)\
             .eq("is_returned", True)\
             .execute()
         
         # Get student name
-        student = supabase.table("users").select("name").eq("id", student_id).execute()
+        student = supabase.table("dashboard_user").select("name").eq("id", student_id).execute()
         student_name = student.data[0].get("name", "Student") if student.data else "Student"
         
         context = {
@@ -536,11 +536,11 @@ def student_dashboard(request):
     
     try:
         # Get student name
-        student = supabase.table("users").select("name").eq("id", student_id).execute()
+        student = supabase.table("dashboard_user").select("name").eq("id", student_id).execute()
         student_name = student.data[0].get("name", "Student") if student.data else "Student"
         
         # Count borrowed books (not returned)
-        borrowed_response = supabase.table("borrow_records")\
+        borrowed_response = supabase.table("dashboard_borrowrecord")\
             .select("*")\
             .eq("user_id", student_id)\
             .eq("is_returned", False)\
@@ -548,7 +548,7 @@ def student_dashboard(request):
         total_borrowed = len(borrowed_response.data) if borrowed_response.data else 0
         
         # Count returned books
-        returned_response = supabase.table("borrow_records")\
+        returned_response = supabase.table("dashboard_borrowrecord")\
             .select("*")\
             .eq("user_id", student_id)\
             .eq("is_returned", True)\
@@ -557,7 +557,7 @@ def student_dashboard(request):
         
         # Count overdue books
         today = date.today().isoformat()
-        overdue_response = supabase.table("borrow_records")\
+        overdue_response = supabase.table("dashboard_borrowrecord")\
             .select("*")\
             .eq("user_id", student_id)\
             .lt("due_date", today)\
@@ -566,8 +566,8 @@ def student_dashboard(request):
         total_overdue = len(overdue_response.data) if overdue_response.data else 0
         
         # Get recent activities (last 5 borrow records)
-        recent_response = supabase.table("borrow_records")\
-            .select("*, books(title, id)")\
+        recent_response = supabase.table("dashboard_borrowrecord")\
+            .select("*, books:dashboard_book(title, id)")\
             .eq("user_id", student_id)\
             .order("borrowed_date", desc=True)\
             .limit(5)\
