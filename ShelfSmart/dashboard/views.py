@@ -7,16 +7,42 @@ from datetime import datetime, date
 from .supabase_client import supabase
 import json
 
-def get_current_user_name(request):
-    """Helper function to get current user's name from session"""
-    user_id = request.session.get('user_id', 1)
-    try:
-        user = supabase.table("dashboard_user").select("name").eq("id", user_id).execute()
-        if user.data:
-            return user.data[0].get("name", "Admin")
-    except:
-        pass
-    return "Admin"
+def get_current_user_info(request):
+    """Helper function to get current user's info from Django User object"""
+    # Use Django's authenticated user instead of querying Supabase
+    if request.user.is_authenticated:
+        user = request.user
+        
+        # Get names from Django User model
+        first_name = user.first_name or "User"
+        last_name = user.last_name or ""
+        full_name = f"{first_name} {last_name}".strip() if last_name else first_name
+        username = user.username or "username"
+        
+        # Determine role from user properties
+        if user.is_superuser:
+            role = "Admin"
+        elif hasattr(user, 'is_staff') and user.is_staff:
+            role = "Admin"
+        else:
+            role = "User"
+        
+        return {
+            "full_name": full_name,
+            "first_name": first_name,
+            "last_name": last_name,
+            "username": username,
+            "role": role
+        }
+    
+    # Fallback if not authenticated
+    return {
+        "full_name": "User",
+        "first_name": "User",
+        "last_name": "",
+        "username": "username",
+        "role": "User"
+    }
 
 @login_required
 def dashboard_view(request):
@@ -56,6 +82,7 @@ def dashboard_view(request):
             .execute()
 
         context = {
+            "user_info": get_current_user_info(request),
             "total_users": total_users,
             "total_books": total_books,
             "overdue_borrowers": overdue_response.data if overdue_response.data else [],
@@ -69,6 +96,7 @@ def dashboard_view(request):
     except Exception as e:
         messages.error(request, f"Error loading dashboard: {str(e)}")
         return render(request, "dashboard/admin_dashboard.html", {
+            "user_info": get_current_user_info(request),
             "total_users": 0,
             "total_books": 0,
             "overdue_borrowers": [],
@@ -144,7 +172,7 @@ def catalog_admin(request):
             record['days_overdue'] = days_overdue
 
         context = {
-            "user_name": get_current_user_name(request),
+            "user_info": get_current_user_info(request),
             "borrowed_books": borrowed_books.data if borrowed_books.data else [],
             "overdue_books": overdue_books.data if overdue_books.data else [],
         }
@@ -154,7 +182,7 @@ def catalog_admin(request):
     except Exception as e:
         messages.error(request, f"Error loading catalog: {str(e)}")
         return render(request, "dashboard/catalog_admin.html", {
-            "user_name": get_current_user_name(request),
+            "user_info": get_current_user_info(request),
             "borrowed_books": [],
             "overdue_books": [],
         })
@@ -214,7 +242,7 @@ def book_management(request):
             book['availability'] = 'Available' if book.get('available_copies', 0) > 0 else 'Borrowed'
         
         context = {
-            "user_name": get_current_user_name(request),
+            "user_info": get_current_user_info(request),
             "books": books,
         }
         return render(request, "dashboard/book_management.html", context)
@@ -222,7 +250,7 @@ def book_management(request):
     except Exception as e:
         messages.error(request, f"Error loading books: {str(e)}")
         return render(request, "dashboard/book_management.html", {
-            "user_name": get_current_user_name(request),
+            "user_info": get_current_user_info(request),
             "books": []
         })
 
@@ -273,7 +301,7 @@ def user_management(request):
         users = users_response.data if users_response.data else []
         
         context = {
-            "user_name": get_current_user_name(request),
+            "user_info": get_current_user_info(request),
             "users": users,
         }
         return render(request, "dashboard/user_management.html", context)
@@ -281,7 +309,7 @@ def user_management(request):
     except Exception as e:
         messages.error(request, f"Error loading users: {str(e)}")
         return render(request, "dashboard/user_management.html", {
-            "user_name": get_current_user_name(request),
+            "user_info": get_current_user_info(request),
             "users": []
         })
 
@@ -327,6 +355,7 @@ def admin_profile(request):
         if admin_response.data:
             admin_data = admin_response.data[0]
             context = {
+                "user_info": get_current_user_info(request),
                 "user_name": admin_data.get("name", "Admin User"),
                 "role": "Admin",
                 "email": admin_data.get("email", ""),
@@ -337,6 +366,7 @@ def admin_profile(request):
             }
         else:
             context = {
+                "user_info": get_current_user_info(request),
                 "user_name": "Admin User",
                 "role": "Admin",
                 "email": "",
@@ -351,6 +381,7 @@ def admin_profile(request):
     except Exception as e:
         messages.error(request, f"Error loading profile: {str(e)}")
         return render(request, "dashboard/admin_profile.html", {
+            "user_info": get_current_user_info(request),
             "user_name": "Admin User",
             "role": "Admin",
             "email": "",

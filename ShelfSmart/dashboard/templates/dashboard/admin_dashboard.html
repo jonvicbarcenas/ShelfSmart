@@ -69,8 +69,11 @@
                         <i class="fas fa-user-circle"></i>
                     </div>
                     <div class="user-details">
-                        <div class="user-name" id="headerUserName">{{ user_name|default:"Admin" }}</div>
-                        <div class="user-role">Admin</div>
+                        <div class="user-name" id="headerUserName">
+                            {{ user_info.full_name|default:"User" }}
+                            <span class="user-role-badge">({{ user_info.role|default:"User" }})</span>
+                        </div>
+                        <div class="user-username">@{{ user_info.username|default:"username" }}</div>
                     </div>
                 </div>
                 <div class="header-right">

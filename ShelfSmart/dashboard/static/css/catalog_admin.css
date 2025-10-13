@@ -167,6 +167,21 @@ body {
     font-weight: 500;
     color: #000000;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-details .user-username {
+    font-size: 13px;
+    color: #666;
+    font-weight: 400;
+}
+
+.user-details .user-role-badge {
+    font-size: 12px;
+    color: #666;
+    font-weight: 400;
 }
 
 .user-details .user-role {
