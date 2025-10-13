@@ -29,7 +29,8 @@ def login_view(request):
                 or request.GET.get("next")
                 or reverse("dashboard")
             )
-            auth_login(request, form.get_user())
+            user = form.get_user()
+            auth_login(request, user)
             if _is_ajax(request):
                 return JsonResponse({"success": True, "redirect_url": redirect_url})
             return redirect(redirect_url)

@@ -8,7 +8,7 @@ from .supabase_client import supabase
 import json
 
 def get_current_user_info(request):
-    """Helper function to get current user's info from Django User object"""
+    """Helper function to get current user's info from Django User object and session"""
     # Use Django's authenticated user instead of querying Supabase
     if request.user.is_authenticated:
         user = request.user
@@ -19,13 +19,8 @@ def get_current_user_info(request):
         full_name = f"{first_name} {last_name}".strip() if last_name else first_name
         username = user.username or "username"
         
-        # Determine role from user properties
-        if user.is_superuser:
-            role = "Admin"
-        elif hasattr(user, 'is_staff') and user.is_staff:
-            role = "Admin"
-        else:
-            role = "User"
+        # Get role directly from Django User model (custom field)
+        role = getattr(user, 'role', 'user').capitalize()
         
         return {
             "full_name": full_name,
