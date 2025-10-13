@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Books Admin</title>
+  <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+  <style>
+    .actions a, .actions form { display: inline-block; margin-right: 8px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin: 12px 0; }
+    .button { padding: 8px 12px; background:#000; color:#fff; border-radius:6px; text-decoration:none; }
+    .button.secondary { background:#e5e5e5; color:#000; }
+    table { width: 100%; border-collapse: collapse; background:#fff; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #eee; text-align:left; }
+  </style>
+</head>
+<body>
+  <div class="content" style="padding:16px; max-width:1100px; margin:0 auto;">
+    <div class="topbar">
+      <h1>Books</h1>
+      {% if is_admin %}
+        <a class="button" href="{% url 'books_admin:create' %}">+ Add Book</a>
+      {% endif %}
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Total</th>
+          <th>Available</th>
+          {% if is_admin %}<th>Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in books %}
+          <tr>
+            <td>{{ b.id }}</td>
+            <td>{{ b.title }}</td>
+            <td>{{ b.author|default:"Unknown" }}</td>
+            <td>{{ b.total_copies }}</td>
+            <td>{{ b.available_copies }}</td>
+            {% if is_admin %}
+            <td class="actions">
+              <a class="button secondary" href="{% url 'books_admin:update' b.id %}">Edit</a>
+              <a class="button secondary" href="{% url 'books_admin:delete' b.id %}">Delete</a>
+            </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">No books found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div style="margin-top:12px;">
+      <a class="button secondary" href="{% url 'dashboard' %}">Back to Dashboard</a>
+    </div>
+  </div>
+</body>
+</html>
