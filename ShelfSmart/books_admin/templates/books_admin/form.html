@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% if mode == 'create' %}Create Book{% else %}Update Book{% endif %}</title>
+  <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+  <style>
+    .button { padding: 8px 12px; background:#000; color:#fff; border-radius:6px; text-decoration:none; }
+    .button.secondary { background:#e5e5e5; color:#000; }
+    form label { display:block; margin-top:10px; font-weight:600; }
+    form input { width: 100%; max-width: 480px; padding: 10px; border:1px solid #ddd; border-radius:6px; }
+  </style>
+</head>
+<body>
+  <div class="content" style="padding:16px; max-width:700px; margin:0 auto;">
+    <h1 style="margin-bottom:16px;">{% if mode == 'create' %}Create Book{% else %}Update Book{% endif %}</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      <label>Title</label>
+      <input type="text" name="title" value="{{ book.title|default:'' }}" required />
+
+      <label>Author</label>
+      <input type="text" name="author" value="{{ book.author|default:'' }}" />
+
+      <label>Total Copies</label>
+      <input type="number" min="0" name="total_copies" value="{{ book.total_copies|default:1 }}" required />
+
+      <label>Available Copies</label>
+      <input type="number" min="0" name="available_copies" value="{{ book.available_copies|default:1 }}" required />
+
+      <div style="margin-top: 14px;">
+        <button class="button" type="submit">{% if mode == 'create' %}Create{% else %}Update{% endif %}</button>
+        <a class="button secondary" href="{% url 'books_admin:list' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

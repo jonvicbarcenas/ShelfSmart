@@ -20,6 +20,7 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', include('dashboard.urls')),
+    path('books-admin/', include(('books_admin.urls', 'books_admin'), namespace='books_admin')),
     path('settings/', include(('settings.urls', 'settings'), namespace='settings_app')),
     path('logout/', include(('logout_app.urls', 'logout_app'), namespace='logout_app')),
     path('forgot-password/', include(('forgot_password.urls', 'forgot_password'), namespace='forgot_password')),

@@ -297,8 +297,16 @@
         const cells = row.querySelectorAll('.editable');
         const data = { action: 'edit', book_id: id };
         
+        // helper to enforce single-line strings
+        const sanitizeSingleLine = (s) => (s || '')
+            .replace(/[\r\n]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
         cells.forEach(cell => {
-            data[cell.dataset.field] = cell.textContent.trim();
+            // strip any newlines pasted or entered
+            cell.textContent = sanitizeSingleLine(cell.textContent);
+            data[cell.dataset.field] = cell.textContent;
         });
 
         fetch('{% url "book_management" %}', {
@@ -320,6 +328,32 @@
             }
         });
     }
+
+    // Pressing Enter while editing saves the row (no newline)
+    document.addEventListener('keydown', function(e) {
+        const el = document.activeElement;
+        if (el && el.isContentEditable && e.key === 'Enter') {
+            e.preventDefault();
+            const row = el.closest('tr');
+            if (row && row.classList.contains('editing')) {
+                const saveBtn = row.querySelector('.save-btn');
+                if (saveBtn) {
+                    saveRow(saveBtn);
+                }
+            }
+        }
+    });
+
+    // Sanitize pasted content to single line in contentEditable cells
+    document.addEventListener('paste', function(e) {
+        const el = document.activeElement;
+        if (el && el.isContentEditable) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            const single = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+            document.execCommand('insertText', false, single);
+        }
+    });
 
     // Delete book
     function deleteBook(id) {

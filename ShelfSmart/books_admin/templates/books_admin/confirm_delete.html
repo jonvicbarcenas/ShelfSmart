@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Delete Book</title>
+  <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+  <style>
+    .button { padding: 8px 12px; background:#000; color:#fff; border-radius:6px; text-decoration:none; }
+    .button.secondary { background:#e5e5e5; color:#000; }
+    form { display: inline; }
+  </style>
+</head>
+<body>
+  <div class="content" style="padding:16px; max-width:700px; margin:0 auto;">
+    <h1>Delete Book</h1>
+    <p>Are you sure you want to delete “{{ book.title }}”?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="button" type="submit">Yes, Delete</button>
+      <a class="button secondary" href="{% url 'books_admin:list' %}">Cancel</a>
+    </form>
+  </div>
+</body>
+</html>
