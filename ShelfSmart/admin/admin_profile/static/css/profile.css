@@ -143,6 +143,9 @@
     cursor: pointer;
     border: none;
     transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-primary {
