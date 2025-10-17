@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShelfSmart Library Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+        <link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=1.1">
     <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -179,20 +179,15 @@
                             <h2>ShelfSmart Admins</h2>
                             <div class="list" id="adminsList">
                                 {% for admin in admins %}
-                                <div class="list-item">
-                                    <div class="list-item-content">
-                                        <div class="admin-avatar">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <div class="info-text">
-                                            <h4>{{ admin.name }}</h4>
-                                            <p>Admin ID: {{ admin.id }}</p>
-                                        </div>
-                                        <span class="status-dot active"></span>
+                                <div class="admin-item">
+                                    <div class="admin-avatar">{{ admin.first_name|slice:":1" }}{{ admin.last_name|slice:":1" }}</div>
+                                    <div class="admin-info">
+                                        <p class="admin-name">{{ admin.first_name }} {{ admin.last_name }}</p>
+                                        <p class="admin-role">{{ admin.user_type|capfirst }}</p>
                                     </div>
                                 </div>
                                 {% empty %}
-                                <p style="text-align: center; padding: 20px; color: #666;">No admins found</p>
+                                <p>No active admins found.</p>
                                 {% endfor %}
                             </div>
                         </div>

@@ -6,10 +6,10 @@ from user_auth.decorators import admin_required
 import logging
 
 from datetime import datetime, date
-from admin.common.supabase_client import supabase
-import json
+from user_auth.models import User
 from admin.common.models import Book
 
+# Configure logging
 logger = logging.getLogger(__name__)
 
 def _single_line(value: str) -> str:
@@ -56,61 +56,33 @@ def get_current_user_info(request):
 
 @admin_required
 def dashboard_view(request):
-    """Admin Dashboard with real-time data from Supabase"""
-    try:
-        # Fetch total users
-        users_response = supabase.table("dashboard_user").select("*").execute()
-        total_users = len(users_response.data) if users_response.data else 0
+    """Admin Dashboard with real-time data from the database"""
+    # Fetch total users from Django's User model
+    total_users = User.objects.count()
+    logger.info(f"Total users found: {total_users}")
 
-        # Fetch total books
-        books_response = supabase.table("dashboard_book").select("*").execute()
-        total_books = len(books_response.data) if books_response.data else 0
+    # Fetch total books from the Book model
+    total_books = Book.objects.count()
+    logger.info(f"Total books found: {total_books}")
 
-        # Fetch overdue borrowers
-        today = date.today().isoformat()
-        overdue_response = supabase.table("dashboard_borrowrecord")\
-            .select("*, users:dashboard_user(name, id), books:dashboard_book(title)")\
-            .lt("due_date", today)\
-            .eq("is_returned", False)\
-            .execute()
-        
-        # Fetch borrowed books stats for chart
-        borrowed_response = supabase.table("dashboard_borrowrecord")\
-            .select("*")\
-            .eq("is_returned", False)\
-            .execute()
-        
-        returned_response = supabase.table("dashboard_borrowrecord")\
-            .select("*")\
-            .eq("is_returned", True)\
-            .execute()
-        
-        # Fetch active admins
-        admins_response = supabase.table("dashboard_user")\
-            .select("*")\
-            .eq("role", "admin")\
-            .execute()
+    # Fetch active admins from the User model
+    admins = User.objects.filter(user_type='admin')
+    logger.info(f"Admins found: {admins.count()}")
 
-        context = {
-            "user_info": get_current_user_info(request),
-            "total_users": total_users,
-            "total_books": total_books,
-            "overdue_borrowers": overdue_response.data if overdue_response.data else [],
-            "total_borrowed": len(borrowed_response.data) if borrowed_response.data else 0,
-            "total_returned": len(returned_response.data) if returned_response.data else 0,
-            "admins": admins_response.data if admins_response.data else [],
-        }
+    # NOTE: The following sections for overdue borrowers and borrowed/returned stats
+    # are placeholders and will be migrated in a future step.
+    overdue_borrowers = []
+    total_borrowed = 0
+    total_returned = 0
 
-        return render(request, "admin_dashboard/admin_dashboard.html", context)
-    
-    except Exception as e:
-        messages.error(request, f"Error loading dashboard: {str(e)}")
-        return render(request, "admin_dashboard/admin_dashboard.html", {
-            "user_info": get_current_user_info(request),
-            "total_users": 0,
-            "total_books": 0,
-            "overdue_borrowers": [],
-            "total_borrowed": 0,
-            "total_returned": 0,
-            "admins": [],
-        })
+    context = {
+        "user_info": get_current_user_info(request),
+        "total_users": total_users,
+        "total_books": total_books,
+        "overdue_borrowers": overdue_borrowers,
+        "total_borrowed": total_borrowed,
+        "total_returned": total_returned,
+        "admins": admins,
+    }
+
+    return render(request, "admin_dashboard/admin_dashboard.html", context)

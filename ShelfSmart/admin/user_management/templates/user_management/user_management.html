@@ -136,10 +136,10 @@
                         {% for user in users %}
                         <tr data-id="{{ user.id }}">
                             <td>{{ user.id }}</td>
-                            <td class="editable" data-field="name">{{ user.name }}</td>
+                            <td class="editable" data-field="name">{{ user.first_name }} {{ user.last_name }}</td>
                             <td class="editable" data-field="email">{{ user.email }}</td>
                             <td class="editable" data-field="username">{{ user.username }}</td>
-                            <td>{{ user.role }}</td>
+                            <td class="editable" data-field="role">{{ user.user_type }}</td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn edit-btn" title="Edit" onclick="editRow(this)">
@@ -210,9 +210,7 @@
         document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { 
             hour: '2-digit', minute: '2-digit', hour12: true 
         });
-        document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { 
-            month: 'short', day: '2-digit', year: 'numeric' 
-        });
+
     }
     updateDateTime();
     setInterval(updateDateTime, 60000);
@@ -270,10 +268,22 @@
         const row = btn.closest('tr');
         row.classList.add('editing');
         const editableCells = row.querySelectorAll('.editable');
+
         editableCells.forEach(cell => {
-            const value = cell.textContent;
+            const value = cell.textContent.trim();
             cell.setAttribute('data-original', value);
-            cell.contentEditable = true;
+
+            if (cell.dataset.field === 'role') {
+                cell.contentEditable = false;
+                cell.innerHTML = `
+                    <select class="role-select">
+                        <option value="admin" ${value.toLowerCase() === 'admin' ? 'selected' : ''}>Admin</option>
+                        <option value="user" ${value.toLowerCase() === 'user' ? 'selected' : ''}>User</option>
+                    </select>
+                `;
+            } else {
+                cell.contentEditable = true;
+            }
             cell.style.background = '#fffde7';
         });
     }
@@ -283,26 +293,39 @@
         const row = btn.closest('tr');
         const id = row.dataset.id;
         const cells = row.querySelectorAll('.editable');
-        const data = { action: 'edit', user_id: id };
-        
+        const data = { action: 'edit', user_id: id, 'csrfmiddlewaretoken': '{{ csrf_token }}' };
+        let validationPassed = true;
+
         cells.forEach(cell => {
-            data[cell.dataset.field] = cell.textContent.trim();
+            let value;
+            if (cell.dataset.field === 'role') {
+                const select = cell.querySelector('.role-select');
+                value = select.value;
+            } else {
+                value = cell.textContent.trim();
+            }
+
+            if (!value) {
+                validationPassed = false;
+            }
+            data[cell.dataset.field] = value;
         });
+
+        if (!validationPassed) {
+            alert('All fields are required. Please fill in all fields before saving.');
+            return;
+        }
 
         fetch('/admin-panel/users/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
             },
             body: new URLSearchParams(data)
         }).then(response => {
             if (response.ok) {
-                row.classList.remove('editing');
-                cells.forEach(cell => {
-                    cell.contentEditable = false;
-                    cell.style.background = '';
-                });
+                // Reload to see changes and messages
+                location.reload(); 
             } else {
                 alert('Error saving changes');
             }
