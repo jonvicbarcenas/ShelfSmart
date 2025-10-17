@@ -32,8 +32,8 @@ def get_current_user_info(request):
         full_name = f"{first_name} {last_name}".strip() if last_name else first_name
         username = user.username or "username"
         
-        # Get role directly from Django User model (custom field)
-        role = getattr(user, 'role', 'user').capitalize()
+        # Get role from user_type field in Django User model
+        role = getattr(user, 'user_type', 'user').capitalize()
         
         return {
             "full_name": full_name,
@@ -62,8 +62,8 @@ def book_management(request):
     if request.method == "POST":
         action = request.POST.get("action")
         # Only admins can mutate
-        role = getattr(request.user, "role", "user")
-        if role != "admin":
+        user_type = getattr(request.user, "user_type", "user")
+        if user_type != "admin":
             messages.error(request, "You do not have permission to modify books.")
             return redirect("/admin-panel/books/")
 
@@ -72,16 +72,22 @@ def book_management(request):
             print("[dashboard] POST action=", action, " data=", dict(request.POST))
             if action == "add":
                 # Add new book via ORM
-                title = _single_line(request.POST.get("title") or request.POST.get("name"))
-                author = _single_line(request.POST.get("author") or "Unknown")
-                total_copies = int(request.POST.get("total_copies") or 1)
-                available_copies = int(request.POST.get("available_copies") or total_copies)
+                name = _single_line(request.POST.get("name") or "")
+                book_type = _single_line(request.POST.get("type") or "")
+                language = _single_line(request.POST.get("language") or "English")
+                quantity = int(request.POST.get("quantity") or 1)
+                availability = request.POST.get("availability") or "Available"
+
+                if not name or not book_type:
+                    messages.error(request, "Name and Type are required fields.")
+                    return redirect("/admin-panel/books/")
 
                 book = Book(
-                    title=title,
-                    author=author,
-                    total_copies=total_copies,
-                    available_copies=available_copies,
+                    name=name,
+                    type=book_type,
+                    language=language,
+                    quantity=quantity,
+                    availability=availability,
                 )
                 book.save()
                 print("[dashboard] ORM add saved id=", book.id)
@@ -91,14 +97,25 @@ def book_management(request):
                 # Update book via ORM
                 book_id = request.POST.get("book_id")
                 book = Book.objects.get(pk=book_id)
-                new_title = request.POST.get("title") or request.POST.get("name")
-                new_author = request.POST.get("author")
-                if new_title is not None:
-                    book.title = _single_line(new_title) or book.title
-                if new_author is not None:
-                    book.author = _single_line(new_author) or book.author or "Unknown"
-                book.total_copies = int(request.POST.get("total_copies") or book.total_copies or 1)
-                book.available_copies = int(request.POST.get("available_copies") or book.available_copies or 0)
+                
+                # Update fields with new schema
+                new_name = request.POST.get("name")
+                new_type = request.POST.get("type")
+                new_language = request.POST.get("language")
+                new_quantity = request.POST.get("quantity")
+                new_availability = request.POST.get("availability")
+                
+                if new_name is not None:
+                    book.name = _single_line(new_name) or book.name
+                if new_type is not None:
+                    book.type = _single_line(new_type) or book.type
+                if new_language is not None:
+                    book.language = _single_line(new_language) or book.language
+                if new_quantity is not None:
+                    book.quantity = int(new_quantity) if new_quantity else book.quantity
+                if new_availability is not None:
+                    book.availability = new_availability or book.availability
+                    
                 book.save()
                 print("[dashboard] ORM edit saved id=", book.id)
                 messages.success(request, "Book updated successfully!")
@@ -120,16 +137,19 @@ def book_management(request):
     try:
         # Fetch all books via ORM
         books_qs = Book.objects.all().order_by("id")
-        # Compute availability for display if template expects it
+        # Format books data with new schema
         books = []
         for b in books_qs:
             books.append({
                 "id": b.id,
-                "title": b.title,
-                "author": b.author,
-                "total_copies": b.total_copies,
-                "available_copies": b.available_copies,
-                "availability": "Available" if (b.available_copies or 0) > 0 else "Borrowed",
+                "book_id": b.book_id,  # Alias property
+                "name": b.name,
+                "type": b.type,
+                "language": b.language,
+                "quantity": b.quantity,
+                "availability": b.availability,
+                "created_at": b.created_at,
+                "updated_at": b.updated_at,
             })
 
         context = {

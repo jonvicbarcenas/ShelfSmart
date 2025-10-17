@@ -7,27 +7,7 @@
     <title>Book Management | ShelfSmart</title>
     <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { margin: 0; color: #333; }
-        .close-modal { background: none; border: none; font-size: 28px; cursor: pointer; color: #999; }
-        .close-modal:hover { color: #333; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #4CAF50; }
-        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
-        .btn-primary { background: #4CAF50; color: white; }
-        .btn-primary:hover { background: #45a049; }
-        .btn-secondary { background: #ddd; color: #333; }
-        .btn-secondary:hover { background: #ccc; }
-        .save-btn { display: none !important; }
-        tr.editing .save-btn { display: inline-flex !important; }
-        tr.editing .edit-btn { display: none !important; }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/popup_styles.css' %}">
 </head>
 <body>
 <div class="dashboard">
@@ -120,37 +100,37 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Author</th>
+                            <th>Book ID</th>
+                            <th>Name</th>
                             <th>Type</th>
                             <th>Language</th>
+                            <th>Quantity</th>
                             <th>Availability</th>
-                            <th>Action</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="booksTableBody">
                         {% for book in books %}
                         <tr data-id="{{ book.id }}">
-                            <td>{{ book.id }}</td>
-                            <td class="editable" data-field="title">{{ book.title }}</td>
-                            <td class="editable" data-field="author">{{ book.author }}</td>
-                            <td class="editable" data-field="type">{{ book.type }}</td>
-                            <td class="editable" data-field="language">{{ book.language }}</td>
+                            <td>{{ book.book_id }}</td>
+                            <td>{{ book.name }}</td>
+                            <td>{{ book.type }}</td>
+                            <td>{{ book.language }}</td>
+                            <td>{{ book.quantity }}</td>
                             <td>
-                                <span class="status-badge {% if book.availability == 'Available' %}available{% else %}borrowed{% endif %}">
+                                <span class="status-badge {% if book.availability == 'Available' %}status-available{% else %}status-borrowed{% endif %}">
                                     {{ book.availability }}
                                 </span>
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="action-btn edit-btn" title="Edit" onclick="editRow(this)">
-                                        <i class="fas fa-pen"></i>
+                                    <button class="action-btn btn-view" title="View" onclick="viewBook({{ book.id }})">
+                                        <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="action-btn save-btn" title="Save" onclick="saveRow(this)">
-                                        <i class="fas fa-save"></i>
+                                    <button class="action-btn btn-edit" title="Edit" onclick="editBook({{ book.id }})">
+                                        <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="action-btn delete-btn" title="Delete" onclick="deleteBook('{{ book.id }}')">
+                                    <button class="action-btn btn-delete" title="Delete" onclick="deleteBook({{ book.id }})">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -168,217 +148,187 @@
     </div>
 </div>
 
-<!-- Add Book Modal -->
-<div id="addBookModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Add New Book</h2>
-            <button class="close-modal" onclick="closeAddModal()">&times;</button>
+<!-- Add Book Popup -->
+<div id="addBookPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-book"></i>
+                Add Book
+            </h3>
+            <button class="popup-close" onclick="closeAddPopup()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <form id="addBookForm" onsubmit="addBook(event)">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="title">Title *</label>
-                <input type="text" id="title" name="title" required>
-            </div>
-            <div class="form-group">
-                <label for="author">Author *</label>
-                <input type="text" id="author" name="author" required>
-            </div>
-            <div class="form-group">
-                <label for="type">Type</label>
-                <select id="type" name="type">
-                    <option value="Fiction">Fiction</option>
-                    <option value="Non-Fiction">Non-Fiction</option>
-                    <option value="Textbook">Textbook</option>
-                    <option value="Programming">Programming</option>
-                    <option value="Science">Science</option>
-                    <option value="History">History</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="language">Language</label>
-                <input type="text" id="language" name="language" value="English">
-            </div>
-            <div class="form-group">
-                <label for="total_copies">Total Copies</label>
-                <input type="number" id="total_copies" name="total_copies" value="1" min="1">
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Add Book</button>
-            </div>
-        </form>
+        <div class="popup-content">
+            <form id="addBookForm" onsubmit="addBook(event)">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="add-name">Name</label>
+                    <input type="text" id="add-name" name="name" placeholder="Enter book name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add-type">Type</label>
+                        <select id="add-type" name="type" required>
+                            <option value="">Select Type</option>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Textbook">Textbook</option>
+                            <option value="Programming">Programming</option>
+                            <option value="Science">Science</option>
+                            <option value="History">History</option>
+                            <option value="Biography">Biography</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-quantity">Quantity</label>
+                        <input type="number" id="add-quantity" name="quantity" value="1" min="1" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="add-language">Language</label>
+                    <input type="text" id="add-language" name="language" placeholder="Enter language" value="English">
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeAddPopup()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<script>
-    // Update time and date
-    function updateDateTime() {
-        const now = new Date();
-        document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { 
-            hour: '2-digit', minute: '2-digit', hour12: true 
-        });
-        document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { 
-            month: 'short', day: '2-digit', year: 'numeric' 
-        });
-    }
-    updateDateTime();
-    setInterval(updateDateTime, 60000);
+<!-- Update Book Popup -->
+<div id="updateBookPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-edit"></i>
+                Update Book
+            </h3>
+            <button class="popup-close" onclick="closeUpdatePopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <form id="updateBookForm" onsubmit="updateBook(event)">
+                {% csrf_token %}
+                <input type="hidden" id="update-book-id" name="book_id">
+                <div class="form-group">
+                    <label for="update-name">Name</label>
+                    <input type="text" id="update-name" name="name" placeholder="Enter book name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="update-type">Type</label>
+                        <select id="update-type" name="type" required>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Textbook">Textbook</option>
+                            <option value="Programming">Programming</option>
+                            <option value="Science">Science</option>
+                            <option value="History">History</option>
+                            <option value="Biography">Biography</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="update-quantity">Quantity</label>
+                        <input type="number" id="update-quantity" name="quantity" min="1" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="update-language">Language</label>
+                    <input type="text" id="update-language" name="language" placeholder="Enter language">
+                </div>
+                <div class="form-group">
+                    <label for="update-availability">Availability</label>
+                    <select id="update-availability" name="availability">
+                        <option value="Available">Available</option>
+                        <option value="Borrowed">Borrowed</option>
+                    </select>
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeUpdatePopup()">Cancel</button>
+                    <button type="submit" class="btn btn-update">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll('#booksTableBody tr');
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
-    });
+<!-- View Book Popup -->
+<div id="viewBookPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-eye"></i>
+                View Book
+            </h3>
+            <button class="popup-close" onclick="closeViewPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="book-info">
+                <div class="info-item">
+                    <div class="info-label">Book ID</div>
+                    <div class="info-value" id="view-book-id">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Name</div>
+                    <div class="info-value" id="view-name">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Type</div>
+                    <div class="info-value" id="view-type">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Language</div>
+                    <div class="info-value" id="view-language">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Quantity</div>
+                    <div class="info-value" id="view-quantity">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Availability</div>
+                    <div class="info-value" id="view-availability">-</div>
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-close" onclick="closeViewPopup()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    // Modal functions
-    function openAddModal() {
-        document.getElementById('addBookModal').style.display = 'block';
-    }
+<!-- Delete Confirmation Popup -->
+<div id="deleteBookPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-trash"></i>
+                Delete Confirmation
+            </h3>
+            <button class="popup-close" onclick="closeDeletePopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="delete-message">
+                Are you certain you wish to proceed with the deletion of the selected entry?
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeDeletePopup()">Cancel</button>
+                <button type="button" class="btn btn-confirm" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    function closeAddModal() {
-        document.getElementById('addBookModal').style.display = 'none';
-        document.getElementById('addBookForm').reset();
-    }
-
-    // Add book
-    function addBook(event) {
-        event.preventDefault();
-        const formData = new FormData(event.target);
-        const data = {
-            action: 'add',
-            name: formData.get('title'),
-            author: formData.get('author'),
-            type: formData.get('type'),
-            language: formData.get('language'),
-            total_copies: formData.get('total_copies'),
-            available_copies: formData.get('total_copies')
-        };
-
-        fetch('/admin-panel/books/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-            },
-            body: new URLSearchParams(data)
-        }).then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                alert('Error adding book');
-            }
-        });
-    }
-
-    // Edit row
-    function editRow(btn) {
-        const row = btn.closest('tr');
-        row.classList.add('editing');
-        const editableCells = row.querySelectorAll('.editable');
-        editableCells.forEach(cell => {
-            const value = cell.textContent;
-            cell.setAttribute('data-original', value);
-            cell.contentEditable = true;
-            cell.style.background = '#fffde7';
-        });
-    }
-
-    // Save row
-    function saveRow(btn) {
-        const row = btn.closest('tr');
-        const id = row.dataset.id;
-        const cells = row.querySelectorAll('.editable');
-        const data = { action: 'edit', book_id: id };
-        
-        // helper to enforce single-line strings
-        const sanitizeSingleLine = (s) => (s || '')
-            .replace(/[\r\n]+/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-
-        cells.forEach(cell => {
-            // strip any newlines pasted or entered
-            cell.textContent = sanitizeSingleLine(cell.textContent);
-            data[cell.dataset.field] = cell.textContent;
-        });
-
-        fetch('/admin-panel/books/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: new URLSearchParams(data)
-        }).then(response => {
-            if (response.ok) {
-                row.classList.remove('editing');
-                cells.forEach(cell => {
-                    cell.contentEditable = false;
-                    cell.style.background = '';
-                });
-            } else {
-                alert('Error saving changes');
-            }
-        });
-    }
-
-    // Pressing Enter while editing saves the row (no newline)
-    document.addEventListener('keydown', function(e) {
-        const el = document.activeElement;
-        if (el && el.isContentEditable && e.key === 'Enter') {
-            e.preventDefault();
-            const row = el.closest('tr');
-            if (row && row.classList.contains('editing')) {
-                const saveBtn = row.querySelector('.save-btn');
-                if (saveBtn) {
-                    saveRow(saveBtn);
-                }
-            }
-        }
-    });
-
-    // Sanitize pasted content to single line in contentEditable cells
-    document.addEventListener('paste', function(e) {
-        const el = document.activeElement;
-        if (el && el.isContentEditable) {
-            e.preventDefault();
-            const text = (e.clipboardData || window.clipboardData).getData('text');
-            const single = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
-            document.execCommand('insertText', false, single);
-        }
-    });
-
-    // Delete book
-    function deleteBook(id) {
-        if (confirm('Are you sure you want to delete this book?')) {
-            const formData = new URLSearchParams({
-                action: 'delete',
-                book_id: id
-            });
-
-            fetch('/admin-panel/books/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: formData
-            }).then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('Error deleting book');
-                }
-            });
-        }
-    }
-</script>
+<script src="{% static 'js/popup_functions.js' %}"></script>
 </body>
 </html>
