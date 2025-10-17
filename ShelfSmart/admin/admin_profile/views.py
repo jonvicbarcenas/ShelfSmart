@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 import logging
 
 from datetime import datetime, date
-from admin.common.supabase_client import supabase
 import json
-from admin.common.models import Book
 
+User = get_user_model()
 logger = logging.getLogger(__name__)
 
 def get_current_user_info(request):
@@ -22,8 +24,8 @@ def get_current_user_info(request):
         full_name = f"{first_name} {last_name}".strip() if last_name else first_name
         username = user.username or "username"
         
-        # Get role directly from Django User model (custom field)
-        role = getattr(user, 'role', 'user').capitalize()
+        # Get role directly from Django User model (user_type field)
+        role = getattr(user, 'user_type', 'user').capitalize()
         
         return {
             "full_name": full_name,
@@ -44,76 +46,101 @@ def get_current_user_info(request):
 
 @login_required
 def admin_profile(request):
-    """Admin Profile with UPDATE functionality"""
-    # Get admin ID from session (you should implement proper authentication)
-    admin_id = request.session.get('user_id', 1)  # Default to 1 for testing
+    """Admin Profile with UPDATE functionality using Django User model"""
+    # Get the current authenticated user
+    user = request.user
+    
+    # Ensure user is an admin
+    if not user.is_authenticated or user.user_type != 'admin':
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect("/admin-panel/dashboard/")
     
     if request.method == "POST":
         try:
-            # Update admin profile
-            profile_data = {
-                "name": request.POST.get("fullName"),
-                "email": request.POST.get("email"),
-                "phone": request.POST.get("phone"),
-                "address": request.POST.get("address"),
-                "year": request.POST.get("year"),
-            }
+            # Get form data
+            first_name = request.POST.get("firstName", "").strip()
+            last_name = request.POST.get("lastName", "").strip()
+            email = request.POST.get("email", "").strip()
+            phone = request.POST.get("phone", "").strip()
+            username = request.POST.get("username", "").strip()
             
-            supabase.table("dashboard_user").update(profile_data).eq("id", admin_id).execute()
+            # Validation
+            errors = []
+            
+            if not first_name:
+                errors.append("First name is required.")
+            if not last_name:
+                errors.append("Last name is required.")
+            if not email:
+                errors.append("Email is required.")
+            else:
+                try:
+                    validate_email(email)
+                except ValidationError:
+                    errors.append("Please enter a valid email address.")
+            
+            if not username:
+                errors.append("Username is required.")
+            else:
+                # Check if username is taken by another user
+                if User.objects.filter(username=username).exclude(id=user.id).exists():
+                    errors.append("Username is already taken.")
+            
+            # Check if email is taken by another user
+            if email and User.objects.filter(email=email).exclude(id=user.id).exists():
+                errors.append("Email is already taken.")
+            
+            if errors:
+                for error in errors:
+                    messages.error(request, error)
+                return redirect("/admin-panel/profile/")
+            
+            # Update user profile
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.phone = phone or None
+            user.username = username
+            user.save()
+            
             messages.success(request, "Profile updated successfully!")
-            
-            # Fetch updated data
-            admin_response = supabase.table("dashboard_user").select("*").eq("id", admin_id).execute()
-            admin_data = admin_response.data[0] if admin_response.data else {}
+            logger.info(f"Admin profile updated for user {user.username} (ID: {user.id})")
             
         except Exception as e:
             messages.error(request, f"Error updating profile: {str(e)}")
-            admin_data = {}
+            logger.error(f"Error updating admin profile for user {user.id}: {str(e)}")
         
         return redirect("/admin-panel/profile/")
     
-    # GET request - fetch admin data
+    # GET request - display profile form
     try:
-        admin_response = supabase.table("dashboard_user")\
-            .select("*")\
-            .eq("id", admin_id)\
-            .eq("role", "admin")\
-            .execute()
-        
-        if admin_response.data:
-            admin_data = admin_response.data[0]
-            context = {
-                "user_info": get_current_user_info(request),
-                "user_name": admin_data.get("name", "Admin User"),
-                "role": "Admin",
-                "email": admin_data.get("email", ""),
-                "phone": admin_data.get("phone", ""),
-                "year": admin_data.get("year", "2025"),
-                "address": admin_data.get("address", ""),
-                "user_id": admin_id,
-            }
-        else:
-            context = {
-                "user_info": get_current_user_info(request),
-                "user_name": "Admin User",
-                "role": "Admin",
-                "email": "",
-                "phone": "",
-                "year": "2025",
-                "address": "",
-                "user_id": admin_id,
-            }
+        context = {
+            "user_info": get_current_user_info(request),
+            "user_name": user.get_full_name() or user.username,
+            "role": "Admin",
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "phone": user.phone or "",
+            "username": user.username,
+            "user_id": user.id,
+            "created_at": user.created_at,
+            "updated_at": user.updated_at,
+            "status": user.status,
+        }
         
         return render(request, "admin_profile/admin_profile.html", context)
     
     except Exception as e:
         messages.error(request, f"Error loading profile: {str(e)}")
+        logger.error(f"Error loading admin profile for user {user.id}: {str(e)}")
         return render(request, "admin_profile/admin_profile.html", {
             "user_info": get_current_user_info(request),
             "user_name": "Admin User",
             "role": "Admin",
+            "first_name": "",
+            "last_name": "",
             "email": "",
             "phone": "",
-            "year": "2025",
-            "address": "",
+            "username": "",
         })

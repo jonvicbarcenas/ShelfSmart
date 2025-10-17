@@ -106,7 +106,7 @@
                             <i class="fas fa-user"></i>
                         </div>
                         <div class="profile-info">
-                            <h2>{{ user_name|default:"Admin" }}</h2>
+                            <h2>{{ first_name }} {{ last_name }}</h2>
                             <p><i class="fas fa-shield-alt"></i> Admin</p>
                         </div>
                     </div>
@@ -116,10 +116,25 @@
                         {% csrf_token %}
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="fullName">
-                                    <i class="fas fa-user"></i> Full Name
+                                <label for="firstName">
+                                    <i class="fas fa-user"></i> First Name
                                 </label>
-                                <input type="text" id="fullName" name="fullName" value="{{ user_name|default:'' }}" disabled required>
+                                <input type="text" id="firstName" name="firstName" value="{{ first_name|default:'' }}" disabled required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">
+                                    <i class="fas fa-user"></i> Last Name
+                                </label>
+                                <input type="text" id="lastName" name="lastName" value="{{ last_name|default:'' }}" disabled required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="username">
+                                    <i class="fas fa-at"></i> Username
+                                </label>
+                                <input type="text" id="username" name="username" value="{{ username|default:'' }}" disabled required>
                             </div>
                             <div class="form-group">
                                 <label for="email">
@@ -137,19 +152,25 @@
                                 <input type="tel" id="phone" name="phone" value="{{ phone|default:'' }}" disabled>
                             </div>
                             <div class="form-group">
-                                <label for="year">
-                                    <i class="fas fa-calendar"></i> Year
+                                <label for="status">
+                                    <i class="fas fa-info-circle"></i> Status
                                 </label>
-                                <input type="text" id="year" name="year" value="{{ year|default:'' }}" disabled>
+                                <input type="text" id="status" name="status" value="{{ status|default:'active'|capfirst }}" disabled readonly>
                             </div>
                         </div>
 
                         <div class="form-row">
-                            <div class="form-group full-width">
-                                <label for="address">
-                                    <i class="fas fa-map-marker-alt"></i> Address
+                            <div class="form-group">
+                                <label for="created_at">
+                                    <i class="fas fa-calendar-plus"></i> Account Created
                                 </label>
-                                <input type="text" id="address" name="address" value="{{ address|default:'' }}" disabled>
+                                <input type="text" id="created_at" name="created_at" value="{{ created_at|date:'M d, Y H:i' }}" disabled readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="updated_at">
+                                    <i class="fas fa-calendar-check"></i> Last Updated
+                                </label>
+                                <input type="text" id="updated_at" name="updated_at" value="{{ updated_at|date:'M d, Y H:i' }}" disabled readonly>
                             </div>
                         </div>
 
@@ -200,7 +221,12 @@
 
         // Edit button click
         editBtn.addEventListener('click', function() {
-            inputs.forEach(input => input.disabled = false);
+            inputs.forEach(input => {
+                // Don't enable readonly fields
+                if (!input.hasAttribute('readonly')) {
+                    input.disabled = false;
+                }
+            });
             editBtn.style.display = 'none';
             saveBtn.style.display = 'inline-flex';
             cancelBtn.style.display = 'inline-flex';
@@ -209,8 +235,10 @@
         // Cancel button click
         cancelBtn.addEventListener('click', function() {
             inputs.forEach(input => {
-                input.value = originalValues[input.name];
-                input.disabled = true;
+                if (!input.hasAttribute('readonly')) {
+                    input.value = originalValues[input.name];
+                    input.disabled = true;
+                }
             });
             editBtn.style.display = 'inline-flex';
             saveBtn.style.display = 'none';
@@ -219,12 +247,14 @@
 
         // Form validation
         form.addEventListener('submit', function(e) {
-            const name = document.getElementById('fullName').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
             
-            if (!name || !email) {
+            if (!firstName || !lastName || !username || !email) {
                 e.preventDefault();
-                alert('Name and Email are required fields!');
+                alert('First Name, Last Name, Username, and Email are required fields!');
                 return false;
             }
             
@@ -232,6 +262,14 @@
             if (!emailRegex.test(email)) {
                 e.preventDefault();
                 alert('Please enter a valid email address!');
+                return false;
+            }
+            
+            // Username validation (alphanumeric and underscores only)
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            if (!usernameRegex.test(username)) {
+                e.preventDefault();
+                alert('Username can only contain letters, numbers, and underscores!');
                 return false;
             }
         });
