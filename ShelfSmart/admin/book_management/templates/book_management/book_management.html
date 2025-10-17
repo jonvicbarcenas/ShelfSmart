@@ -1,0 +1,384 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Management | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; color: #333; }
+        .close-modal { background: none; border: none; font-size: 28px; cursor: pointer; color: #999; }
+        .close-modal:hover { color: #333; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #4CAF50; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+        .btn-primary { background: #4CAF50; color: white; }
+        .btn-primary:hover { background: #45a049; }
+        .btn-secondary { background: #ddd; color: #333; }
+        .btn-secondary:hover { background: #ccc; }
+        .save-btn { display: none !important; }
+        tr.editing .save-btn { display: inline-flex !important; }
+        tr.editing .edit-btn { display: none !important; }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-dots">
+                <div class="dot dot-1"></div>
+                <div class="dot dot-2"></div>
+                <div class="dot dot-3"></div>
+                <div class="dot dot-4"></div>
+                <div class="dot dot-5"></div>
+                <div class="dot dot-6"></div>
+                <div class="dot dot-7"></div>
+            </div>
+            <h2 class="brand-title">ShelfSmart</h2>
+            <p class="brand-subtitle">LIBRARY</p>
+        </div>
+        <nav class="nav-menu">
+            <a href="/admin-panel/dashboard/" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/admin-panel/catalog/admin/" class="nav-link">
+                <i class="fas fa-book-open"></i>
+                <span>Catalog</span>
+            </a>
+            <a href="/admin-panel/books/" class="nav-link active">
+                <i class="fas fa-book"></i>
+                <span>Books</span>
+            </a>
+            <a href="/admin-panel/users/" class="nav-link">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+            <a href="/admin-panel/profile/" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="{% url 'settings_app:settings' %}" class="nav-link">
+                <i class="fas fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="logout">
+            <a href="{% url 'logout_app:logout' %}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name" id="headerUserName">
+                        {{ user_info.full_name|default:"User" }}
+                        <span class="user-role-badge">({{ user_info.role|default:"User" }})</span>
+                    </div>
+                    <div class="user-username">@{{ user_info.username|default:"username" }}</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="time" id="currentTime">12:29 PM</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="content-header">
+                <h1 class="page-title">Book Management</h1>
+                <div class="header-actions">
+                    <div class="current-date" id="currentDate"></div>
+                    <button class="add-book-btn" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Book
+                    </button>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search by title or type">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Type</th>
+                            <th>Language</th>
+                            <th>Availability</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksTableBody">
+                        {% for book in books %}
+                        <tr data-id="{{ book.id }}">
+                            <td>{{ book.id }}</td>
+                            <td class="editable" data-field="title">{{ book.title }}</td>
+                            <td class="editable" data-field="author">{{ book.author }}</td>
+                            <td class="editable" data-field="type">{{ book.type }}</td>
+                            <td class="editable" data-field="language">{{ book.language }}</td>
+                            <td>
+                                <span class="status-badge {% if book.availability == 'Available' %}available{% else %}borrowed{% endif %}">
+                                    {{ book.availability }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn edit-btn" title="Edit" onclick="editRow(this)">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="action-btn save-btn" title="Save" onclick="saveRow(this)">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" title="Delete" onclick="deleteBook('{{ book.id }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px;">No books found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Book Modal -->
+<div id="addBookModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Book</h2>
+            <button class="close-modal" onclick="closeAddModal()">&times;</button>
+        </div>
+        <form id="addBookForm" onsubmit="addBook(event)">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="author">Author *</label>
+                <input type="text" id="author" name="author" required>
+            </div>
+            <div class="form-group">
+                <label for="type">Type</label>
+                <select id="type" name="type">
+                    <option value="Fiction">Fiction</option>
+                    <option value="Non-Fiction">Non-Fiction</option>
+                    <option value="Textbook">Textbook</option>
+                    <option value="Programming">Programming</option>
+                    <option value="Science">Science</option>
+                    <option value="History">History</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="language">Language</label>
+                <input type="text" id="language" name="language" value="English">
+            </div>
+            <div class="form-group">
+                <label for="total_copies">Total Copies</label>
+                <input type="number" id="total_copies" name="total_copies" value="1" min="1">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Book</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Update time and date
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', minute: '2-digit', hour12: true 
+        });
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { 
+            month: 'short', day: '2-digit', year: 'numeric' 
+        });
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#booksTableBody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Modal functions
+    function openAddModal() {
+        document.getElementById('addBookModal').style.display = 'block';
+    }
+
+    function closeAddModal() {
+        document.getElementById('addBookModal').style.display = 'none';
+        document.getElementById('addBookForm').reset();
+    }
+
+    // Add book
+    function addBook(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const data = {
+            action: 'add',
+            name: formData.get('title'),
+            author: formData.get('author'),
+            type: formData.get('type'),
+            language: formData.get('language'),
+            total_copies: formData.get('total_copies'),
+            available_copies: formData.get('total_copies')
+        };
+
+        fetch('/admin-panel/books/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: new URLSearchParams(data)
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error adding book');
+            }
+        });
+    }
+
+    // Edit row
+    function editRow(btn) {
+        const row = btn.closest('tr');
+        row.classList.add('editing');
+        const editableCells = row.querySelectorAll('.editable');
+        editableCells.forEach(cell => {
+            const value = cell.textContent;
+            cell.setAttribute('data-original', value);
+            cell.contentEditable = true;
+            cell.style.background = '#fffde7';
+        });
+    }
+
+    // Save row
+    function saveRow(btn) {
+        const row = btn.closest('tr');
+        const id = row.dataset.id;
+        const cells = row.querySelectorAll('.editable');
+        const data = { action: 'edit', book_id: id };
+        
+        // helper to enforce single-line strings
+        const sanitizeSingleLine = (s) => (s || '')
+            .replace(/[\r\n]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        cells.forEach(cell => {
+            // strip any newlines pasted or entered
+            cell.textContent = sanitizeSingleLine(cell.textContent);
+            data[cell.dataset.field] = cell.textContent;
+        });
+
+        fetch('/admin-panel/books/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams(data)
+        }).then(response => {
+            if (response.ok) {
+                row.classList.remove('editing');
+                cells.forEach(cell => {
+                    cell.contentEditable = false;
+                    cell.style.background = '';
+                });
+            } else {
+                alert('Error saving changes');
+            }
+        });
+    }
+
+    // Pressing Enter while editing saves the row (no newline)
+    document.addEventListener('keydown', function(e) {
+        const el = document.activeElement;
+        if (el && el.isContentEditable && e.key === 'Enter') {
+            e.preventDefault();
+            const row = el.closest('tr');
+            if (row && row.classList.contains('editing')) {
+                const saveBtn = row.querySelector('.save-btn');
+                if (saveBtn) {
+                    saveRow(saveBtn);
+                }
+            }
+        }
+    });
+
+    // Sanitize pasted content to single line in contentEditable cells
+    document.addEventListener('paste', function(e) {
+        const el = document.activeElement;
+        if (el && el.isContentEditable) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            const single = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+            document.execCommand('insertText', false, single);
+        }
+    });
+
+    // Delete book
+    function deleteBook(id) {
+        if (confirm('Are you sure you want to delete this book?')) {
+            const formData = new URLSearchParams({
+                action: 'delete',
+                book_id: id
+            });
+
+            fetch('/admin-panel/books/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Error deleting book');
+                }
+            });
+        }
+    }
+</script>
+</body>
+</html>

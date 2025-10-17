@@ -1,0 +1,247 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog Admin | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/catalog_admin.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-dots">
+                <div class="dot dot-1"></div>
+                <div class="dot dot-2"></div>
+                <div class="dot dot-3"></div>
+                <div class="dot dot-4"></div>
+                <div class="dot dot-5"></div>
+                <div class="dot dot-6"></div>
+                <div class="dot dot-7"></div>
+            </div>
+            <h2 class="brand-title">ShelfSmart</h2>
+            <p class="brand-subtitle">LIBRARY</p>
+        </div>
+        <nav class="nav-menu">
+            <a href="/admin-panel/dashboard/" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/admin-panel/catalog/admin/" class="nav-link active">
+                <i class="fas fa-book-open"></i>
+                <span>Catalog</span>
+            </a>
+            <a href="/admin-panel/books/" class="nav-link">
+                <i class="fas fa-book"></i>
+                <span>Books</span>
+            </a>
+            <a href="/admin-panel/users/" class="nav-link">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+            <a href="/admin-panel/profile/" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="{% url 'settings_app:settings' %}" class="nav-link">
+                <i class="fas fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="logout">
+            <a href="{% url 'logout_app:logout' %}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name" id="headerUserName">
+                        {{ user_info.full_name|default:"User" }}
+                        <span class="user-role-badge">({{ user_info.role|default:"User" }})</span>
+                    </div>
+                    <div class="user-username">@{{ user_info.username|default:"username" }}</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="time-date-container">
+                    <div class="time" id="currentTime">12:29 PM</div>
+                    <div class="current-date" id="currentDate">Oct 02, 2025</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <h1 class="page-title">Catalog Management</h1>
+            
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="borrowed" onclick="switchTab('borrowed')">Borrowed Books</button>
+                <button class="tab-btn" data-tab="overdue" onclick="switchTab('overdue')">Overdue Borrowers</button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search by ID or User">
+            </div>
+
+            <!-- Borrowed Books Table -->
+            <div class="table-container tab-content active" id="borrowed-tab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Borrow ID</th>
+                            <th>User Name</th>
+                            <th>Book Title</th>
+                            <th>Borrowed Date</th>
+                            <th>Due Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in borrowed_books %}
+                        <tr>
+                            <td>{{ record.id }}</td>
+                            <td>{{ record.users.name|default:"Unknown" }}</td>
+                            <td>{{ record.books.title|default:"Unknown Book" }}</td>
+                            <td>{{ record.borrowed_date }}</td>
+                            <td>{{ record.due_date }}</td>
+                            <td>
+                                <button class="delete-btn" onclick="markAsReturned({{ record.id }})" title="Mark as Returned">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px;">No borrowed books found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Overdue Borrowers Table -->
+            <div class="table-container tab-content" id="overdue-tab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Borrow ID</th>
+                            <th>User Name</th>
+                            <th>Book Title</th>
+                            <th>Borrowed Date</th>
+                            <th>Due Date</th>
+                            <th>Days Overdue</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in overdue_books %}
+                        <tr style="background-color: #fff3cd;">
+                            <td>{{ record.id }}</td>
+                            <td>{{ record.users.name|default:"Unknown" }}</td>
+                            <td>{{ record.books.title|default:"Unknown Book" }}</td>
+                            <td>{{ record.borrowed_date }}</td>
+                            <td>{{ record.due_date }}</td>
+                            <td>
+                                <span style="color: #d32f2f; font-weight: bold;">
+                                    {% widthratio record.days_overdue 1 1 %} days
+                                </span>
+                            </td>
+                            <td>
+                                <button class="delete-btn" onclick="markAsReturned({{ record.id }})" title="Mark as Returned">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px;">No overdue books found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update time and date
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', minute: '2-digit', hour12: true 
+        });
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { 
+            month: 'short', day: '2-digit', year: 'numeric' 
+        });
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+
+    // Tab switching
+    function switchTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.tab === tabName) {
+                btn.classList.add('active');
+            }
+        });
+
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(tabName + '-tab').classList.add('active');
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const activeTab = document.querySelector('.tab-content.active');
+        const rows = activeTab.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Mark as returned
+    function markAsReturned(borrowId) {
+        if (confirm('Mark this book as returned?')) {
+            fetch('/admin-panel/catalog/admin/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    action: 'return',
+                    borrow_id: borrowId
+                })
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Error marking as returned');
+                }
+            });
+        }
+    }
+</script>
+</body>
+</html>

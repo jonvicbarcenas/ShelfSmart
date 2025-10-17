@@ -19,11 +19,13 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dashboard/', include('dashboard.urls')),
+    # path('dashboard/', include('dashboard.urls')),  # Removed - moved to admin apps
     path('books-admin/', include(('books_admin.urls', 'books_admin'), namespace='books_admin')),
     path('settings/', include(('settings.urls', 'settings'), namespace='settings_app')),
     path('logout/', include(('logout_app.urls', 'logout_app'), namespace='logout_app')),
     path('forgot-password/', include(('forgot_password.urls', 'forgot_password'), namespace='forgot_password')),
     path('accounts/', include('django.contrib.auth.urls')),
+    # New admin apps
+    path('admin-panel/', include(('admin.urls', 'admin'), namespace='admin')),
     path('', include(('user_auth.urls', 'user_auth'), namespace='user_auth')),
 ]

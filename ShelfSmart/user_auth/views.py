@@ -18,7 +18,7 @@ def _is_ajax(request) -> bool:
 @require_http_methods(["GET", "POST"])
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect("dashboard")
+        return redirect("/admin-panel/dashboard/")
 
     form = LoginForm(request=request, data=request.POST or None)
 
@@ -27,7 +27,7 @@ def login_view(request):
             redirect_url = (
                 request.POST.get("next")
                 or request.GET.get("next")
-                or reverse("dashboard")
+                or "/admin-panel/dashboard/"
             )
             user = form.get_user()
             auth_login(request, user)
@@ -62,7 +62,7 @@ def login_view(request):
 @require_http_methods(["GET", "POST"])
 def signup_view(request):
     if request.user.is_authenticated:
-        return redirect("dashboard")
+        return redirect("/admin-panel/dashboard/")
 
     form = SignupForm(request.POST or None)
 
@@ -109,5 +109,5 @@ def logout_view(request):
 
 def home_view(request):
     if request.user.is_authenticated:
-        return redirect("dashboard")
+        return redirect("/admin-panel/dashboard/")
     return redirect("user_auth:login")

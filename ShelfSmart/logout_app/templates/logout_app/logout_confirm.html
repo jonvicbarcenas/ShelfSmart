@@ -28,7 +28,7 @@
             <form method="post" action="{% url 'logout_app:logout' %}" class="actions">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Yes, log me out</button>
-                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                <a href="/admin-panel/dashboard/" class="btn btn-secondary">Cancel</a>
             </form>
         </section>
     </main>

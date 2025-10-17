@@ -6,7 +6,7 @@ import logging
 import traceback
 
 from .decorators import admin_required
-from dashboard.models import Book
+from admin.common.models import Book
 
 logger = logging.getLogger(__name__)
 
