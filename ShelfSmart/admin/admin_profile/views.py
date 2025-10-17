@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from user_auth.decorators import admin_required
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -44,7 +45,7 @@ def get_current_user_info(request):
         "role": "User"
     }
 
-@login_required
+@admin_required
 def admin_profile(request):
     """Admin Profile with UPDATE functionality using Django User model"""
     # Get the current authenticated user
