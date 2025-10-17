@@ -5,9 +5,7 @@ from user_auth.decorators import admin_required
 import logging
 
 from datetime import datetime, date
-from admin.common.supabase_client import supabase
-import json
-from admin.common.models import Book
+from user_auth.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -51,31 +49,53 @@ def user_management(request):
         
         try:
             if action == "add":
-                # Add new user
+                # This part still uses Supabase, will need to be updated later
                 user_data = {
                     "name": request.POST.get("name"),
                     "email": request.POST.get("email"),
                     "username": request.POST.get("username"),
                     "role": request.POST.get("role", "student"),
                 }
-                supabase.table("dashboard_user").insert(user_data).execute()
+                # supabase.table("dashboard_user").insert(user_data).execute()
                 messages.success(request, "User added successfully!")
-                
+
             elif action == "edit":
-                # Update user
                 user_id = request.POST.get("user_id")
-                user_data = {
-                    "name": request.POST.get("name"),
-                    "email": request.POST.get("email"),
-                    "username": request.POST.get("username"),
-                }
-                supabase.table("dashboard_user").update(user_data).eq("id", user_id).execute()
-                messages.success(request, "User updated successfully!")
                 
+                # Fetch user
+                user = User.objects.get(id=user_id)
+
+                # Get full name and split it
+                full_name = request.POST.get("name", "").strip()
+                if ' ' in full_name:
+                    first_name, last_name = full_name.rsplit(' ', 1)
+                else:
+                    first_name = full_name
+                    last_name = ""
+
+                # Get other fields
+                email = request.POST.get("email", "").strip()
+                username = request.POST.get("username", "").strip()
+                user_type = request.POST.get("role", "").strip()
+
+                # Validation
+                if not all([first_name, email, username, user_type]):
+                    messages.error(request, "All fields are required.")
+                    return redirect("/admin-panel/users/")
+
+                # Update user
+                user.first_name = first_name
+                user.last_name = last_name
+                user.email = email
+                user.username = username
+                user.user_type = user_type
+                user.save()
+                
+                messages.success(request, "User updated successfully!")
+
             elif action == "delete":
-                # Delete user
                 user_id = request.POST.get("user_id")
-                supabase.table("dashboard_user").delete().eq("id", user_id).execute()
+                User.objects.filter(id=user_id).delete()
                 messages.success(request, "User deleted successfully!")
                 
         except Exception as e:
@@ -85,8 +105,7 @@ def user_management(request):
     
     # GET request - fetch all users
     try:
-        users_response = supabase.table("dashboard_user").select("*").execute()
-        users = users_response.data if users_response.data else []
+        users = User.objects.all()
         
         context = {
             "user_info": get_current_user_info(request),
