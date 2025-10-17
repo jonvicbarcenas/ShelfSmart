@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from dashboard.supabase_client import supabase
+from admin.common.supabase_client import supabase
 
 
 def _default_settings():

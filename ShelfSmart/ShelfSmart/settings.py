@@ -44,12 +44,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ShelfSmart',
-    'dashboard',
     'user_auth',
     'logout_app',
     'forgot_password',
     'settings',
     'books_admin',
+    # Admin apps
+    'admin.common',
+    'admin.admin_dashboard',
+    'admin.admin_profile',
+    'admin.book_management',
+    'admin.user_management',
+    'admin.catalog_management',
+    'admin.student_dashboard',
+    'admin.student_catalog',
 ]
 
 MIDDLEWARE = [
@@ -155,7 +163,7 @@ LOGIN_URL = 'user_auth:login'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'dashboard.User'
+# AUTH_USER_MODEL = 'dashboard.User'  # Removed - using Django's default User model
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
