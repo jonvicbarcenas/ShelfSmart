@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from user_auth.decorators import admin_required
 import logging
 
 from datetime import datetime, date
@@ -42,7 +43,7 @@ def get_current_user_info(request):
         "role": "User"
     }
 
-@login_required
+@admin_required
 def user_management(request):
     """User Management - CRUD operations"""
     if request.method == "POST":

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from user_auth.decorators import admin_required
 import logging
 
 from datetime import datetime, date
@@ -42,7 +43,7 @@ def get_current_user_info(request):
         "role": "User"
     }
 
-@login_required
+@admin_required
 def catalog_admin(request):
     """Catalog management - Borrowed and Overdue books"""
     if request.method == "POST":
@@ -123,7 +124,7 @@ def catalog_admin(request):
             "overdue_books": [],
         })
 
-@login_required
+@admin_required
 def student_catalog(request):
     """Student Catalog - View borrowed and returned books"""
     # Get student ID from session

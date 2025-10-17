@@ -27,5 +27,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     # New admin apps
     path('admin-panel/', include('admin.urls')),
+    # User apps
+    path('user/', include('users.urls')),
     path('', include(('user_auth.urls', 'user_auth'), namespace='user_auth')),
 ]

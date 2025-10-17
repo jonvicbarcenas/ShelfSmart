@@ -18,19 +18,29 @@ def _is_ajax(request) -> bool:
 @require_http_methods(["GET", "POST"])
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect("/admin-panel/dashboard/")
+        # Redirect based on user_type
+        if request.user.user_type == 'admin':
+            return redirect("/admin-panel/dashboard/")
+        else:
+            return redirect("/user/dashboard/")
 
     form = LoginForm(request=request, data=request.POST or None)
 
     if request.method == "POST":
         if form.is_valid():
-            redirect_url = (
-                request.POST.get("next")
-                or request.GET.get("next")
-                or "/admin-panel/dashboard/"
-            )
             user = form.get_user()
             auth_login(request, user)
+            
+            # Determine redirect URL based on user_type
+            if request.POST.get("next") or request.GET.get("next"):
+                redirect_url = request.POST.get("next") or request.GET.get("next")
+            else:
+                # Default redirect based on user_type
+                if user.user_type == 'admin':
+                    redirect_url = "/admin-panel/dashboard/"
+                else:
+                    redirect_url = "/user/dashboard/"
+            
             if _is_ajax(request):
                 return JsonResponse({"success": True, "redirect_url": redirect_url})
             return redirect(redirect_url)
@@ -62,7 +72,11 @@ def login_view(request):
 @require_http_methods(["GET", "POST"])
 def signup_view(request):
     if request.user.is_authenticated:
-        return redirect("/admin-panel/dashboard/")
+        # Redirect based on user_type
+        if request.user.user_type == 'admin':
+            return redirect("/admin-panel/dashboard/")
+        else:
+            return redirect("/user/dashboard/")
 
     form = SignupForm(request.POST or None)
 
@@ -109,5 +123,9 @@ def logout_view(request):
 
 def home_view(request):
     if request.user.is_authenticated:
-        return redirect("/admin-panel/dashboard/")
+        # Redirect based on user_type
+        if request.user.user_type == 'admin':
+            return redirect("/admin-panel/dashboard/")
+        else:
+            return redirect("/user/dashboard/")
     return redirect("user_auth:login")
