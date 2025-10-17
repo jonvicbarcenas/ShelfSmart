@@ -23,7 +23,7 @@ def get_current_user_info(request):
         username = user.username or "username"
         
         # Get role directly from Django User model (custom field)
-        role = getattr(user, 'role', 'user').capitalize()
+        role = getattr(user, 'user_type', 'user').capitalize()
         
         return {
             "full_name": full_name,
