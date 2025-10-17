@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management | ShelfSmart</title>
     <link rel="stylesheet" href="{% static 'css/user_management.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
@@ -83,25 +84,25 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="header">
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="user-details">
-                    <div class="user-name" id="headerUserName">
-                        {{ user_info.full_name|default:"User" }}
-                        <span class="user-role-badge">({{ user_info.role|default:"User" }})</span>
+                <div class="user-header__left">
+                    <div class="user-header__avatar">
+                        <svg class="user-header__avatar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
                     </div>
-                    <div class="user-username">@{{ user_info.username|default:"username" }}</div>
+                    <div class="user-header__details">
+                        <span class="user-header__name">
+                            {{ user_info.full_name|default:"Jon Vic Barcenas" }}
+                            <span class="user-header__role">({{ user_info.role|default:"Admin" }})</span>
+                        </span>
+                        <span class="user-header__handle">@{{ user_info.username|default:"Dainsleif" }}</span>
+                    </div>
+                </div>
+                <div class="user-header__timestamp" id="currentTime">
+                    <!-- The time will be updated by the JavaScript below -->
                 </div>
             </div>
-            <div class="header-right">
-                <div class="time-date-container">
-                    <div class="time" id="currentTime">12:29 PM</div>
-                    <div class="current-date" id="currentDate">Sep 02, 2023</div>
-                </div>
-            </div>
-        </div>
 
         <div class="content">
             <div class="content-header">

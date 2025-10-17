@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShelfSmart Library Dashboard</title>
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -64,23 +65,23 @@
         <div class="main-content">
             <!-- Header -->
             <div class="header">
-                <div class="user-info">
-                    <div class="user-avatar">
-                        <i class="fas fa-user-circle"></i>
+                <div class="user-header__left">
+                    <div class="user-header__avatar">
+                        <svg class="user-header__avatar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
                     </div>
-                    <div class="user-details">
-                        <div class="user-name" id="headerUserName">
-                            {{ user_info.full_name|default:"User" }}
-                            <span class="user-role-badge">({{ user_info.role|default:"User" }})</span>
-                        </div>
-                        <div class="user-username">@{{ user_info.username|default:"username" }}</div>
+                    <div class="user-header__details">
+                        <span class="user-header__name">
+                            {{ user_info.full_name|default:"Jon Vic Barcenas" }}
+                            <span class="user-header__role">({{ user_info.role|default:"Admin" }})</span>
+                        </span>
+                        <span class="user-header__handle">@{{ user_info.username|default:"Dainsleif" }}</span>
                     </div>
                 </div>
-                <div class="header-right">
-                    <div class="time-date-container">
-                        <div class="time" id="currentTime">12:29 PM</div>
-                        <div class="current-date" id="currentDate">Oct 02, 2025</div>
-                    </div>
+                <div class="user-header__timestamp" id="currentTime">
+                    <!-- The time will be updated by the JavaScript below -->
                 </div>
             </div>
 
@@ -209,9 +210,7 @@
             document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { 
                 hour: '2-digit', minute: '2-digit', hour12: true 
             });
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { 
-                month: 'short', day: '2-digit', year: 'numeric' 
-            });
+
         }
         updateDateTime();
         setInterval(updateDateTime, 1000);

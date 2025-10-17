@@ -56,8 +56,6 @@ INSTALLED_APPS = [
     'admin.book_management',
     'admin.user_management',
     'admin.catalog_management',
-    'admin.student_dashboard',
-    'admin.student_catalog',
 ]
 
 MIDDLEWARE = [

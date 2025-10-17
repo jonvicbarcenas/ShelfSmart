@@ -18,9 +18,5 @@ urlpatterns = [
     # Catalog Management
     path('catalog/', include('admin.catalog_management.urls')),
     
-    # Student Dashboard
-    path('student-dashboard/', include('admin.student_dashboard.urls')),
-    
-    # Student Catalog (Profile)
-    path('student/', include('admin.student_catalog.urls')),
+
 ]

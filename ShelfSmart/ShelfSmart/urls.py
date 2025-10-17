@@ -26,6 +26,6 @@ urlpatterns = [
     path('forgot-password/', include(('forgot_password.urls', 'forgot_password'), namespace='forgot_password')),
     path('accounts/', include('django.contrib.auth.urls')),
     # New admin apps
-    path('admin-panel/', include(('admin.urls', 'admin'), namespace='admin')),
+    path('admin-panel/', include('admin.urls')),
     path('', include(('user_auth.urls', 'user_auth'), namespace='user_auth')),
 ]
