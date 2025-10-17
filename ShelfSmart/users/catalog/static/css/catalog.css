@@ -125,7 +125,7 @@ body {
 .main-content {
     flex: 1;
     margin-left: 256px;
-    padding: 0;
+    padding: 32px;
     background: #f8f9fa;
 }
 
