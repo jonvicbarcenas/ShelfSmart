@@ -1,19 +1,20 @@
 /* Centralized User Header - Final Integrated Design */
 
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 20px; /* Space between header and content */
-    width: 100%;
-    box-sizing: border-box;
-    border-bottom: 1px solid #e0e0e0; /* Optional: adds a subtle separator */
-    margin-bottom: 20px; /* Space below the header */
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding-bottom: 20px !important; /* Space between header and content */
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-bottom: 1px solid #e0e0e0 !important; /* Optional: adds a subtle separator */
+    margin-bottom: 20px !important; /* Space below the header */
 }
 
 .user-header__left {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
 }
 
 .user-header__avatar {
@@ -24,7 +25,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-right: 12px;
     flex-shrink: 0;
 }
 
