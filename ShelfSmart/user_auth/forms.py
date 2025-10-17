@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
-from .models import UserProfile
+from .models import User
 
 
 class LoginForm(AuthenticationForm):
@@ -32,15 +32,16 @@ UserModel = get_user_model()
 
 class SignupForm(UserCreationForm):
     email = forms.EmailField(required=True, label="Email address")
-    contact = forms.CharField(required=True, label="Contact Number", max_length=50)
+    phone = forms.CharField(required=False, label="Phone Number", max_length=15)
 
     class Meta:
-        model = UserModel
+        model = User
         fields = (
             "first_name",
             "last_name",
             "email",
             "username",
+            "phone",
             "password1",
             "password2",
         )
@@ -50,7 +51,7 @@ class SignupForm(UserCreationForm):
         placeholders = {
             "first_name": "First Name",
             "last_name": "Last Name",
-            "contact": "Contact No",
+            "phone": "Phone Number (Optional)",
             "email": "Email",
             "username": "Username",
             "password1": "Password",
@@ -66,14 +67,6 @@ class SignupForm(UserCreationForm):
             )
             field.help_text = None
 
-        # Contact field is declared directly on the form, update its attrs separately
-        self.fields["contact"].widget.attrs.update(
-            {
-                "class": "form-input",
-                "placeholder": placeholders["contact"],
-            }
-        )
-
     def clean_email(self):
         email = self.cleaned_data.get("email", "").lower()
         if self._meta.model.objects.filter(email__iexact=email).exists():
@@ -85,10 +78,10 @@ class SignupForm(UserCreationForm):
         user.email = self.cleaned_data["email"].lower()
         user.first_name = self.cleaned_data["first_name"]
         user.last_name = self.cleaned_data["last_name"]
+        user.phone = self.cleaned_data.get("phone", "")
+        # Set default values for new fields
+        user.user_type = 'user'  # Default to 'user' as specified
+        user.status = 'active'   # Default to 'active' as specified
         if commit:
             user.save()
-            UserProfile.objects.update_or_create(
-                user=user,
-                defaults={"contact": self.cleaned_data["contact"]},
-            )
         return user

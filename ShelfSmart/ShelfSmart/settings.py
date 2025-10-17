@@ -163,8 +163,7 @@ LOGIN_URL = 'user_auth:login'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# AUTH_USER_MODEL = 'dashboard.User'  # Removed - using Django's default User model
-
+AUTH_USER_MODEL = 'user_auth.User'  # Use our custom User model
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
