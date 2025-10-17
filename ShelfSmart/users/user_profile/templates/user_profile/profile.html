@@ -1,0 +1,180 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - ShelfSmart Library</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .alert { padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; }
+        .alert-success { background-color: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-dots">
+                    <div class="dot dot-1"></div>
+                    <div class="dot dot-2"></div>
+                    <div class="dot dot-3"></div>
+                    <div class="dot dot-4"></div>
+                    <div class="dot dot-5"></div>
+                    <div class="dot dot-6"></div>
+                    <div class="dot dot-7"></div>
+                </div>
+                <h2 class="brand-title">ShelfSmart</h2>
+                <p class="brand-subtitle">LIBRARY</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="{% url 'users:user_dashboard:dashboard' %}" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'users:catalog:catalog' %}" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>Catalog</span>
+                </a>
+                <a href="{% url 'users:user_profile:profile' %}" class="nav-link active">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="logout">
+                <a href="{% url 'logout_app:logout' %}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            {% include 'components/user_header.html' %}
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <h1 class="profile-title">User Profile</h1>
+
+                <!-- Success/Error Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h2>{{ first_name }} {{ last_name }}</h2>
+                            <p><i class="fas fa-user-graduate"></i> User</p>
+                        </div>
+                    </div>
+
+                    <!-- Profile Form -->
+                    <form id="profileForm" class="profile-form" method="POST" action="{% url 'users:user_profile:profile' %}">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName"><i class="fas fa-user"></i> First Name</label>
+                                <input type="text" id="firstName" name="firstName" value="{{ first_name|default:'' }}" disabled required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName"><i class="fas fa-user"></i> Last Name</label>
+                                <input type="text" id="lastName" name="lastName" value="{{ last_name|default:'' }}" disabled required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="username"><i class="fas fa-at"></i> Username</label>
+                                <input type="text" id="username" name="username" value="{{ username|default:'' }}" disabled required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                                <input type="email" id="email" name="email" value="{{ email|default:'' }}" disabled required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                                <input type="tel" id="phone" name="phone" value="{{ phone|default:'' }}" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="status"><i class="fas fa-info-circle"></i> Status</label>
+                                <input type="text" id="status" name="status" value="{{ status|default:'active'|capfirst }}" disabled readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="editBtn" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Profile</button>
+                            <button type="submit" id="saveBtn" class="btn btn-save" style="display: none;"><i class="fas fa-save"></i> Save Changes</button>
+                            <button type="button" id="cancelBtn" class="btn btn-cancel" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Profile form handling
+        const form = document.getElementById('profileForm');
+        const editBtn = document.getElementById('editBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const inputs = form.querySelectorAll('input:not([type="hidden"])');
+        let originalValues = {};
+
+        inputs.forEach(input => { originalValues[input.name] = input.value; });
+
+        editBtn.addEventListener('click', function() {
+            inputs.forEach(input => { if (!input.hasAttribute('readonly')) { input.disabled = false; } });
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-flex';
+            cancelBtn.style.display = 'inline-flex';
+        });
+
+        cancelBtn.addEventListener('click', function() {
+            inputs.forEach(input => {
+                if (!input.hasAttribute('readonly')) {
+                    input.value = originalValues[input.name];
+                    input.disabled = true;
+                }
+            });
+            editBtn.style.display = 'inline-flex';
+            saveBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+        });
+
+        form.addEventListener('submit', function(e) {
+            const requiredFields = ['firstName', 'lastName', 'username', 'email'];
+            for (const fieldName of requiredFields) {
+                if (!document.getElementById(fieldName).value.trim()) {
+                    e.preventDefault();
+                    alert(`${fieldName.replace(/([A-Z])/g, ' $1').trim()} is a required field!`);
+                    return;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

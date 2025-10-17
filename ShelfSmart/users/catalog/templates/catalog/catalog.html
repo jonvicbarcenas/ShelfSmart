@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Catalog | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-dots">
+                <div class="dot dot-1"></div>
+                <div class="dot dot-2"></div>
+                <div class="dot dot-3"></div>
+                <div class="dot dot-4"></div>
+                <div class="dot dot-5"></div>
+                <div class="dot dot-6"></div>
+                <div class="dot dot-7"></div>
+            </div>
+            <h2 class="brand-title">ShelfSmart</h2>
+            <p class="brand-subtitle">LIBRARY</p>
+        </div>
+        <nav class="nav-menu">
+            <a href="{% url 'users:user_dashboard:dashboard' %}" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'users:catalog:catalog' %}" class="nav-link active">
+                <i class="fas fa-book-open"></i>
+                <span>Catalog</span>
+            </a>
+            <a href="{% url 'users:user_profile:profile' %}" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="logout">
+            <a href="{% url 'logout_app:logout' %}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        {% include 'components/user_header.html' %}
+
+        <div class="content">
+            <h1 class="page-title">Book Catalog</h1>
+            
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search by Title, Type, or Language">
+            </div>
+
+            <!-- Books Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Book Name</th>
+                            <th>Type</th>
+                            <th>Language</th>
+                            <th>Quantity</th>
+                            <th>Availability</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {# Placeholder Row #}
+                        <tr>
+                            <td>The Hitchhiker's Guide to the Galaxy</td>
+                            <td>Science Fiction</td>
+                            <td>English</td>
+                            <td>5</td>
+                            <td><span class="availability-status available">Available</span></td>
+                            <td><button class="action-btn">Borrow</button></td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px;">No other books found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Basic search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let filter = this.value.toUpperCase();
+        let table = document.querySelector('table');
+        let tr = table.getElementsByTagName('tr');
+        for (let i = 1; i < tr.length; i++) { // Start from 1 to skip header
+            let rowVisible = false;
+            let td = tr[i].getElementsByTagName('td');
+            for (let j = 0; j < td.length - 1; j++) { // Exclude actions column
+                if (td[j]) {
+                    if (td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
+                        rowVisible = true;
+                    }
+                }
+            }
+            if (rowVisible) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    });
+</script>
+</body>
+</html>

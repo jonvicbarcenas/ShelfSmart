@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfSmart User Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-dots">
+                    <div class="dot dot-1"></div>
+                    <div class="dot dot-2"></div>
+                    <div class="dot dot-3"></div>
+                    <div class="dot dot-4"></div>
+                    <div class="dot dot-5"></div>
+                    <div class="dot dot-6"></div>
+                    <div class="dot dot-7"></div>
+                </div>
+                <h2 class="brand-title">ShelfSmart</h2>
+                <p class="brand-subtitle">LIBRARY</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="{% url 'users:user_dashboard:dashboard' %}" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'users:catalog:catalog' %}" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>Catalog</span>
+                </a>
+                <a href="{% url 'users:user_profile:profile' %}" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="logout">
+                <a href="{% url 'logout_app:logout' %}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            {% include 'components/user_header.html' %}
+
+            <div class="dashboard-content">
+                <!-- Left Section (User Stats) -->
+                <div class="left-section">
+                    <div class="stats-container vertical">
+                        <div class="stat-card">
+                            <div class="stat-content">
+                                <div class="stat-icon"><i class="fas fa-book"></i></div>
+                                <div class="stat-text">
+                                    <h3>{{ borrowed_books_count|default:"0" }}</h3>
+                                    <p>Books Borrowed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-content">
+                                <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                                <div class="stat-text">
+                                    <h3>{{ overdue_books_count|default:"0" }}</h3>
+                                    <p>Overdue Books</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Section (Currently Borrowed) -->
+                <div class="right-section">
+                    <div class="main-sections">
+                        <div class="section-container">
+                            <h2>Currently Borrowed Books</h2>
+                            <div class="list" id="borrowedBooksList">
+                                {# Placeholder Content #}
+                                <div class="list-item">
+                                    <div class="list-item-content">
+                                        <div class="info-text">
+                                            <h4>The Great Gatsby</h4>
+                                            <p>Due Date: 25 Oct 2025</p>
+                                        </div>
+                                    </div>
+                                    <button class="edit-btn" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <p style="text-align: center; padding: 20px; color: #666;">No other books borrowed.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update time and date
+        function updateDateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('currentTime');
+            if(timeElement) {
+                timeElement.textContent = now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', minute: '2-digit', hour12: true 
+                });
+            }
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
+</body>
+</html>
