@@ -88,19 +88,48 @@
                         <div class="section-container">
                             <h2>Currently Borrowed Books</h2>
                             <div class="list" id="borrowedBooksList">
-                                {# Placeholder Content #}
-                                <div class="list-item">
-                                    <div class="list-item-content">
-                                        <div class="info-text">
-                                            <h4>The Great Gatsby</h4>
-                                            <p>Due Date: 25 Oct 2025</p>
+                                {% if borrowed_books %}
+                                    {% for record in borrowed_books %}
+                                    <div class="borrowed-book-item {% if record.due_date < today %}overdue{% endif %}">
+                                        <div class="book-main-info">
+                                            <h4 class="book-title">{{ record.book.name }}</h4>
+                                            <div class="book-meta-row">
+                                                <span class="book-type-badge">
+                                                    <i class="fas fa-tag"></i> {{ record.book.type }}
+                                                </span>
+                                                <span class="book-language-badge">
+                                                    <i class="fas fa-language"></i> {{ record.book.language }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="book-dates-info">
+                                            <div class="date-row">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                <span class="date-label">Borrowed:</span>
+                                                <span class="date-value">{{ record.borrowed_date|date:"d M Y" }}</span>
+                                            </div>
+                                            <div class="date-row">
+                                                <i class="fas fa-clock"></i>
+                                                <span class="date-label">Due:</span>
+                                                <span class="date-value">{{ record.due_date|date:"d M Y" }}</span>
+                                                {% if record.due_date < today %}
+                                                    <span class="overdue-badge"><i class="fas fa-exclamation-circle"></i> OVERDUE</span>
+                                                {% elif record.due_date == today %}
+                                                    <span class="due-today-badge"><i class="fas fa-info-circle"></i> Due Today</span>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
-                                    <button class="edit-btn" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                <p style="text-align: center; padding: 20px; color: #666;">No other books borrowed.</p>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="empty-state">
+                                        <i class="fas fa-book-open" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                                        <p style="text-align: center; padding: 20px; color: #666; margin: 0;">
+                                            You haven't borrowed any books yet.<br>
+                                            <a href="{% url 'users:catalog:catalog' %}" style="color: #667eea; text-decoration: none;">Browse the catalog</a> to get started!
+                                        </p>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
