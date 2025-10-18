@@ -5,7 +5,6 @@ from user_auth.decorators import admin_required
 import logging
 
 from datetime import datetime, date
-from admin.common.supabase_client import supabase
 import json
 from admin.common.models import Book
 

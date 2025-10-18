@@ -1,45 +1,49 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from admin.common.supabase_client import supabase
-
-
-def _default_settings():
-    return {
-        "id": 1,  # singleton row id
-        "library_name": "ShelfSmart Library",
-        "theme": "default",
-        "email_notifications": True,
-        "default_borrow_days": 14,
-    }
+from .models import AppSettings
 
 
 def _fetch_settings():
+    """Fetch settings using Django ORM."""
     try:
-        # Try to get singleton settings row
-        resp = supabase.table("app_settings").select("*").eq("id", 1).execute()
-        if resp.data:
-            # Normalize booleans that may come back as 't'/'f' or 0/1
-            data = resp.data[0]
-            data["email_notifications"] = bool(data.get("email_notifications", True))
-            return data
+        settings = AppSettings.get_settings()
+        return {
+            "id": settings.id,
+            "library_name": settings.library_name,
+            "theme": settings.theme,
+            "email_notifications": settings.email_notifications,
+            "default_borrow_days": settings.default_borrow_days,
+        }
     except Exception:
-        # If table does not exist or any error, just fall back to defaults silently
-        pass
-    return _default_settings()
+        # Fallback to defaults if any error
+        return {
+            "id": 1,
+            "library_name": "ShelfSmart Library",
+            "theme": "default",
+            "email_notifications": True,
+            "default_borrow_days": 14,
+        }
 
 
 def _save_settings(payload: dict) -> None:
+    """Save settings using Django ORM."""
     try:
-        # Upsert semantics: if id=1 exists -> update, else insert
-        existing = supabase.table("app_settings").select("id").eq("id", 1).execute()
-        to_save = {**_default_settings(), **payload, "id": 1}
-        if existing.data:
-            supabase.table("app_settings").update(to_save).eq("id", 1).execute()
-        else:
-            supabase.table("app_settings").insert(to_save).execute()
+        settings = AppSettings.get_settings()
+        
+        # Update fields from payload
+        if "library_name" in payload:
+            settings.library_name = payload["library_name"]
+        if "theme" in payload:
+            settings.theme = payload["theme"]
+        if "email_notifications" in payload:
+            settings.email_notifications = bool(payload["email_notifications"])
+        if "default_borrow_days" in payload:
+            settings.default_borrow_days = int(payload["default_borrow_days"])
+        
+        settings.save()
     except Exception:
-        # Swallow errors so UI still works; caller can show a generic warning if needed
+        # Re-raise so caller can handle appropriately
         raise
 
 
