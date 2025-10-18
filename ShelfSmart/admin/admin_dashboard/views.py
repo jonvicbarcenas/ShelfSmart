@@ -6,8 +6,11 @@ from user_auth.decorators import admin_required
 import logging
 
 from datetime import datetime, date
+from django.db.models import Count, Q
+from django.db.models.functions import ExtractMonth, ExtractYear
 from user_auth.models import User
-from admin.common.models import Book
+from admin.common.models import Book, BorrowRecord
+import json
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -69,11 +72,77 @@ def dashboard_view(request):
     admins = User.objects.filter(user_type='admin')
     logger.info(f"Admins found: {admins.count()}")
 
-    # NOTE: The following sections for overdue borrowers and borrowed/returned stats
-    # are placeholders and will be migrated in a future step.
+    # Fetch borrow statistics from BorrowRecord model
+    # Total currently borrowed books (not returned)
+    total_borrowed = BorrowRecord.objects.filter(is_returned=False).count()
+    logger.info(f"Total borrowed books: {total_borrowed}")
+    
+    # Total returned books (all time)
+    total_returned = BorrowRecord.objects.filter(is_returned=True).count()
+    logger.info(f"Total returned books: {total_returned}")
+    
+    # Fetch overdue borrowers (not returned and due date passed)
+    today = date.today()
+    overdue_records = BorrowRecord.objects.filter(
+        is_returned=False,
+        due_date__lt=today
+    ).select_related('book').order_by('due_date')
+    
+    # Build overdue borrowers list with user information
     overdue_borrowers = []
-    total_borrowed = 0
-    total_returned = 0
+    for record in overdue_records:
+        try:
+            user = User.objects.get(id=record.user_id)
+            days_overdue = (today - record.due_date).days
+            overdue_borrowers.append({
+                'id': record.id,
+                'user_name': f"{user.first_name} {user.last_name}",
+                'username': user.username,
+                'book_name': record.book.name,
+                'due_date': record.due_date,
+                'days_overdue': days_overdue
+            })
+        except User.DoesNotExist:
+            continue
+    
+    logger.info(f"Overdue borrowers found: {len(overdue_borrowers)}")
+    
+    # Calculate monthly borrow and return statistics for the current year
+    current_year = datetime.now().year
+    
+    # Initialize monthly data arrays (12 months)
+    monthly_borrowed = [0] * 12
+    monthly_returned = [0] * 12
+    
+    # Get borrowed books by month (based on borrowed_date)
+    borrowed_by_month = BorrowRecord.objects.filter(
+        borrowed_date__year=current_year
+    ).annotate(
+        month=ExtractMonth('borrowed_date')
+    ).values('month').annotate(
+        count=Count('id')
+    ).order_by('month')
+    
+    for item in borrowed_by_month:
+        month_index = item['month'] - 1  # Convert 1-12 to 0-11
+        monthly_borrowed[month_index] = item['count']
+    
+    # Get returned books by month (based on return_date)
+    returned_by_month = BorrowRecord.objects.filter(
+        return_date__year=current_year,
+        is_returned=True
+    ).annotate(
+        month=ExtractMonth('return_date')
+    ).values('month').annotate(
+        count=Count('id')
+    ).order_by('month')
+    
+    for item in returned_by_month:
+        month_index = item['month'] - 1  # Convert 1-12 to 0-11
+        monthly_returned[month_index] = item['count']
+    
+    logger.info(f"Monthly borrowed: {monthly_borrowed}")
+    logger.info(f"Monthly returned: {monthly_returned}")
 
     context = {
         "user_info": get_current_user_info(request),
@@ -82,6 +151,8 @@ def dashboard_view(request):
         "overdue_borrowers": overdue_borrowers,
         "total_borrowed": total_borrowed,
         "total_returned": total_returned,
+        "monthly_borrowed": json.dumps(monthly_borrowed),
+        "monthly_returned": json.dumps(monthly_returned),
         "admins": admins,
     }
 

@@ -160,8 +160,12 @@
                                             <i class="fas fa-user"></i>
                                         </div>
                                         <div class="info-text">
-                                            <h4>{{ borrower.users.name|default:"Unknown User" }}</h4>
-                                            <p>Borrow ID: {{ borrower.id }}</p>
+                                            <h4>{{ borrower.user_name }}</h4>
+                                            <p>
+                                                <i class="fas fa-book"></i> {{ borrower.book_name }}<br>
+                                                <i class="fas fa-exclamation-circle" style="color: #d32f2f;"></i> 
+                                                <span style="color: #d32f2f; font-weight: bold;">{{ borrower.days_overdue }} day{{ borrower.days_overdue|pluralize }} overdue</span>
+                                            </p>
                                         </div>
                                     </div>
                                     <button class="edit-btn" title="Mark as Returned" onclick="markAsReturned({{ borrower.id }})">
@@ -210,9 +214,9 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
 
-        // Chart data from backend
-        const borrowedCount = {{ total_borrowed|default:"0" }};
-        const returnedCount = {{ total_returned|default:"0" }};
+        // Chart data from backend - Real monthly statistics
+        const monthlyBorrowed = {{ monthly_borrowed|safe }};
+        const monthlyReturned = {{ monthly_returned|safe }};
 
         // Create chart
         const ctx = document.getElementById('borrowChart').getContext('2d');
@@ -222,16 +226,12 @@
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 datasets: [{
                     label: 'Borrowed Books',
-                    data: [borrowedCount, borrowedCount * 0.9, borrowedCount * 1.1, borrowedCount * 0.8, 
-                           borrowedCount * 1.2, borrowedCount, borrowedCount * 0.95, borrowedCount * 1.05,
-                           borrowedCount * 0.9, borrowedCount, borrowedCount * 1.1, borrowedCount],
+                    data: monthlyBorrowed,
                     backgroundColor: '#4CAF50',
                     borderRadius: 8
                 }, {
                     label: 'Returned Books',
-                    data: [returnedCount, returnedCount * 1.1, returnedCount * 0.9, returnedCount * 1.2,
-                           returnedCount * 0.8, returnedCount, returnedCount * 1.05, returnedCount * 0.95,
-                           returnedCount, returnedCount * 1.1, returnedCount * 0.9, returnedCount],
+                    data: monthlyReturned,
                     backgroundColor: '#2196F3',
                     borderRadius: 8
                 }]
@@ -240,7 +240,19 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true }
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
                 }
             }
         });
