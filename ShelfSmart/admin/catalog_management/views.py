@@ -5,9 +5,11 @@ from user_auth.decorators import admin_required
 import logging
 
 from datetime import datetime, date
-from admin.common.supabase_client import supabase
+from admin.common.models import Book, BorrowRecord
+from django.contrib.auth import get_user_model
 import json
-from admin.common.models import Book
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
@@ -53,154 +55,117 @@ def catalog_admin(request):
             if action == "return":
                 # Mark book as returned
                 borrow_id = request.POST.get("borrow_id")
-                from datetime import date
                 
-                # Update borrow record
-                supabase.table("dashboard_borrowrecord").update({
-                    "is_returned": True,
-                    "return_date": date.today().isoformat()
-                }).eq("id", borrow_id).execute()
+                # Get the borrow record
+                borrow_record = BorrowRecord.objects.select_related('book').get(id=borrow_id)
                 
-                # Get the book_id to update availability
-                borrow_record = supabase.table("dashboard_borrowrecord")\
-                    .select("book_id")\
-                    .eq("id", borrow_id)\
-                    .execute()
+                # Mark as returned
+                borrow_record.is_returned = True
+                borrow_record.return_date = date.today()
+                borrow_record.save()
                 
-                if borrow_record.data:
-                    book_id = borrow_record.data[0]['book_id']
-                    
-                    # Update book availability
-                    book = supabase.table("dashboard_book").select("available_copies").eq("id", book_id).execute()
-                    if book.data:
-                        new_available = book.data[0]['available_copies'] + 1
-                        supabase.table("dashboard_book").update({
-                            "available_copies": new_available,
-                            "availability": "Available"
-                        }).eq("id", book_id).execute()
+                # Update book quantity and availability
+                book = borrow_record.book
+                book.quantity += 1
+                if book.quantity > 0:
+                    book.availability = "Available"
+                book.save()
                 
                 messages.success(request, "Book marked as returned successfully!")
+                logger.info(f"Admin returned book {book.name} for user {borrow_record.user_id}")
                 
+        except BorrowRecord.DoesNotExist:
+            messages.error(request, "Borrow record not found.")
         except Exception as e:
+            logger.error(f"Error returning book: {str(e)}")
             messages.error(request, f"Error: {str(e)}")
         
         return redirect("/admin-panel/catalog/admin/")
     
     try:
-        # Fetch borrowed books
-        borrowed_books = supabase.table("dashboard_borrowrecord")\
-            .select("*, users:dashboard_user(name, id), books:dashboard_book(title, id)")\
-            .eq("is_returned", False)\
-            .execute()
+        # Fetch all borrowed books (not returned) with user information
+        borrowed_books = BorrowRecord.objects.filter(
+            is_returned=False
+        ).select_related('book').order_by('-borrowed_date')
+        
+        # Add user information to each record
+        borrowed_books_with_users = []
+        for record in borrowed_books:
+            try:
+                user = User.objects.get(id=record.user_id)
+                record.user = user  # Attach user object to the record
+                borrowed_books_with_users.append(record)
+            except User.DoesNotExist:
+                # Skip records where user no longer exists
+                continue
 
         # Fetch overdue books with days overdue calculation
-        today = date.today().isoformat()
-        overdue_books = supabase.table("dashboard_borrowrecord")\
-            .select("*, users:dashboard_user(name, id), books:dashboard_book(title, id)")\
-            .lt("due_date", today)\
-            .eq("is_returned", False)\
-            .execute()
+        today = date.today()
+        overdue_books = BorrowRecord.objects.filter(
+            is_returned=False,
+            due_date__lt=today
+        ).select_related('book').order_by('due_date')
         
-        # Calculate days overdue for each record
-        from datetime import datetime
-        for record in overdue_books.data if overdue_books.data else []:
-            due_date = datetime.fromisoformat(record['due_date'])
-            days_overdue = (datetime.now() - due_date).days
-            record['days_overdue'] = days_overdue
+        # Add user information and calculate days overdue
+        overdue_books_with_users = []
+        for record in overdue_books:
+            try:
+                user = User.objects.get(id=record.user_id)
+                record.user = user  # Attach user object to the record
+                record.days_overdue = (today - record.due_date).days
+                overdue_books_with_users.append(record)
+            except User.DoesNotExist:
+                continue
 
         context = {
             "user_info": get_current_user_info(request),
-            "borrowed_books": borrowed_books.data if borrowed_books.data else [],
-            "overdue_books": overdue_books.data if overdue_books.data else [],
+            "borrowed_books": borrowed_books_with_users,
+            "overdue_books": overdue_books_with_users,
+            "borrowed_count": len(borrowed_books_with_users),
+            "overdue_count": len(overdue_books_with_users),
         }
 
         return render(request, "catalog_management/catalog_admin.html", context)
     
     except Exception as e:
+        logger.error(f"Error loading catalog: {str(e)}")
         messages.error(request, f"Error loading catalog: {str(e)}")
         return render(request, "catalog_management/catalog_admin.html", {
             "user_info": get_current_user_info(request),
             "borrowed_books": [],
             "overdue_books": [],
+            "borrowed_count": 0,
+            "overdue_count": 0,
         })
 
 @admin_required
 def student_catalog(request):
     """Student Catalog - View borrowed and returned books"""
-    # Get student ID from session
-    student_id = request.session.get('user_id', 1)
-    
-    if request.method == "POST":
-        action = request.POST.get("action")
-        
-        try:
-            if action == "return":
-                # Mark book as returned
-                borrow_id = request.POST.get("book_id")
-                
-                # Update borrow record
-                supabase.table("dashboard_borrowrecord").update({
-                    "is_returned": True,
-                    "return_date": date.today().isoformat()
-                }).eq("id", borrow_id).eq("user_id", student_id).execute()
-                
-                # Get the book_id to update availability
-                borrow_record = supabase.table("dashboard_borrowrecord")\
-                    .select("book_id")\
-                    .eq("id", borrow_id)\
-                    .execute()
-                
-                if borrow_record.data:
-                    book_id = borrow_record.data[0]['book_id']
-                    
-                    # Update book availability
-                    book = supabase.table("dashboard_book").select("available_copies").eq("id", book_id).execute()
-                    if book.data:
-                        new_available = book.data[0]['available_copies'] + 1
-                        supabase.table("dashboard_book").update({
-                            "available_copies": new_available,
-                            "availability": "Available"
-                        }).eq("id", book_id).execute()
-                
-                messages.success(request, "Book returned successfully!")
-                
-        except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
-        
-        return redirect("/admin-panel/catalog/student/")
-    
-    # GET request - fetch student's borrowed and returned books
     try:
-        # Fetch borrowed books for this student - FIXED VERSION
-        borrowed_books = supabase.table("dashboard_borrowrecord")\
-            .select("*, books:dashboard_book(title, id)")\
-            .eq("user_id", student_id)\
-            .eq("is_returned", False)\
-            .execute()
+        # Get all borrow records for all users
+        all_records = BorrowRecord.objects.select_related('book').order_by('-borrowed_date')
         
-        # Fetch returned books for this student - FIXED VERSION
-        returned_books = supabase.table("dashboard_borrowrecord")\
-            .select("*, books:dashboard_book(title, id)")\
-            .eq("user_id", student_id)\
-            .eq("is_returned", True)\
-            .execute()
-        
-        # Get student name
-        student = supabase.table("dashboard_user").select("name").eq("id", student_id).execute()
-        student_name = student.data[0].get("name", "Student") if student.data else "Student"
+        # Add user information to each record
+        records_with_users = []
+        for record in all_records:
+            try:
+                user = User.objects.get(id=record.user_id)
+                record.user = user  # Attach user object to the record
+                records_with_users.append(record)
+            except User.DoesNotExist:
+                continue
         
         context = {
-            "user_name": student_name,
-            "borrowed_books": borrowed_books.data if borrowed_books.data else [],
-            "returned_books": returned_books.data if returned_books.data else [],
+            "user_info": get_current_user_info(request),
+            "borrow_records": records_with_users,
         }
         
         return render(request, "catalog_management/catalog_student.html", context)
     
     except Exception as e:
+        logger.error(f"Error loading student catalog: {str(e)}")
         messages.error(request, f"Error loading catalog: {str(e)}")
         return render(request, "catalog_management/catalog_student.html", {
-            "user_name": "Student",
-            "borrowed_books": [],
-            "returned_books": [],
+            "user_info": get_current_user_info(request),
+            "borrow_records": [],
         })
