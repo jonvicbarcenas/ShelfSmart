@@ -114,13 +114,28 @@
                         {% for record in borrowed_books %}
                         <tr>
                             <td>{{ record.id }}</td>
-                            <td>{{ record.users.name|default:"Unknown" }}</td>
-                            <td>{{ record.books.title|default:"Unknown Book" }}</td>
-                            <td>{{ record.borrowed_date }}</td>
-                            <td>{{ record.due_date }}</td>
+                            <td>
+                                {% if record.user %}
+                                    {{ record.user.first_name }} {{ record.user.last_name }}
+                                    <br>
+                                    <small style="color: #666;">@{{ record.user.username }}</small>
+                                {% else %}
+                                    Unknown User
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ record.book.name|default:"Unknown Book" }}
+                                <br>
+                                <small style="color: #666;">
+                                    <i class="fas fa-tag"></i> {{ record.book.type }} • 
+                                    <i class="fas fa-language"></i> {{ record.book.language }}
+                                </small>
+                            </td>
+                            <td>{{ record.borrowed_date|date:"M d, Y" }}</td>
+                            <td>{{ record.due_date|date:"M d, Y" }}</td>
                             <td>
                                 <button class="delete-btn" onclick="markAsReturned({{ record.id }})" title="Mark as Returned">
-                                    <i class="fas fa-check"></i>
+                                    <i class="fas fa-check"></i> Return
                                 </button>
                             </td>
                         </tr>
@@ -149,20 +164,35 @@
                     </thead>
                     <tbody>
                         {% for record in overdue_books %}
-                        <tr style="background-color: #fff3cd;">
+                        <tr style="background-color: #fff5f5; border-left: 4px solid #d32f2f;">
                             <td>{{ record.id }}</td>
-                            <td>{{ record.users.name|default:"Unknown" }}</td>
-                            <td>{{ record.books.title|default:"Unknown Book" }}</td>
-                            <td>{{ record.borrowed_date }}</td>
-                            <td>{{ record.due_date }}</td>
                             <td>
-                                <span style="color: #d32f2f; font-weight: bold;">
-                                    {% widthratio record.days_overdue 1 1 %} days
+                                {% if record.user %}
+                                    {{ record.user.first_name }} {{ record.user.last_name }}
+                                    <br>
+                                    <small style="color: #666;">@{{ record.user.username }}</small>
+                                {% else %}
+                                    Unknown User
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ record.book.name|default:"Unknown Book" }}
+                                <br>
+                                <small style="color: #666;">
+                                    <i class="fas fa-tag"></i> {{ record.book.type }} • 
+                                    <i class="fas fa-language"></i> {{ record.book.language }}
+                                </small>
+                            </td>
+                            <td>{{ record.borrowed_date|date:"M d, Y" }}</td>
+                            <td>{{ record.due_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span style="color: #d32f2f; font-weight: bold; background: #ffebee; padding: 4px 8px; border-radius: 4px;">
+                                    <i class="fas fa-exclamation-circle"></i> {{ record.days_overdue }} day{{ record.days_overdue|pluralize }}
                                 </span>
                             </td>
                             <td>
                                 <button class="delete-btn" onclick="markAsReturned({{ record.id }})" title="Mark as Returned">
-                                    <i class="fas fa-check"></i>
+                                    <i class="fas fa-check"></i> Return
                                 </button>
                             </td>
                         </tr>
