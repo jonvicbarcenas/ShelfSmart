@@ -206,6 +206,11 @@ table tbody tr:last-child td {
     font-weight: bold;
 }
 
+.availability-status.borrowed {
+    color: #ffc107;
+    font-weight: bold;
+}
+
 .availability-status.unavailable {
     color: #dc3545;
     font-weight: bold;
@@ -213,7 +218,7 @@ table tbody tr:last-child td {
 
 /* Action Button */
 .action-btn {
-    background: #007bff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
     color: white;
     cursor: pointer;
@@ -221,17 +226,43 @@ table tbody tr:last-child td {
     border-radius: 20px;
     font-size: 12px;
     font-weight: bold;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-btn i {
+    font-size: 11px;
 }
 
 .action-btn:hover:not(:disabled) {
-    background: #0056b3;
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.action-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
 }
 
 .action-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background: #cccccc;
+    box-shadow: none;
+}
+
+/* Spinner animation for loading state */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fa-spinner.fa-spin {
+    animation: spin 1s linear infinite;
 }
 
 /* Responsive Design */

@@ -78,18 +78,36 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {# Placeholder Row #}
-                        <tr>
-                            <td>The Hitchhiker's Guide to the Galaxy</td>
-                            <td>Science Fiction</td>
-                            <td>English</td>
-                            <td>5</td>
-                            <td><span class="availability-status available">Available</span></td>
-                            <td><button class="action-btn">Borrow</button></td>
-                        </tr>
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 40px;">No other books found.</td>
-                        </tr>
+                        {% if books %}
+                            {% for book in books %}
+                            <tr data-book-id="{{ book.id }}">
+                                <td>{{ book.name }}</td>
+                                <td>{{ book.type }}</td>
+                                <td>{{ book.language }}</td>
+                                <td class="book-quantity">{{ book.quantity }}</td>
+                                <td>
+                                    <span class="availability-status {% if book.availability == 'Available' %}available{% else %}borrowed{% endif %}">
+                                        {{ book.availability }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if book.availability == 'Available' and book.quantity > 0 %}
+                                        <button class="action-btn borrow-btn" data-book-id="{{ book.id }}" data-book-name="{{ book.name }}">
+                                            <i class="fas fa-book-reader"></i> Borrow
+                                        </button>
+                                    {% else %}
+                                        <button class="action-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                            <i class="fas fa-ban"></i> Unavailable
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px;">No books available in the catalog.</td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -98,6 +116,23 @@
 </div>
 
 <script>
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
     // Basic search functionality
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let filter = this.value.toUpperCase();
@@ -120,6 +155,93 @@
             }
         }
     });
+
+    // Borrow book functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Content Loaded - Setting up borrow buttons...');
+        const borrowButtons = document.querySelectorAll('.borrow-btn');
+        console.log('Found borrow buttons:', borrowButtons.length);
+        
+        borrowButtons.forEach((button, index) => {
+            console.log(`Setting up button ${index}:`, button);
+            console.log(`Button data-book-id: ${button.getAttribute('data-book-id')}`);
+            console.log(`Button data-book-name: ${button.getAttribute('data-book-name')}`);
+            
+            button.addEventListener('click', function(e) {
+                console.log('Borrow button clicked!');
+                e.preventDefault();
+                const bookId = this.getAttribute('data-book-id');
+                const bookName = this.getAttribute('data-book-name');
+                
+                console.log('Book ID:', bookId);
+                console.log('Book Name:', bookName);
+                
+                if (confirm(`Are you sure you want to borrow "${bookName}"?`)) {
+                    borrowBook(bookId, this);
+                }
+            });
+        });
+        
+        console.log('Borrow buttons setup complete');
+    });
+
+    function borrowBook(bookId, buttonElement) {
+        // Disable button to prevent double-clicking
+        buttonElement.disabled = true;
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrowing...';
+        
+        fetch(`/user/catalog/borrow/${bookId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert(data.message);
+                
+                // Update the row in the table
+                const row = buttonElement.closest('tr');
+                const quantityCell = row.querySelector('.book-quantity');
+                const availabilityCell = row.querySelector('.availability-status');
+                
+                // Update quantity
+                quantityCell.textContent = data.new_quantity;
+                
+                // Update availability
+                availabilityCell.textContent = data.new_availability;
+                if (data.new_availability === 'Available') {
+                    availabilityCell.className = 'availability-status available';
+                } else {
+                    availabilityCell.className = 'availability-status borrowed';
+                }
+                
+                // Update button
+                if (data.new_availability === 'Available' && data.new_quantity > 0) {
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = '<i class="fas fa-book-reader"></i> Borrow';
+                } else {
+                    buttonElement.innerHTML = '<i class="fas fa-ban"></i> Unavailable';
+                    buttonElement.style.opacity = '0.5';
+                    buttonElement.style.cursor = 'not-allowed';
+                }
+            } else {
+                // Show error message
+                alert(data.message);
+                buttonElement.disabled = false;
+                buttonElement.innerHTML = '<i class="fas fa-book-reader"></i> Borrow';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while borrowing the book. Please try again.');
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = '<i class="fas fa-book-reader"></i> Borrow';
+        });
+    }
 </script>
 </body>
 </html>
