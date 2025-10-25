@@ -6,7 +6,7 @@ import logging
 
 from datetime import datetime, date
 import json
-from admin.common.models import Book
+from admin.common.models import Book, Category, Publisher
 
 logger = logging.getLogger(__name__)
 
@@ -71,48 +71,88 @@ def book_management(request):
             logger.info("[dashboard] POST action=%s data=%s", action, dict(request.POST))
             print("[dashboard] POST action=", action, " data=", dict(request.POST))
             if action == "add":
-                # Add new book via ORM
-                name = _single_line(request.POST.get("name") or "")
-                book_type = _single_line(request.POST.get("type") or "")
+                # Add new book via ORM with new schema
+                title = _single_line(request.POST.get("title") or "")
+                isbn = _single_line(request.POST.get("isbn") or "")
+                subtitle = _single_line(request.POST.get("subtitle") or "")
+                description = _single_line(request.POST.get("description") or "")
                 language = _single_line(request.POST.get("language") or "English")
+                category_id = request.POST.get("category_id")
+                publisher_id = request.POST.get("publisher_id")
                 quantity = int(request.POST.get("quantity") or 1)
-                availability = request.POST.get("availability") or "Available"
+                total_copies = int(request.POST.get("total_copies") or quantity)
+                availability = request.POST.get("availability") or "available"
 
-                if not name or not book_type:
-                    messages.error(request, "Name and Type are required fields.")
+                if not title or not category_id or not publisher_id:
+                    messages.error(request, "Title, Category, and Publisher are required fields.")
                     return redirect("/admin-panel/books/")
 
-                book = Book(
-                    name=name,
-                    type=book_type,
-                    language=language,
-                    quantity=quantity,
-                    availability=availability,
-                )
-                book.save()
-                print("[dashboard] ORM add saved id=", book.id)
-                messages.success(request, "Book added successfully!")
+                try:
+                    category = Category.objects.get(pk=category_id)
+                    publisher = Publisher.objects.get(pk=publisher_id)
+                    
+                    book = Book(
+                        title=title,
+                        isbn=isbn if isbn else None,
+                        subtitle=subtitle if subtitle else None,
+                        description=description if description else None,
+                        language=language,
+                        category=category,
+                        publisher=publisher,
+                        quantity=quantity,
+                        total_copies=total_copies,
+                        availability=availability,
+                    )
+                    book.save()
+                    print("[dashboard] ORM add saved id=", book.id)
+                    messages.success(request, "Book added successfully!")
+                except (Category.DoesNotExist, Publisher.DoesNotExist):
+                    messages.error(request, "Invalid category or publisher selected.")
+                    return redirect("/admin-panel/books/")
 
             elif action == "edit":
-                # Update book via ORM
+                # Update book via ORM with new schema
                 book_id = request.POST.get("book_id")
                 book = Book.objects.get(pk=book_id)
                 
                 # Update fields with new schema
-                new_name = request.POST.get("name")
-                new_type = request.POST.get("type")
+                new_title = request.POST.get("title")
+                new_isbn = request.POST.get("isbn")
+                new_subtitle = request.POST.get("subtitle")
+                new_description = request.POST.get("description")
                 new_language = request.POST.get("language")
+                new_category_id = request.POST.get("category_id")
+                new_publisher_id = request.POST.get("publisher_id")
                 new_quantity = request.POST.get("quantity")
+                new_total_copies = request.POST.get("total_copies")
                 new_availability = request.POST.get("availability")
                 
-                if new_name is not None:
-                    book.name = _single_line(new_name) or book.name
-                if new_type is not None:
-                    book.type = _single_line(new_type) or book.type
+                if new_title is not None:
+                    book.title = _single_line(new_title) or book.title
+                if new_isbn is not None:
+                    book.isbn = _single_line(new_isbn) if new_isbn else None
+                if new_subtitle is not None:
+                    book.subtitle = _single_line(new_subtitle) if new_subtitle else None
+                if new_description is not None:
+                    book.description = _single_line(new_description) if new_description else None
                 if new_language is not None:
                     book.language = _single_line(new_language) or book.language
+                if new_category_id is not None:
+                    try:
+                        book.category = Category.objects.get(pk=new_category_id)
+                    except Category.DoesNotExist:
+                        messages.error(request, "Invalid category selected.")
+                        return redirect("/admin-panel/books/")
+                if new_publisher_id is not None:
+                    try:
+                        book.publisher = Publisher.objects.get(pk=new_publisher_id)
+                    except Publisher.DoesNotExist:
+                        messages.error(request, "Invalid publisher selected.")
+                        return redirect("/admin-panel/books/")
                 if new_quantity is not None:
                     book.quantity = int(new_quantity) if new_quantity else book.quantity
+                if new_total_copies is not None:
+                    book.total_copies = int(new_total_copies) if new_total_copies else book.total_copies
                 if new_availability is not None:
                     book.availability = new_availability or book.availability
                     
@@ -133,20 +173,32 @@ def book_management(request):
 
         return redirect("/admin-panel/books/")
     
-    # GET request - fetch all books
+    # GET request - fetch all books, categories, and publishers
     try:
-        # Fetch all books via ORM
-        books_qs = Book.objects.all().order_by("id")
+        # Fetch all books via ORM with related data
+        books_qs = Book.objects.select_related('category', 'publisher').all().order_by("id")
+        # Fetch all categories for dropdown
+        categories = Category.objects.all().order_by('category_name')
+        # Fetch all publishers for dropdown
+        publishers = Publisher.objects.all().order_by('publisher_name')
+        
         # Format books data with new schema
         books = []
         for b in books_qs:
             books.append({
                 "id": b.id,
                 "book_id": b.book_id,  # Alias property
-                "name": b.name,
-                "type": b.type,
+                "title": b.title,
+                "isbn": b.isbn or "",
+                "subtitle": b.subtitle or "",
+                "description": b.description or "",
+                "category_id": b.category.id if b.category else None,
+                "category_name": b.category.category_name if b.category else "N/A",
+                "publisher_id": b.publisher.id if b.publisher else None,
+                "publisher_name": b.publisher.publisher_name if b.publisher else "N/A",
                 "language": b.language,
                 "quantity": b.quantity,
+                "total_copies": b.total_copies,
                 "availability": b.availability,
                 "created_at": b.created_at,
                 "updated_at": b.updated_at,
@@ -155,6 +207,8 @@ def book_management(request):
         context = {
             "user_info": get_current_user_info(request),
             "books": books,
+            "categories": categories,
+            "publishers": publishers,
         }
         return render(request, "book_management/book_management.html", context)
     
