@@ -54,11 +54,16 @@ function updateDateTime() {
     const formData = new FormData(event.target)
     const data = {
       action: "add",
-      name: formData.get("name"),
-      type: formData.get("type"),
+      title: formData.get("title"),
+      isbn: formData.get("isbn"),
+      subtitle: formData.get("subtitle"),
+      description: formData.get("description"),
+      category_id: formData.get("category_id"),
+      publisher_id: formData.get("publisher_id"),
       language: formData.get("language"),
       quantity: formData.get("quantity"),
-      availability: "Available",
+      total_copies: formData.get("quantity"),
+      availability: "available",
     }
   
     fetch("/admin-panel/books/", {
@@ -89,12 +94,17 @@ function updateDateTime() {
     const row = document.querySelector(`tr[data-id="${bookId}"]`)
     if (row) {
       const cells = row.querySelectorAll("td")
+      // New schema: Book ID, ISBN, Title, Category, Publisher, Language, Quantity, Availability
       document.getElementById("view-book-id").textContent = cells[0].textContent
-      document.getElementById("view-name").textContent = cells[1].textContent
-      document.getElementById("view-type").textContent = cells[2].textContent
-      document.getElementById("view-language").textContent = cells[3].textContent
-      document.getElementById("view-quantity").textContent = cells[4].textContent
-      document.getElementById("view-availability").textContent = cells[5].textContent.trim()
+      document.getElementById("view-isbn").textContent = cells[1].textContent || "-"
+      document.getElementById("view-title").textContent = cells[2].textContent
+      document.getElementById("view-subtitle").textContent = "-" // Not in table
+      document.getElementById("view-description").textContent = "-" // Not in table
+      document.getElementById("view-category").textContent = cells[3].textContent.trim()
+      document.getElementById("view-publisher").textContent = cells[4].textContent
+      document.getElementById("view-language").textContent = cells[5].textContent
+      document.getElementById("view-quantity").textContent = cells[6].textContent
+      document.getElementById("view-availability").textContent = cells[7].textContent.trim()
   
       document.getElementById("viewBookPopup").style.display = "block"
     }
@@ -110,14 +120,36 @@ function updateDateTime() {
     const row = document.querySelector(`tr[data-id="${bookId}"]`)
     if (row) {
       const cells = row.querySelectorAll("td")
-  
+      // New schema: Book ID, ISBN, Title, Category, Publisher, Language, Quantity, Availability
+      
       // Populate update form
       document.getElementById("update-book-id").value = bookId
-      document.getElementById("update-name").value = cells[1].textContent
-      document.getElementById("update-type").value = cells[2].textContent
-      document.getElementById("update-language").value = cells[3].textContent
-      document.getElementById("update-quantity").value = cells[4].textContent
-      document.getElementById("update-availability").value = cells[5].textContent.trim()
+      document.getElementById("update-isbn").value = cells[1].textContent !== "-" ? cells[1].textContent : ""
+      document.getElementById("update-title").value = cells[2].textContent
+      // For category and publisher, we need to get the data attribute or find by text
+      const categoryText = cells[3].textContent.trim()
+      const publisherText = cells[4].textContent.trim()
+      document.getElementById("update-language").value = cells[5].textContent
+      document.getElementById("update-quantity").value = cells[6].textContent
+      const availText = cells[7].textContent.trim().toLowerCase()
+      document.getElementById("update-availability").value = availText
+      
+      // Set category and publisher select values by text matching
+      const categorySelect = document.getElementById("update-category")
+      for (let option of categorySelect.options) {
+        if (option.text === categoryText) {
+          categorySelect.value = option.value
+          break
+        }
+      }
+      
+      const publisherSelect = document.getElementById("update-publisher")
+      for (let option of publisherSelect.options) {
+        if (option.text === publisherText) {
+          publisherSelect.value = option.value
+          break
+        }
+      }
   
       document.getElementById("updateBookPopup").style.display = "block"
     }
@@ -135,10 +167,15 @@ function updateDateTime() {
     const data = {
       action: "edit",
       book_id: formData.get("book_id"),
-      name: formData.get("name"),
-      type: formData.get("type"),
+      title: formData.get("title"),
+      isbn: formData.get("isbn"),
+      subtitle: formData.get("subtitle"),
+      description: formData.get("description"),
+      category_id: formData.get("category_id"),
+      publisher_id: formData.get("publisher_id"),
       language: formData.get("language"),
       quantity: formData.get("quantity"),
+      total_copies: formData.get("quantity"),
       availability: formData.get("availability"),
     }
   

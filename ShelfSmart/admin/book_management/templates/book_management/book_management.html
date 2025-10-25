@@ -89,7 +89,6 @@
             <div class="content-header">
                 <h1 class="page-title">Book Management</h1>
                 <div class="header-actions">
-                    <div class="current-date" id="currentDate"></div>
                     <button class="add-book-btn" onclick="openAddModal()">
                         <i class="fas fa-plus"></i>
                         Add Book
@@ -106,8 +105,10 @@
                     <thead>
                         <tr>
                             <th>Book ID</th>
-                            <th>Name</th>
-                            <th>Type</th>
+                            <th>ISBN</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Publisher</th>
                             <th>Language</th>
                             <th>Quantity</th>
                             <th>Availability</th>
@@ -118,13 +119,15 @@
                         {% for book in books %}
                         <tr data-id="{{ book.id }}">
                             <td>{{ book.book_id }}</td>
-                            <td>{{ book.name }}</td>
-                            <td>{{ book.type }}</td>
+                            <td>{{ book.isbn|default:"-" }}</td>
+                            <td>{{ book.title }}</td>
+                            <td><span class="category-badge">{{ book.category_name }}</span></td>
+                            <td>{{ book.publisher_name }}</td>
                             <td>{{ book.language }}</td>
                             <td>{{ book.quantity }}</td>
                             <td>
-                                <span class="status-badge {% if book.availability == 'Available' %}status-available{% else %}status-borrowed{% endif %}">
-                                    {{ book.availability }}
+                                <span class="status-badge {% if book.availability == 'available' %}status-available{% else %}status-borrowed{% endif %}">
+                                    {{ book.availability|title }}
                                 </span>
                             </td>
                             <td>
@@ -143,7 +146,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px;">No books found.</td>
+                            <td colspan="9" style="text-align: center; padding: 40px;">No books found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -169,32 +172,52 @@
             <form id="addBookForm" onsubmit="addBook(event)">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="add-name">Name</label>
-                    <input type="text" id="add-name" name="name" placeholder="Enter book name" required>
+                    <label for="add-title">Title <span style="color: red;">*</span></label>
+                    <input type="text" id="add-title" name="title" placeholder="Enter book title" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="add-type">Type</label>
-                        <select id="add-type" name="type" required>
-                            <option value="">Select Type</option>
-                            <option value="Fiction">Fiction</option>
-                            <option value="Non-Fiction">Non-Fiction</option>
-                            <option value="Textbook">Textbook</option>
-                            <option value="Programming">Programming</option>
-                            <option value="Science">Science</option>
-                            <option value="History">History</option>
-                            <option value="Biography">Biography</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <label for="add-isbn">ISBN</label>
+                        <input type="text" id="add-isbn" name="isbn" placeholder="Enter ISBN-13" maxlength="13">
                     </div>
                     <div class="form-group">
-                        <label for="add-quantity">Quantity</label>
-                        <input type="number" id="add-quantity" name="quantity" value="1" min="1" required>
+                        <label for="add-subtitle">Subtitle</label>
+                        <input type="text" id="add-subtitle" name="subtitle" placeholder="Enter subtitle">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="add-language">Language</label>
-                    <input type="text" id="add-language" name="language" placeholder="Enter language" value="English">
+                    <label for="add-description">Description</label>
+                    <textarea id="add-description" name="description" placeholder="Enter book description" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add-category">Category <span style="color: red;">*</span></label>
+                        <select id="add-category" name="category_id" required>
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-publisher">Publisher <span style="color: red;">*</span></label>
+                        <select id="add-publisher" name="publisher_id" required>
+                            <option value="">Select Publisher</option>
+                            {% for publisher in publishers %}
+                                <option value="{{ publisher.id }}">{{ publisher.publisher_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add-language">Language</label>
+                        <input type="text" id="add-language" name="language" placeholder="Enter language" value="English">
+                    </div>
+                    <div class="form-group">
+                        <label for="add-quantity">Quantity <span style="color: red;">*</span></label>
+                        <input type="number" id="add-quantity" name="quantity" value="1" min="1" required>
+                    </div>
                 </div>
                 <div class="popup-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeAddPopup()">Cancel</button>
@@ -222,37 +245,58 @@
                 {% csrf_token %}
                 <input type="hidden" id="update-book-id" name="book_id">
                 <div class="form-group">
-                    <label for="update-name">Name</label>
-                    <input type="text" id="update-name" name="name" placeholder="Enter book name" required>
+                    <label for="update-title">Title <span style="color: red;">*</span></label>
+                    <input type="text" id="update-title" name="title" placeholder="Enter book title" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="update-type">Type</label>
-                        <select id="update-type" name="type" required>
-                            <option value="Fiction">Fiction</option>
-                            <option value="Non-Fiction">Non-Fiction</option>
-                            <option value="Textbook">Textbook</option>
-                            <option value="Programming">Programming</option>
-                            <option value="Science">Science</option>
-                            <option value="History">History</option>
-                            <option value="Biography">Biography</option>
-                            <option value="Other">Other</option>
+                        <label for="update-isbn">ISBN</label>
+                        <input type="text" id="update-isbn" name="isbn" placeholder="Enter ISBN-13" maxlength="13">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-subtitle">Subtitle</label>
+                        <input type="text" id="update-subtitle" name="subtitle" placeholder="Enter subtitle">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="update-description">Description</label>
+                    <textarea id="update-description" name="description" placeholder="Enter book description" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="update-category">Category <span style="color: red;">*</span></label>
+                        <select id="update-category" name="category_id" required>
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.category_name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="update-quantity">Quantity</label>
+                        <label for="update-publisher">Publisher <span style="color: red;">*</span></label>
+                        <select id="update-publisher" name="publisher_id" required>
+                            <option value="">Select Publisher</option>
+                            {% for publisher in publishers %}
+                                <option value="{{ publisher.id }}">{{ publisher.publisher_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="update-language">Language</label>
+                        <input type="text" id="update-language" name="language" placeholder="Enter language">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-quantity">Quantity <span style="color: red;">*</span></label>
                         <input type="number" id="update-quantity" name="quantity" min="1" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="update-language">Language</label>
-                    <input type="text" id="update-language" name="language" placeholder="Enter language">
-                </div>
-                <div class="form-group">
                     <label for="update-availability">Availability</label>
                     <select id="update-availability" name="availability">
-                        <option value="Available">Available</option>
-                        <option value="Borrowed">Borrowed</option>
+                        <option value="available">Available</option>
+                        <option value="borrowed">Borrowed</option>
                     </select>
                 </div>
                 <div class="popup-actions">
@@ -283,12 +327,28 @@
                     <div class="info-value" id="view-book-id">-</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Name</div>
-                    <div class="info-value" id="view-name">-</div>
+                    <div class="info-label">ISBN</div>
+                    <div class="info-value" id="view-isbn">-</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Type</div>
-                    <div class="info-value" id="view-type">-</div>
+                    <div class="info-label">Title</div>
+                    <div class="info-value" id="view-title">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Subtitle</div>
+                    <div class="info-value" id="view-subtitle">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Description</div>
+                    <div class="info-value" id="view-description">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Category</div>
+                    <div class="info-value" id="view-category">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Publisher</div>
+                    <div class="info-value" id="view-publisher">-</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Language</div>

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from user_auth.decorators import user_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from admin.common.models import Book, BorrowRecord
+from admin.common.models import Book, BorrowRecord, Category
 from datetime import datetime, timedelta
 import logging
 
@@ -14,10 +14,25 @@ logger = logging.getLogger(__name__)
 @user_required
 def catalog_view(request):
     """
-    User catalog view - displays available books for borrowing
+    User catalog view - displays available books for borrowing with category filtering
     """
-    # Fetch all books from database
-    books = Book.objects.all().order_by('-created_at')
+    # Get category filter from query params
+    category_id = request.GET.get('category', None)
+    
+    # Fetch books with related category and publisher data
+    books_query = Book.objects.select_related('category', 'publisher').all()
+    
+    # Apply category filter if provided
+    if category_id:
+        try:
+            books_query = books_query.filter(category_id=category_id)
+        except ValueError:
+            pass  # Invalid category ID, show all books
+    
+    books = books_query.order_by('-created_at')
+    
+    # Fetch all categories for the filter dropdown
+    categories = Category.objects.all().order_by('category_name')
     
     user_info = {
         'full_name': f"{request.user.first_name} {request.user.last_name}",
@@ -28,6 +43,8 @@ def catalog_view(request):
         'user': request.user,
         'user_info': user_info,
         'books': books,
+        'categories': categories,
+        'selected_category': category_id,
     }
     return render(request, 'catalog/catalog.html', context)
 
@@ -42,7 +59,7 @@ def borrow_book(request, book_id):
         book = Book.objects.get(id=book_id)
         
         # Check if book is available
-        if book.availability != 'Available':
+        if book.availability != 'available':
             return JsonResponse({
                 'success': False,
                 'message': 'This book is currently not available for borrowing.'
@@ -82,14 +99,14 @@ def borrow_book(request, book_id):
         # Update book quantity
         book.quantity -= 1
         if book.quantity == 0:
-            book.availability = 'Borrowed'
+            book.availability = 'borrowed'
         book.save()
         
-        logger.info(f"User {request.user.username} borrowed book {book.name}")
+        logger.info(f"User {request.user.username} borrowed book {book.title}")
         
         return JsonResponse({
             'success': True,
-            'message': f'Successfully borrowed "{book.name}". Due date: {due_date.strftime("%B %d, %Y")}',
+            'message': f'Successfully borrowed "{book.title}". Due date: {due_date.strftime("%B %d, %Y")}',
             'due_date': due_date.strftime('%Y-%m-%d'),
             'new_quantity': book.quantity,
             'new_availability': book.availability
