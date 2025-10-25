@@ -1,30 +1,107 @@
 from django.db import models
 
 class Book(models.Model):
+    """Book model with comprehensive schema for library management"""
     # Primary key is automatically created as 'id' by Django
-    name = models.CharField(max_length=255, help_text="Book title/name")
-    type = models.CharField(max_length=100, help_text="Book type/genre")
+    isbn = models.CharField(max_length=13, unique=True, blank=True, null=True, help_text="ISBN-13 number")
+    title = models.CharField(max_length=255, help_text="Book title")
+    subtitle = models.CharField(max_length=255, blank=True, null=True, help_text="Book subtitle")
+    description = models.TextField(blank=True, null=True, help_text="Book description")
+    publication_date = models.DateField(blank=True, null=True, help_text="Publication date")
+    edition = models.CharField(max_length=50, blank=True, null=True, help_text="Book edition")
+    pages = models.IntegerField(blank=True, null=True, help_text="Number of pages")
     language = models.CharField(max_length=50, default='English', help_text="Book language")
-    quantity = models.IntegerField(default=1, help_text="Total number of copies")
+    
+    # Foreign Keys
+    publisher = models.ForeignKey(
+        'Publisher',
+        on_delete=models.PROTECT,
+        related_name='books',
+        help_text="Book publisher"
+    )
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.PROTECT,
+        related_name='books',
+        help_text="Book category"
+    )
+    
+    # Inventory fields
+    total_copies = models.IntegerField(default=1, help_text="Total number of copies")
+    quantity = models.IntegerField(default=1, help_text="Available quantity")
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Book price")
+    
+    # Media
+    cover_image_url = models.URLField(max_length=500, blank=True, null=True, help_text="Cover image URL")
+    
+    # Availability
     availability = models.CharField(
         max_length=20,
-        choices=[('Available', 'Available'), ('Borrowed', 'Borrowed')],
-        default='Available',
+        choices=[('available', 'Available'), ('borrowed', 'Borrowed')],
+        default='available',
         help_text="Current availability status"
     )
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.title
 
     @property
     def book_id(self):
         """Alias for id to match schema naming"""
         return self.id
+    
+    @property
+    def is_available(self):
+        """Check if book is available for borrowing"""
+        return self.quantity > 0 and self.availability == 'available'
 
     class Meta:
-        db_table = 'dashboard_book'  # Keep the same table name for compatibility
+        db_table = 'book'
+        verbose_name = 'Book'
+        verbose_name_plural = 'Books'
+        ordering = ['title']
+
+
+class BookAuthor(models.Model):
+    """Junction table for Book-Author many-to-many relationship with role information"""
+    book = models.ForeignKey(
+        'Book',
+        on_delete=models.CASCADE,
+        related_name='book_authors',
+        help_text="Book reference"
+    )
+    author = models.ForeignKey(
+        'Author',
+        on_delete=models.CASCADE,
+        related_name='book_authors',
+        help_text="Author reference"
+    )
+    author_role = models.CharField(
+        max_length=20,
+        choices=[
+            ('primary', 'Primary Author'),
+            ('co-author', 'Co-Author'),
+            ('editor', 'Editor'),
+            ('translator', 'Translator')
+        ],
+        default='primary',
+        help_text="Role of the author in this book"
+    )
+
+    def __str__(self):
+        return f"{self.book.title} - {self.author.full_name} ({self.author_role})"
+
+    class Meta:
+        db_table = 'book_author'
+        verbose_name = 'Book Author'
+        verbose_name_plural = 'Book Authors'
+        unique_together = [['book', 'author']]  # Composite primary key
+        ordering = ['book', 'author']
+
 
 class BorrowRecord(models.Model):
     user_id = models.IntegerField()
