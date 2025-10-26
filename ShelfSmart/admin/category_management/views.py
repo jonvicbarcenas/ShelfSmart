@@ -181,6 +181,7 @@ def category_management(request):
             "user_info": get_current_user_info(request),
             "categories": categories,
             "root_categories": root_categories,
+            "active_page": "categories",
         }
         return render(request, "category_management/category_management.html", context)
     
@@ -191,4 +192,5 @@ def category_management(request):
             "user_info": get_current_user_info(request),
             "categories": [],
             "root_categories": [],
+            "active_page": "categories",
         })

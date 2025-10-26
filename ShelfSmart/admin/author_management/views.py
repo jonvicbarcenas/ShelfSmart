@@ -149,6 +149,7 @@ def author_management(request):
         context = {
             "user_info": get_current_user_info(request),
             "authors": authors,
+            "active_page": "authors",
         }
         return render(request, "author_management/author_management.html", context)
     
@@ -158,4 +159,5 @@ def author_management(request):
         return render(request, "author_management/author_management.html", {
             "user_info": get_current_user_info(request),
             "authors": [],
+            "active_page": "authors",
         })
