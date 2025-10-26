@@ -16,12 +16,14 @@ class Book(models.Model):
     publisher = models.ForeignKey(
         'Publisher',
         on_delete=models.PROTECT,
+        null=False,
         related_name='books',
         help_text="Book publisher"
     )
     category = models.ForeignKey(
         'Category',
         on_delete=models.PROTECT,
+        null=False,
         related_name='books',
         help_text="Book category"
     )
@@ -29,7 +31,6 @@ class Book(models.Model):
     # Inventory fields
     total_copies = models.IntegerField(default=1, help_text="Total number of copies")
     quantity = models.IntegerField(default=1, help_text="Available quantity")
-    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Book price")
     
     # Media
     cover_image_url = models.URLField(max_length=500, blank=True, null=True, help_text="Cover image URL")
