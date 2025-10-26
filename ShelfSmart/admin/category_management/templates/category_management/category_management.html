@@ -1,0 +1,250 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+    <link rel="stylesheet" href="{% static 'css/popup_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/category_management.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard">
+    <!-- Sidebar -->
+    {% include 'components/admin_sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        {% include 'components/user_header.html' %}
+
+        <div class="content">
+            <div class="page-header">
+                <h1 class="page-title">Category Management</h1>
+                <button class="btn-add" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i>
+                    Add Category
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search categories by name...">
+                </div>
+            </div>
+
+            <!-- Categories Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category ID</th>
+                            <th>Category Name</th>
+                            <th>Full Path</th>
+                            <th>Description</th>
+                            <th>Parent Category</th>
+                            <th>Books</th>
+                            <th>Subcategories</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesTableBody">
+                        {% for category in categories %}
+                        <tr data-id="{{ category.id }}">
+                            <td>{{ category.category_id }}</td>
+                            <td>{{ category.category_name }}</td>
+                            <td><span class="category-badge">{{ category.full_path }}</span></td>
+                            <td>{{ category.description|truncatewords:10|default:"-" }}</td>
+                            <td>{{ category.parent_category_name|default:"-" }}</td>
+                            <td><span class="count-badge">{{ category.book_count }}</span></td>
+                            <td><span class="count-badge">{{ category.subcategory_count }}</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-view" title="View" onclick="viewCategory({{ category.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn btn-edit" title="Edit" onclick="editCategory({{ category.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn btn-delete" title="Delete" onclick="deleteCategory({{ category.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px;">No categories found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Popup -->
+<div id="addCategoryPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-folder-plus"></i>
+                Add Category
+            </h3>
+            <button class="popup-close" onclick="closeAddPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <form id="addCategoryForm" onsubmit="addCategory(event)">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="add-category-name">Category Name <span style="color: red;">*</span></label>
+                    <input type="text" id="add-category-name" name="category_name" placeholder="Enter category name" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-description">Description</label>
+                    <textarea id="add-description" name="description" placeholder="Enter category description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="add-parent-category">Parent Category (Optional)</label>
+                    <select id="add-parent-category" name="parent_category_id">
+                        <option value="">None (Root Category)</option>
+                        {% for cat in root_categories %}
+                            <option value="{{ cat.id }}">{{ cat.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeAddPopup()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Category Popup -->
+<div id="updateCategoryPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-edit"></i>
+                Update Category
+            </h3>
+            <button class="popup-close" onclick="closeUpdatePopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <form id="updateCategoryForm" onsubmit="updateCategory(event)">
+                {% csrf_token %}
+                <input type="hidden" id="update-category-id" name="category_id">
+                <div class="form-group">
+                    <label for="update-category-name">Category Name <span style="color: red;">*</span></label>
+                    <input type="text" id="update-category-name" name="category_name" placeholder="Enter category name" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-description">Description</label>
+                    <textarea id="update-description" name="description" placeholder="Enter category description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="update-parent-category">Parent Category</label>
+                    <select id="update-parent-category" name="parent_category_id">
+                        <option value="">None (Root Category)</option>
+                        {% for cat in root_categories %}
+                            <option value="{{ cat.id }}">{{ cat.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeUpdatePopup()">Cancel</button>
+                    <button type="submit" class="btn btn-update">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Category Popup -->
+<div id="viewCategoryPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-eye"></i>
+                View Category
+            </h3>
+            <button class="popup-close" onclick="closeViewPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="book-info">
+                <div class="info-item">
+                    <div class="info-label">Category ID</div>
+                    <div class="info-value" id="view-category-id">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Category Name</div>
+                    <div class="info-value" id="view-category-name">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Full Path</div>
+                    <div class="info-value" id="view-full-path">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Description</div>
+                    <div class="info-value" id="view-description">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Parent Category</div>
+                    <div class="info-value" id="view-parent-category">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Books Count</div>
+                    <div class="info-value" id="view-book-count">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Subcategories Count</div>
+                    <div class="info-value" id="view-subcategory-count">-</div>
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-close" onclick="closeViewPopup()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Popup -->
+<div id="deleteCategoryPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-trash"></i>
+                Delete Confirmation
+            </h3>
+            <button class="popup-close" onclick="closeDeletePopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="delete-message">
+                Are you certain you wish to proceed with the deletion of the selected category?
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeDeletePopup()">Cancel</button>
+                <button type="button" class="btn btn-confirm" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/category_functions.js' %}"></script>
+</body>
+</html>

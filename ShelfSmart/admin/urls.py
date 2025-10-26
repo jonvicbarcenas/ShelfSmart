@@ -12,6 +12,9 @@ urlpatterns = [
     # Book Management
     path('books/', include('admin.book_management.urls')),
     
+    # Category Management
+    path('categories/', include('admin.category_management.urls')),
+    
     # User Management
     path('users/', include('admin.user_management.urls')),
     
