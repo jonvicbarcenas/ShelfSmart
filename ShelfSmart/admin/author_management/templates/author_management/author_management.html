@@ -1,0 +1,228 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Author Management | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+    <link rel="stylesheet" href="{% static 'css/popup_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/author_management.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard">
+    <!-- Sidebar -->
+    {% include 'components/admin_sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        {% include 'components/user_header.html' %}
+
+        <div class="content">
+            <div class="page-header">
+                <h1 class="page-title">Author Management</h1>
+                <button class="btn-add" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i>
+                    Add Author
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search authors by name...">
+                </div>
+            </div>
+
+            <!-- Authors Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Author ID</th>
+                            <th>Author Name</th>
+                            <th>Nationality</th>
+                            <th>Books</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="authorsTableBody">
+                        {% for author in authors %}
+                        <tr data-id="{{ author.id }}" 
+                            data-biography="{{ author.biography|default:'' }}" 
+                            data-nationality="{{ author.nationality|default:'' }}">
+                            <td>{{ author.author_id }}</td>
+                            <td><span class="author-badge">{{ author.name }}</span></td>
+                            <td>{{ author.nationality|default:"-" }}</td>
+                            <td><span class="count-badge">{{ author.book_count }}</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-view" title="View" onclick="viewAuthor({{ author.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn btn-edit" title="Edit" onclick="editAuthor({{ author.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn btn-delete" title="Delete" onclick="deleteAuthor({{ author.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px;">No authors found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Author Popup -->
+<div id="addAuthorPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-user-plus"></i>
+                Add Author
+            </h3>
+            <button class="popup-close" onclick="closeAddPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <form id="addAuthorForm" onsubmit="addAuthor(event)">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="add-name">Author Name <span style="color: red;">*</span></label>
+                    <input type="text" id="add-name" name="name" placeholder="Enter author name" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-biography">Biography</label>
+                    <textarea id="add-biography" name="biography" placeholder="Enter author biography" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="add-nationality">Nationality</label>
+                    <input type="text" id="add-nationality" name="nationality" placeholder="Enter nationality">
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeAddPopup()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Author Popup -->
+<div id="updateAuthorPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-edit"></i>
+                Update Author
+            </h3>
+            <button class="popup-close" onclick="closeUpdatePopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <form id="updateAuthorForm" onsubmit="updateAuthor(event)">
+                {% csrf_token %}
+                <input type="hidden" id="update-author-id" name="author_id">
+                <div class="form-group">
+                    <label for="update-name">Author Name <span style="color: red;">*</span></label>
+                    <input type="text" id="update-name" name="name" placeholder="Enter author name" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-biography">Biography</label>
+                    <textarea id="update-biography" name="biography" placeholder="Enter author biography" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="update-nationality">Nationality</label>
+                    <input type="text" id="update-nationality" name="nationality" placeholder="Enter nationality">
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeUpdatePopup()">Cancel</button>
+                    <button type="submit" class="btn btn-update">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Author Popup -->
+<div id="viewAuthorPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-eye"></i>
+                View Author
+            </h3>
+            <button class="popup-close" onclick="closeViewPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="book-info">
+                <div class="info-item">
+                    <div class="info-label">Author ID</div>
+                    <div class="info-value" id="view-author-id">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Author Name</div>
+                    <div class="info-value" id="view-name">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Biography</div>
+                    <div class="info-value" id="view-biography">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Nationality</div>
+                    <div class="info-value" id="view-nationality">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Books Count</div>
+                    <div class="info-value" id="view-book-count">-</div>
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-close" onclick="closeViewPopup()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Popup -->
+<div id="deleteAuthorPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-trash"></i>
+                Delete Confirmation
+            </h3>
+            <button class="popup-close" onclick="closeDeletePopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="delete-message">
+                Are you certain you wish to proceed with the deletion of the selected author?
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeDeletePopup()">Cancel</button>
+                <button type="button" class="btn btn-confirm" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/author_functions.js' %}"></script>
+</body>
+</html>
