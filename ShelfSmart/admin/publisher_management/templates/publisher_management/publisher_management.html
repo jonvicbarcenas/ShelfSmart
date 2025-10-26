@@ -1,0 +1,273 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publisher Management | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/book_management.css' %}">
+    <link rel="stylesheet" href="{% static 'css/popup_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/publisher_management.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard">
+    <!-- Sidebar -->
+    {% include 'components/admin_sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        {% include 'components/user_header.html' %}
+
+        <div class="content">
+            <div class="page-header">
+                <h1 class="page-title">Publisher Management</h1>
+                <button class="btn-add" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i>
+                    Add Publisher
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search publishers by name...">
+                </div>
+            </div>
+
+            <!-- Publishers Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Publisher ID</th>
+                            <th>Publisher Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Website</th>
+                            <th>Established</th>
+                            <th>Books</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="publishersTableBody">
+                        {% for publisher in publishers %}
+                        <tr data-id="{{ publisher.id }}" 
+                            data-address="{{ publisher.address|default:'' }}" 
+                            data-phone="{{ publisher.phone|default:'' }}" 
+                            data-email="{{ publisher.email|default:'' }}" 
+                            data-website="{{ publisher.website|default:'' }}" 
+                            data-established-year="{{ publisher.established_year|default:'' }}">
+                            <td>{{ publisher.publisher_id }}</td>
+                            <td><span class="publisher-badge">{{ publisher.publisher_name }}</span></td>
+                            <td>{{ publisher.phone|default:"-" }}</td>
+                            <td>{{ publisher.email|default:"-" }}</td>
+                            <td>{{ publisher.website|truncatechars:30|default:"-" }}</td>
+                            <td>{{ publisher.established_year|default:"-" }}</td>
+                            <td><span class="count-badge">{{ publisher.book_count }}</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-view" title="View" onclick="viewPublisher({{ publisher.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn btn-edit" title="Edit" onclick="editPublisher({{ publisher.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn btn-delete" title="Delete" onclick="deletePublisher({{ publisher.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px;">No publishers found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Publisher Popup -->
+<div id="addPublisherPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-building"></i>
+                Add Publisher
+            </h3>
+            <button class="popup-close" onclick="closeAddPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <form id="addPublisherForm" onsubmit="addPublisher(event)">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="add-publisher-name">Publisher Name <span style="color: red;">*</span></label>
+                    <input type="text" id="add-publisher-name" name="publisher_name" placeholder="Enter publisher name" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-address">Address</label>
+                    <textarea id="add-address" name="address" placeholder="Enter publisher address" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="add-phone">Phone</label>
+                    <input type="text" id="add-phone" name="phone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label for="add-email">Email</label>
+                    <input type="email" id="add-email" name="email" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label for="add-website">Website</label>
+                    <input type="url" id="add-website" name="website" placeholder="Enter website URL">
+                </div>
+                <div class="form-group">
+                    <label for="add-established-year">Established Year</label>
+                    <input type="number" id="add-established-year" name="established_year" placeholder="Enter year (e.g., 1990)" min="1800" max="2100">
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeAddPopup()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Publisher Popup -->
+<div id="updatePublisherPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-edit"></i>
+                Update Publisher
+            </h3>
+            <button class="popup-close" onclick="closeUpdatePopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <form id="updatePublisherForm" onsubmit="updatePublisher(event)">
+                {% csrf_token %}
+                <input type="hidden" id="update-publisher-id" name="publisher_id">
+                <div class="form-group">
+                    <label for="update-publisher-name">Publisher Name <span style="color: red;">*</span></label>
+                    <input type="text" id="update-publisher-name" name="publisher_name" placeholder="Enter publisher name" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-address">Address</label>
+                    <textarea id="update-address" name="address" placeholder="Enter publisher address" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="update-phone">Phone</label>
+                    <input type="text" id="update-phone" name="phone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label for="update-email">Email</label>
+                    <input type="email" id="update-email" name="email" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label for="update-website">Website</label>
+                    <input type="url" id="update-website" name="website" placeholder="Enter website URL">
+                </div>
+                <div class="form-group">
+                    <label for="update-established-year">Established Year</label>
+                    <input type="number" id="update-established-year" name="established_year" placeholder="Enter year (e.g., 1990)" min="1800" max="2100">
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeUpdatePopup()">Cancel</button>
+                    <button type="submit" class="btn btn-update">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Publisher Popup -->
+<div id="viewPublisherPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-eye"></i>
+                View Publisher
+            </h3>
+            <button class="popup-close" onclick="closeViewPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="book-info">
+                <div class="info-item">
+                    <div class="info-label">Publisher ID</div>
+                    <div class="info-value" id="view-publisher-id">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Publisher Name</div>
+                    <div class="info-value" id="view-publisher-name">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Address</div>
+                    <div class="info-value" id="view-address">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Phone</div>
+                    <div class="info-value" id="view-phone">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value" id="view-email">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Website</div>
+                    <div class="info-value" id="view-website">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Established Year</div>
+                    <div class="info-value" id="view-established-year">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Books Count</div>
+                    <div class="info-value" id="view-book-count">-</div>
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-close" onclick="closeViewPopup()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Popup -->
+<div id="deletePublisherPopup" class="popup-overlay">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-trash"></i>
+                Delete Confirmation
+            </h3>
+            <button class="popup-close" onclick="closeDeletePopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="delete-message">
+                Are you certain you wish to proceed with the deletion of the selected publisher?
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeDeletePopup()">Cancel</button>
+                <button type="button" class="btn btn-confirm" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/publisher_functions.js' %}"></script>
+</body>
+</html>

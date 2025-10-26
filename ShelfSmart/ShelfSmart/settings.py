@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'admin.admin_profile',
     'admin.book_management',
     'admin.category_management',
+    'admin.publisher_management',
     'admin.user_management',
     'admin.catalog_management',
     # User apps
