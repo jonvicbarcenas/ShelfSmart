@@ -72,12 +72,14 @@ class BookAuthor(models.Model):
     book = models.ForeignKey(
         'Book',
         on_delete=models.CASCADE,
+        null=False,
         related_name='book_authors',
         help_text="Book reference"
     )
     author = models.ForeignKey(
         'Author',
         on_delete=models.CASCADE,
+        null=False,
         related_name='book_authors',
         help_text="Author reference"
     )
@@ -124,8 +126,8 @@ class BorrowRecord(models.Model):
 class Author(models.Model):
     """Author model for storing book author information"""
     # author_id is automatically created as 'id' by Django
-    first_name = models.CharField(max_length=50, help_text="Author's first name")
-    last_name = models.CharField(max_length=50, help_text="Author's last name")
+    first_name = models.CharField(max_length=50, null=False, blank=False, help_text="Author's first name")
+    last_name = models.CharField(max_length=50, null=False, blank=False, help_text="Author's last name")
     biography = models.TextField(blank=True, null=True, help_text="Author biography")
     nationality = models.CharField(max_length=50, blank=True, null=True, help_text="Author nationality")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -154,7 +156,7 @@ class Author(models.Model):
 class Category(models.Model):
     """Category model for book categorization with support for hierarchical categories"""
     # category_id is automatically created as 'id' by Django
-    category_name = models.CharField(max_length=100, unique=True, help_text="Category name")
+    category_name = models.CharField(max_length=100, unique=True, null=False, blank=False, help_text="Category name")
     description = models.TextField(blank=True, null=True, help_text="Category description")
     parent_category = models.ForeignKey(
         'self',
@@ -198,7 +200,7 @@ class Category(models.Model):
 class Publisher(models.Model):
     """Publisher model for storing book publisher information"""
     # publisher_id is automatically created as 'id' by Django
-    publisher_name = models.CharField(max_length=100, unique=True, help_text="Publisher name")
+    publisher_name = models.CharField(max_length=100, unique=True, null=False, blank=False, help_text="Publisher name")
     address = models.TextField(blank=True, null=True, help_text="Publisher address")
     phone = models.CharField(max_length=15, blank=True, null=True, help_text="Contact phone number")
     email = models.EmailField(max_length=100, blank=True, null=True, help_text="Contact email")
