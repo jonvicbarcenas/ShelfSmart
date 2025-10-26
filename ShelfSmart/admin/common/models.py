@@ -126,31 +126,25 @@ class BorrowRecord(models.Model):
 class Author(models.Model):
     """Author model for storing book author information"""
     # author_id is automatically created as 'id' by Django
-    first_name = models.CharField(max_length=50, null=False, blank=False, help_text="Author's first name")
-    last_name = models.CharField(max_length=50, null=False, blank=False, help_text="Author's last name")
+    name = models.CharField(max_length=100, null=False, blank=False, help_text="Author's name")
     biography = models.TextField(blank=True, null=True, help_text="Author biography")
     nationality = models.CharField(max_length=50, blank=True, null=True, help_text="Author nationality")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return self.name
 
     @property
     def author_id(self):
         """Alias for id to match schema naming"""
         return self.id
-    
-    @property
-    def full_name(self):
-        """Get the full name of the author"""
-        return f"{self.first_name} {self.last_name}"
 
     class Meta:
         db_table = 'author'
         verbose_name = 'Author'
         verbose_name_plural = 'Authors'
-        ordering = ['last_name', 'first_name']
+        ordering = ['name']
 
 
 class Category(models.Model):

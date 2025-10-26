@@ -18,6 +18,9 @@ urlpatterns = [
     # Publisher Management
     path('publishers/', include('admin.publisher_management.urls')),
     
+    # Author Management
+    path('authors/', include('admin.author_management.urls')),
+    
     # User Management
     path('users/', include('admin.user_management.urls')),
     
