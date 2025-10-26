@@ -164,6 +164,7 @@ def publisher_management(request):
         context = {
             "user_info": get_current_user_info(request),
             "publishers": publishers,
+            "active_page": "publishers",
         }
         return render(request, "publisher_management/publisher_management.html", context)
     
@@ -173,4 +174,5 @@ def publisher_management(request):
         return render(request, "publisher_management/publisher_management.html", {
             "user_info": get_current_user_info(request),
             "publishers": [],
+            "active_page": "publishers",
         })
