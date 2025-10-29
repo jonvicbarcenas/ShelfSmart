@@ -116,7 +116,7 @@
         <div class="popup-header">
             <h3 class="popup-title">
                 <i class="fas fa-book"></i>
-                Add Book
+                Add New Book
             </h3>
             <button class="popup-close" onclick="closeAddPopup()">
                 <i class="fas fa-times"></i>
@@ -125,13 +125,16 @@
         <div class="popup-content">
             <form id="addBookForm" onsubmit="addBook(event)">
                 {% csrf_token %}
+                
+                <!-- Basic Information -->
                 <div class="form-group">
-                    <label for="add-title">Title <span style="color: red;">*</span></label>
+                    <label for="add-title">Title <span class="required">*</span></label>
                     <input type="text" id="add-title" name="title" placeholder="Enter book title" required>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="add-isbn">ISBN</label>
+                        <label for="add-isbn">ISBN-13</label>
                         <input type="text" id="add-isbn" name="isbn" placeholder="Enter ISBN-13" maxlength="13">
                     </div>
                     <div class="form-group">
@@ -139,13 +142,50 @@
                         <input type="text" id="add-subtitle" name="subtitle" placeholder="Enter subtitle">
                     </div>
                 </div>
+                
                 <div class="form-group">
                     <label for="add-description">Description</label>
                     <textarea id="add-description" name="description" placeholder="Enter book description" rows="3"></textarea>
                 </div>
+                
+                <!-- Authors Section -->
+                <div class="authors-section">
+                    <div class="authors-section-header">
+                        <h4>Authors <span class="required">*</span></h4>
+                        <button type="button" class="add-author-btn" onclick="addAuthorField()">
+                            <i class="fas fa-plus"></i>
+                            Add Author
+                        </button>
+                    </div>
+                    <div id="authorsContainer">
+                        <!-- Author fields will be added here dynamically -->
+                        <div class="author-entry" data-author-index="0">
+                            <div class="form-group">
+                                <label for="author-0">Author Name</label>
+                                <select id="author-0" name="authors[]" class="author-select" required>
+                                    <option value="">Select Author</option>
+                                    {% for author in authors %}
+                                        <option value="{{ author.id }}">{{ author.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="author-role-0">Role</label>
+                                <select id="author-role-0" name="author_roles[]" class="author-role-select" required>
+                                    <option value="primary">Primary Author</option>
+                                    <option value="co-author">Co-Author</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="translator">Translator</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Publication Details -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="add-category">Category <span style="color: red;">*</span></label>
+                        <label for="add-category">Category <span class="required">*</span></label>
                         <select id="add-category" name="category_id" required>
                             <option value="">Select Category</option>
                             {% for category in categories %}
@@ -154,7 +194,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="add-publisher">Publisher <span style="color: red;">*</span></label>
+                        <label for="add-publisher">Publisher <span class="required">*</span></label>
                         <select id="add-publisher" name="publisher_id" required>
                             <option value="">Select Publisher</option>
                             {% for publisher in publishers %}
@@ -163,19 +203,51 @@
                         </select>
                     </div>
                 </div>
+                
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label for="add-publication-date">Publication Date</label>
+                        <input type="date" id="add-publication-date" name="publication_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="add-edition">Edition</label>
+                        <input type="text" id="add-edition" name="edition" placeholder="e.g., 1st, 2nd">
+                    </div>
+                    <div class="form-group">
+                        <label for="add-pages">Pages</label>
+                        <input type="number" id="add-pages" name="pages" placeholder="Number of pages" min="1">
+                    </div>
+                </div>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="add-language">Language</label>
                         <input type="text" id="add-language" name="language" placeholder="Enter language" value="English">
                     </div>
                     <div class="form-group">
-                        <label for="add-quantity">Quantity <span style="color: red;">*</span></label>
+                        <label for="add-cover-image">Cover Image URL</label>
+                        <input type="url" id="add-cover-image" name="cover_image_url" placeholder="https://example.com/cover.jpg">
+                    </div>
+                </div>
+                
+                <!-- Inventory Information -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add-total-copies">Total Copies <span class="required">*</span></label>
+                        <input type="number" id="add-total-copies" name="total_copies" value="1" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-quantity">Available Quantity <span class="required">*</span></label>
                         <input type="number" id="add-quantity" name="quantity" value="1" min="1" required>
                     </div>
                 </div>
+                
                 <div class="popup-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeAddPopup()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Book
+                    </button>
                 </div>
             </form>
         </div>

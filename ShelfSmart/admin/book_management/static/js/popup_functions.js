@@ -37,35 +37,120 @@ function updateDateTime() {
   // Global variable to store book data for operations
   const currentBookData = {}
   let deleteBookId = null
-  
+  let authorFieldIndex = 1 // Start at 1 since we have one field by default
+
   // Add Book Popup Functions
   function openAddModal() {
-    document.getElementById("addBookPopup").style.display = "block"
+    document.getElementById("addBookPopup").style.display = "flex"
   }
-  
+
   function closeAddPopup() {
     document.getElementById("addBookPopup").style.display = "none"
     document.getElementById("addBookForm").reset()
+    // Reset to one author field
+    const authorsContainer = document.getElementById("authorsContainer")
+    const firstAuthor = authorsContainer.querySelector(".author-entry")
+    authorsContainer.innerHTML = ""
+    if (firstAuthor) {
+      firstAuthor.querySelectorAll("select").forEach(select => select.value = "")
+      authorsContainer.appendChild(firstAuthor)
+    }
+    authorFieldIndex = 1
   }
+
+  // Add author field dynamically
+  function addAuthorField() {
+    const authorsContainer = document.getElementById("authorsContainer")
+    const authorEntry = document.createElement("div")
+    authorEntry.className = "author-entry"
+    authorEntry.setAttribute("data-author-index", authorFieldIndex)
   
+    // Get the author select options from the first author field
+    const firstSelect = document.querySelector(".author-select")
+    let authorOptions = '<option value="">Select Author</option>'
+    if (firstSelect) {
+      Array.from(firstSelect.options).slice(1).forEach(option => {
+        authorOptions += `<option value="${option.value}">${option.textContent}</option>`
+      })
+    }
+  
+    authorEntry.innerHTML = `
+      <div class="form-group">
+        <label for="author-${authorFieldIndex}">Author Name</label>
+        <select id="author-${authorFieldIndex}" name="authors[]" class="author-select" required>
+          ${authorOptions}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="author-role-${authorFieldIndex}">Role</label>
+        <select id="author-role-${authorFieldIndex}" name="author_roles[]" class="author-role-select" required>
+          <option value="primary">Primary Author</option>
+          <option value="co-author">Co-Author</option>
+          <option value="editor">Editor</option>
+          <option value="translator">Translator</option>
+        </select>
+      </div>
+      <button type="button" class="remove-author-btn" onclick="removeAuthorField(this)">
+        <i class="fas fa-trash"></i>
+      </button>
+    `
+  
+    authorsContainer.appendChild(authorEntry)
+    authorFieldIndex++
+  }
+
+  // Remove author field
+  function removeAuthorField(button) {
+    const authorsContainer = document.getElementById("authorsContainer")
+    const authorEntries = authorsContainer.querySelectorAll(".author-entry")
+  
+    // Don't allow removing the last author field
+    if (authorEntries.length <= 1) {
+      alert("At least one author is required!")
+      return
+    }
+  
+    button.closest(".author-entry").remove()
+  }
+
   // Add book
   function addBook(event) {
     event.preventDefault()
     const formData = new FormData(event.target)
+  
+    // Validate at least one author is selected
+    const authors = formData.getAll("authors[]")
+    const validAuthors = authors.filter(a => a !== "")
+    if (validAuthors.length === 0) {
+      alert("Please select at least one author!")
+      return
+    }
+  
     const data = {
       action: "add",
       title: formData.get("title"),
       isbn: formData.get("isbn"),
       subtitle: formData.get("subtitle"),
       description: formData.get("description"),
+      publication_date: formData.get("publication_date"),
+      edition: formData.get("edition"),
+      pages: formData.get("pages"),
+      language: formData.get("language"),
+      cover_image_url: formData.get("cover_image_url"),
       category_id: formData.get("category_id"),
       publisher_id: formData.get("publisher_id"),
-      language: formData.get("language"),
+      total_copies: formData.get("total_copies"),
       quantity: formData.get("quantity"),
-      total_copies: formData.get("quantity"),
-      availability: "available",
     }
   
+    // Add authors and their roles
+    const authorRoles = formData.getAll("author_roles[]")
+    validAuthors.forEach((authorId, index) => {
+      data[`author_${index}`] = authorId
+      data[`author_role_${index}`] = authorRoles[index] || "primary"
+    })
+    data["author_count"] = validAuthors.length
+
     fetch("/admin-panel/books/", {
       method: "POST",
       headers: {
@@ -79,12 +164,12 @@ function updateDateTime() {
           closeAddPopup()
           location.reload()
         } else {
-          alert("Error adding book")
+          alert("Error adding book. Please check all required fields.")
         }
       })
       .catch((error) => {
         console.error("Error:", error)
-        alert("Error adding book")
+        alert("Error adding book. Please try again.")
       })
   }
   
