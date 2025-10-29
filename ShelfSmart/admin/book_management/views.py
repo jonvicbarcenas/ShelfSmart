@@ -6,7 +6,7 @@ import logging
 
 from datetime import datetime, date
 import json
-from admin.common.models import Book, Category, Publisher
+from admin.common.models import Book, Category, Publisher, Author, BookAuthor
 
 logger = logging.getLogger(__name__)
 
@@ -76,27 +76,43 @@ def book_management(request):
                 isbn = _single_line(request.POST.get("isbn") or "")
                 subtitle = _single_line(request.POST.get("subtitle") or "")
                 description = _single_line(request.POST.get("description") or "")
+                publication_date = request.POST.get("publication_date") or None
+                edition = _single_line(request.POST.get("edition") or "")
+                pages = request.POST.get("pages")
                 language = _single_line(request.POST.get("language") or "English")
+                cover_image_url = request.POST.get("cover_image_url") or None
                 category_id = request.POST.get("category_id")
                 publisher_id = request.POST.get("publisher_id")
                 quantity = int(request.POST.get("quantity") or 1)
                 total_copies = int(request.POST.get("total_copies") or quantity)
                 availability = request.POST.get("availability") or "available"
+                
+                # Get author data
+                author_count = int(request.POST.get("author_count") or 0)
 
                 if not title or not category_id or not publisher_id:
                     messages.error(request, "Title, Category, and Publisher are required fields.")
+                    return redirect("/admin-panel/books/")
+                
+                if author_count == 0:
+                    messages.error(request, "At least one author is required.")
                     return redirect("/admin-panel/books/")
 
                 try:
                     category = Category.objects.get(pk=category_id)
                     publisher = Publisher.objects.get(pk=publisher_id)
                     
+                    # Create the book
                     book = Book(
                         title=title,
                         isbn=isbn if isbn else None,
                         subtitle=subtitle if subtitle else None,
                         description=description if description else None,
+                        publication_date=publication_date if publication_date else None,
+                        edition=edition if edition else None,
+                        pages=int(pages) if pages else None,
                         language=language,
+                        cover_image_url=cover_image_url if cover_image_url else None,
                         category=category,
                         publisher=publisher,
                         quantity=quantity,
@@ -105,6 +121,23 @@ def book_management(request):
                     )
                     book.save()
                     print("[dashboard] ORM add saved id=", book.id)
+                    
+                    # Add authors to the book
+                    for i in range(author_count):
+                        author_id = request.POST.get(f"author_{i}")
+                        author_role = request.POST.get(f"author_role_{i}", "primary")
+                        
+                        if author_id:
+                            try:
+                                author = Author.objects.get(pk=author_id)
+                                BookAuthor.objects.create(
+                                    book=book,
+                                    author=author,
+                                    author_role=author_role
+                                )
+                            except Author.DoesNotExist:
+                                logger.warning(f"Author with id {author_id} not found")
+                    
                     messages.success(request, "Book added successfully!")
                 except (Category.DoesNotExist, Publisher.DoesNotExist):
                     messages.error(request, "Invalid category or publisher selected.")
@@ -173,7 +206,7 @@ def book_management(request):
 
         return redirect("/admin-panel/books/")
     
-    # GET request - fetch all books, categories, and publishers
+    # GET request - fetch all books, categories, publishers, and authors
     try:
         # Fetch all books via ORM with related data
         books_qs = Book.objects.select_related('category', 'publisher').all().order_by("id")
@@ -181,6 +214,8 @@ def book_management(request):
         categories = Category.objects.all().order_by('category_name')
         # Fetch all publishers for dropdown
         publishers = Publisher.objects.all().order_by('publisher_name')
+        # Fetch all authors for dropdown
+        authors = Author.objects.all().order_by('name')
         
         # Format books data with new schema
         books = []
@@ -209,6 +244,7 @@ def book_management(request):
             "books": books,
             "categories": categories,
             "publishers": publishers,
+            "authors": authors,
         }
         return render(request, "book_management/book_management.html", context)
     
