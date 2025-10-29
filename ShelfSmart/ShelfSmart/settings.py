@@ -168,8 +168,12 @@ project_static_dir = BASE_DIR / 'static'
 if project_static_dir.exists():
     STATICFILES_DIRS.append(project_static_dir)
 
-# WhiteNoise settings for static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use WhiteNoise only in production (DEBUG=False)
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    # Use default Django static file serving in development
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'user_auth:login'
