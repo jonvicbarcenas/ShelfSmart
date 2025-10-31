@@ -1,0 +1,140 @@
+/* Settings page specific styles */
+:root {
+  --ss-bg: #f4f6f8;
+  --ss-card-bg: #ffffff;
+  --ss-text: #1f2937;
+  --ss-muted: #6b7280;
+  --ss-primary: #16a34a;
+  --ss-primary-600: #16a34a;
+  --ss-primary-700: #15803d;
+  --ss-border: #e5e7eb;
+  --ss-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+body.settings-page {
+  background: var(--ss-bg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Layout wrapper */
+.settings-wrap {
+  display: grid;
+  /* Use a single column so the settings content fills the available main area
+     (sidebar is rendered outside of this wrapper). This prevents the settings
+     card from being centered with a large empty left column. */
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+  padding: 20px 24px;
+}
+
+/* When a global sidebar already exists, avoid double layout */
+.settings-wrap.has-global-sidebar {
+  grid-template-columns: 1fr;
+}
+
+/* Card container */
+.settings-card {
+  background: var(--ss-card-bg);
+  border: 1px solid var(--ss-border);
+  border-radius: 14px;
+  box-shadow: var(--ss-shadow);
+  padding: 22px;
+  width: 100%; /* ensure it stretches to the container */
+}
+
+.settings-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--ss-text);
+  margin: 14px 0 24px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Form styling */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--ss-text);
+}
+
+.form-control,
+.form-select {
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+  background: white;
+  color: var(--ss-text);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ss-primary-600);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+/* Buttons */
+.settings-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.btn {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--ss-primary);
+  border: 1px solid var(--ss-primary-600);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--ss-primary-700);
+}
+
+.btn-primary.disabled,
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+  color: var(--ss-text);
+}
+
+/* Guard rails if global styles clash */
+.settings-scope * {
+  box-sizing: border-box;
+}
+
+.settings-scope h1,
+.settings-scope h2,
+.settings-scope h3 {
+  margin: 0;
+}
