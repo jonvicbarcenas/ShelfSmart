@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'forgot_password',
     'settings',
     'books_admin',
+    'isbn_validation',
     # Admin apps
     'admin.common',
     'admin.admin_dashboard',
