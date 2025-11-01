@@ -1,0 +1,116 @@
+<!-- 
+    REUSABLE VIEW BOOK POPUP COMPONENT
+    This component can be used across admin and user sides
+    
+    Required CSS: /static/css/view_book_popup.css
+    Required JS: /static/js/view_book_popup.js
+    Required: Font Awesome for icons
+-->
+
+<div id="viewBookPopup" class="popup-overlay">
+    <div class="popup-container view-book-container">
+        <div class="popup-header">
+            <h3 class="popup-title">
+                <i class="fas fa-eye"></i>
+                View Book Details
+            </h3>
+            <button class="popup-close" onclick="closeViewBookPopup()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="book-info">
+                <!-- Cover Image (Full Width at Top) -->
+                <div class="info-item cover-image-item">
+                    <div class="info-label">Cover Image</div>
+                    <div class="info-value cover-image-container" id="view-cover-image">
+                        <div class="loading-placeholder">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Book Details Grid -->
+                <div class="info-item">
+                    <div class="info-label">Book ID</div>
+                    <div class="info-value" id="view-book-id">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">ISBN</div>
+                    <div class="info-value" id="view-isbn">-</div>
+                </div>
+                
+                <div class="info-item full-width">
+                    <div class="info-label">Title</div>
+                    <div class="info-value" id="view-title">-</div>
+                </div>
+                
+                <div class="info-item full-width">
+                    <div class="info-label">Subtitle</div>
+                    <div class="info-value" id="view-subtitle">-</div>
+                </div>
+                
+                <div class="info-item full-width">
+                    <div class="info-label">Description</div>
+                    <div class="info-value" id="view-description">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Category</div>
+                    <div class="info-value" id="view-category">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Publisher</div>
+                    <div class="info-value" id="view-publisher">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Language</div>
+                    <div class="info-value" id="view-language">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Publication Date</div>
+                    <div class="info-value" id="view-publication-date">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Edition</div>
+                    <div class="info-value" id="view-edition">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Pages</div>
+                    <div class="info-value" id="view-pages">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Available Quantity</div>
+                    <div class="info-value" id="view-quantity">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Total Copies</div>
+                    <div class="info-value" id="view-total-copies">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Availability</div>
+                    <div class="info-value" id="view-availability">-</div>
+                </div>
+                
+                <div class="info-item full-width">
+                    <div class="info-label">Authors</div>
+                    <div class="info-value" id="view-authors">-</div>
+                </div>
+            </div>
+            
+            <div class="popup-actions">
+                <button type="button" class="btn btn-close" onclick="closeViewBookPopup()" aria-label="Close popup">
+                    <i class="fas fa-times"></i>
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

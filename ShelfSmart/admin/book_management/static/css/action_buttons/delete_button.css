@@ -1,0 +1,159 @@
+/* ==============================================
+   DELETE BUTTON STYLES
+   - Trash icon button for deleting book records
+   - Red color scheme with smooth transitions
+   - Enhanced hover effects for destructive action
+   ============================================== */
+
+/* Base Delete Button */
+.action-btn.btn-delete {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: #dc3545;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Delete Button Icon */
+.action-btn.btn-delete i {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+/* Delete Button Hover State */
+.action-btn.btn-delete:hover {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Delete Button Hover Icon Animation */
+.action-btn.btn-delete:hover i {
+    transform: scale(1.1);
+    animation: shake 0.5s ease;
+}
+
+/* Shake Animation for Delete Icon */
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0) scale(1.1);
+    }
+    25% {
+        transform: translateX(-3px) scale(1.1);
+    }
+    75% {
+        transform: translateX(3px) scale(1.1);
+    }
+}
+
+/* Delete Button Active State */
+.action-btn.btn-delete:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+/* Delete Button Focus State (Accessibility) */
+.action-btn.btn-delete:focus {
+    outline: 2px solid #dc3545;
+    outline-offset: 2px;
+}
+
+/* Delete Button Disabled State */
+.action-btn.btn-delete:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Tooltip for Delete Button */
+.action-btn.btn-delete::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    background: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.action-btn.btn-delete:hover::after {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+}
+
+/* Ripple Effect on Click */
+.action-btn.btn-delete::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.action-btn.btn-delete:active::before {
+    width: 100px;
+    height: 100px;
+}
+
+/* Warning Pulse Effect (Optional) */
+@keyframes warningPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+    }
+}
+
+.action-btn.btn-delete:hover {
+    animation: warningPulse 2s infinite;
+}
+
+/* Trash Lid Animation on Hover */
+@keyframes trashLidOpen {
+    0% {
+        transform: scale(1.1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.15) rotate(-15deg);
+    }
+    100% {
+        transform: scale(1.1) rotate(-10deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .action-btn.btn-delete {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .action-btn.btn-delete i {
+        font-size: 16px;
+    }
+}

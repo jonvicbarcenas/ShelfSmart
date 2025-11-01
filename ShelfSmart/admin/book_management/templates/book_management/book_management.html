@@ -9,7 +9,14 @@
     <link rel="stylesheet" href="{% static 'css/popup_styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/popup_styles.css' %}">
+    
+    <!-- Centralized View Book Popup CSS -->
+    <link rel="stylesheet" href="{% static 'css/view_book_popup.css' %}">
+    
+    <!-- Action Button Styles -->
+    <link rel="stylesheet" href="{% static 'css/view_button.css' %}">
+    <link rel="stylesheet" href="{% static 'css/action_buttons/edit_button.css' %}">
+    <link rel="stylesheet" href="{% static 'css/action_buttons/delete_button.css' %}">
 </head>
 <body>
 <div class="dashboard">
@@ -277,27 +284,33 @@
             <form id="updateBookForm" onsubmit="updateBook(event)">
                 {% csrf_token %}
                 <input type="hidden" id="update-book-id" name="book_id">
+                
+                <!-- Basic Information -->
                 <div class="form-group">
-                    <label for="update-title">Title <span style="color: red;">*</span></label>
+                    <label for="update-title">Title <span class="required">*</span></label>
                     <input type="text" id="update-title" name="title" placeholder="Enter book title" required>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="update-isbn">ISBN</label>
-                        <input type="text" id="update-isbn" name="isbn" placeholder="Enter ISBN-13" maxlength="13">
+                        <label for="update-isbn">ISBN (10 or 13 digits)</label>
+                        <input type="text" id="update-isbn" name="isbn" placeholder="Enter ISBN-10 or ISBN-13" maxlength="13">
                     </div>
                     <div class="form-group">
                         <label for="update-subtitle">Subtitle</label>
                         <input type="text" id="update-subtitle" name="subtitle" placeholder="Enter subtitle">
                     </div>
                 </div>
+                
                 <div class="form-group">
                     <label for="update-description">Description</label>
                     <textarea id="update-description" name="description" placeholder="Enter book description" rows="3"></textarea>
                 </div>
+                
+                <!-- Publication Details -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="update-category">Category <span style="color: red;">*</span></label>
+                        <label for="update-category">Category <span class="required">*</span></label>
                         <select id="update-category" name="category_id" required>
                             <option value="">Select Category</option>
                             {% for category in categories %}
@@ -306,7 +319,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="update-publisher">Publisher <span style="color: red;">*</span></label>
+                        <label for="update-publisher">Publisher <span class="required">*</span></label>
                         <select id="update-publisher" name="publisher_id" required>
                             <option value="">Select Publisher</option>
                             {% for publisher in publishers %}
@@ -315,93 +328,59 @@
                         </select>
                     </div>
                 </div>
+                
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label for="update-publication-date">Publication Date</label>
+                        <input type="date" id="update-publication-date" name="publication_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-edition">Edition</label>
+                        <input type="text" id="update-edition" name="edition" placeholder="e.g., 1st, 2nd">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-pages">Pages</label>
+                        <input type="number" id="update-pages" name="pages" placeholder="Number of pages" min="1">
+                    </div>
+                </div>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="update-language">Language</label>
                         <input type="text" id="update-language" name="language" placeholder="Enter language">
                     </div>
                     <div class="form-group">
-                        <label for="update-quantity">Quantity <span style="color: red;">*</span></label>
+                        <label for="update-cover-image">Cover Image URL</label>
+                        <input type="url" id="update-cover-image" name="cover_image_url" placeholder="https://example.com/cover.jpg">
+                    </div>
+                </div>
+                
+                <!-- Inventory Information -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="update-total-copies">Total Copies <span class="required">*</span></label>
+                        <input type="number" id="update-total-copies" name="total_copies" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="update-quantity">Available Quantity <span class="required">*</span></label>
                         <input type="number" id="update-quantity" name="quantity" min="1" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="update-availability">Availability</label>
-                    <select id="update-availability" name="availability">
-                        <option value="available">Available</option>
-                        <option value="borrowed">Borrowed</option>
-                    </select>
-                </div>
+                
                 <div class="popup-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeUpdatePopup()">Cancel</button>
-                    <button type="submit" class="btn btn-update">Update</button>
+                    <button type="submit" class="btn btn-update">
+                        <i class="fas fa-save"></i>
+                        Update Book
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- View Book Popup -->
-<div id="viewBookPopup" class="popup-overlay">
-    <div class="popup-container">
-        <div class="popup-header">
-            <h3 class="popup-title">
-                <i class="fas fa-eye"></i>
-                View Book
-            </h3>
-            <button class="popup-close" onclick="closeViewPopup()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="popup-content">
-            <div class="book-info">
-                <div class="info-item">
-                    <div class="info-label">Book ID</div>
-                    <div class="info-value" id="view-book-id">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">ISBN</div>
-                    <div class="info-value" id="view-isbn">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Title</div>
-                    <div class="info-value" id="view-title">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Subtitle</div>
-                    <div class="info-value" id="view-subtitle">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Description</div>
-                    <div class="info-value" id="view-description">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Category</div>
-                    <div class="info-value" id="view-category">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Publisher</div>
-                    <div class="info-value" id="view-publisher">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Language</div>
-                    <div class="info-value" id="view-language">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Quantity</div>
-                    <div class="info-value" id="view-quantity">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Availability</div>
-                    <div class="info-value" id="view-availability">-</div>
-                </div>
-            </div>
-            <div class="popup-actions">
-                <button type="button" class="btn btn-close" onclick="closeViewPopup()">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Centralized View Book Popup Component -->
+{% include 'components/view_book_popup.html' %}
 
 <!-- Delete Confirmation Popup -->
 <div id="deleteBookPopup" class="popup-overlay">
@@ -464,7 +443,20 @@
     </div>
 </div>
 
-<script src="{% static 'js/popup_functions.js' %}?v=5.0"></script>
+<script src="{% static 'js/popup_functions.js' %}?v=7.0"></script>
 <script src="{% static 'js/quick_add.js' %}?v=6.0"></script>
+
+<!-- Centralized View Book Popup Script -->
+<script src="{% static 'js/view_book_popup.js' %}"></script>
+<script>
+    // Initialize view book popup with admin API endpoint
+    initializeViewBookPopup({
+        apiEndpoint: '/admin-panel/books/api/book/'
+    });
+</script>
+
+<!-- Action Button Scripts -->
+<script src="{% static 'js/action_buttons/edit_button.js' %}?v=2.0"></script>
+<script src="{% static 'js/action_buttons/delete_button.js' %}?v=1.1"></script>
 </body>
 </html>
