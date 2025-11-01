@@ -133,9 +133,16 @@
                 </div>
                 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="add-isbn">ISBN-13</label>
-                        <input type="text" id="add-isbn" name="isbn" placeholder="Enter ISBN-13" maxlength="13">
+                    <div class="form-group isbn-group">
+                        <label for="add-isbn">ISBN (10 or 13 digits)</label>
+                        <div class="isbn-input-wrapper">
+                            <input type="text" id="add-isbn" name="isbn" placeholder="Enter ISBN-10 or ISBN-13" maxlength="13">
+                            <button type="button" class="btn-validate-isbn" onclick="validateISBN()" title="Validate and auto-fill book details">
+                                <i class="fas fa-check-circle"></i>
+                                Validate ISBN
+                            </button>
+                        </div>
+                        <div id="isbn-status" class="isbn-status"></div>
                     </div>
                     <div class="form-group">
                         <label for="add-subtitle">Subtitle</label>
@@ -420,6 +427,44 @@
     </div>
 </div>
 
-<script src="{% static 'js/popup_functions.js' %}"></script>
+<!-- Quick Add Confirmation Popup -->
+<div id="quickAddConfirmPopup" class="popup-overlay" style="z-index: 2000;">
+    <div class="popup-container" style="max-width: 450px;">
+        <div class="popup-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+            <h3 class="popup-title">
+                <i class="fas fa-plus-circle"></i>
+                Quick Add Confirmation
+            </h3>
+            <button class="popup-close" onclick="cancelQuickAdd()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content">
+            <div class="quick-add-message">
+                <div class="quick-add-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <p id="quickAddMessage">
+                    Add <strong><span id="quickAddType"></span></strong> 
+                    <strong>"<span id="quickAddName"></span>"</strong> 
+                    to the database?
+                </p>
+                <small style="color: #666; display: block; margin-top: 8px;">
+                    This will create a new entry and refresh the page.
+                </small>
+            </div>
+            <div class="popup-actions">
+                <button type="button" class="btn btn-cancel" onclick="cancelQuickAdd()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmQuickAdd()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <i class="fas fa-plus"></i>
+                    Add
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/popup_functions.js' %}?v=5.0"></script>
+<script src="{% static 'js/quick_add.js' %}?v=6.0"></script>
 </body>
 </html>

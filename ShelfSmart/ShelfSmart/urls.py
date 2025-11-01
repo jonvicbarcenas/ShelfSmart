@@ -25,6 +25,8 @@ urlpatterns = [
     path('logout/', include(('logout_app.urls', 'logout_app'), namespace='logout_app')),
     path('forgot-password/', include(('forgot_password.urls', 'forgot_password'), namespace='forgot_password')),
     path('accounts/', include('django.contrib.auth.urls')),
+    # ISBN validation API
+    path('api/isbn/', include(('isbn_validation.urls', 'isbn_validation'), namespace='isbn_validation')),
     # New admin apps
     path('admin-panel/', include('admin.urls')),
     # User apps
