@@ -170,55 +170,19 @@ table tbody tr:last-child td {
     color: #e65100;
 }
 
-/* Action Buttons */
+/* Action Buttons Container */
 .action-buttons {
     display: flex;
     gap: 8px;
-}
-
-.action-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    justify-content: flex-start;
 }
 
-.action-btn i {
-    font-size: 14px;
-}
-
-.edit-btn {
-    color: #666;
-}
-
-.edit-btn:hover {
-    background: #e3f2fd;
-    color: #1976d2;
-}
-
-.save-btn {
-    color: #666;
-}
-
-.save-btn:hover {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.delete-btn {
-    color: #dc3545;
-}
-
-.delete-btn:hover {
-    background: #fee;
-    color: #c82333;
-}
+/* Note: Individual button styles (view, edit, delete) are now in separate CSS files:
+   - css/action_buttons/view_button.css
+   - css/action_buttons/edit_button.css
+   - css/action_buttons/delete_button.css
+*/
 
 /* Responsive Design */
 @media (max-width: 768px) {

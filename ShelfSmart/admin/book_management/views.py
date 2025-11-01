@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from user_auth.decorators import admin_required
 import logging
 
@@ -153,12 +154,15 @@ def book_management(request):
                 new_isbn = request.POST.get("isbn")
                 new_subtitle = request.POST.get("subtitle")
                 new_description = request.POST.get("description")
+                new_publication_date = request.POST.get("publication_date")
+                new_edition = request.POST.get("edition")
+                new_pages = request.POST.get("pages")
                 new_language = request.POST.get("language")
+                new_cover_image_url = request.POST.get("cover_image_url")
                 new_category_id = request.POST.get("category_id")
                 new_publisher_id = request.POST.get("publisher_id")
                 new_quantity = request.POST.get("quantity")
                 new_total_copies = request.POST.get("total_copies")
-                new_availability = request.POST.get("availability")
                 
                 if new_title is not None:
                     book.title = _single_line(new_title) or book.title
@@ -168,8 +172,16 @@ def book_management(request):
                     book.subtitle = _single_line(new_subtitle) if new_subtitle else None
                 if new_description is not None:
                     book.description = _single_line(new_description) if new_description else None
+                if new_publication_date is not None:
+                    book.publication_date = new_publication_date if new_publication_date else None
+                if new_edition is not None:
+                    book.edition = _single_line(new_edition) if new_edition else None
+                if new_pages is not None:
+                    book.pages = int(new_pages) if new_pages else None
                 if new_language is not None:
                     book.language = _single_line(new_language) or book.language
+                if new_cover_image_url is not None:
+                    book.cover_image_url = new_cover_image_url if new_cover_image_url else None
                 if new_category_id is not None:
                     try:
                         book.category = Category.objects.get(pk=new_category_id)
@@ -186,8 +198,6 @@ def book_management(request):
                     book.quantity = int(new_quantity) if new_quantity else book.quantity
                 if new_total_copies is not None:
                     book.total_copies = int(new_total_copies) if new_total_copies else book.total_copies
-                if new_availability is not None:
-                    book.availability = new_availability or book.availability
                     
                 book.save()
                 print("[dashboard] ORM edit saved id=", book.id)
@@ -254,3 +264,54 @@ def book_management(request):
             "user_info": get_current_user_info(request),
             "books": []
         })
+
+@admin_required
+def get_book_details(request, book_id):
+    """API endpoint to fetch complete book details"""
+    try:
+        book = Book.objects.select_related('category', 'publisher').get(pk=book_id)
+        
+        # Get all authors for this book
+        book_authors = BookAuthor.objects.filter(book=book).select_related('author')
+        authors_list = [
+            {
+                "id": ba.author.id,
+                "name": ba.author.name,
+                "role": ba.author_role
+            }
+            for ba in book_authors
+        ]
+        
+        book_data = {
+            "success": True,
+            "book": {
+                "id": book.id,
+                "book_id": book.book_id,
+                "isbn": book.isbn or "",
+                "title": book.title,
+                "subtitle": book.subtitle or "",
+                "description": book.description or "",
+                "publication_date": book.publication_date.strftime('%Y-%m-%d') if book.publication_date else "",
+                "edition": book.edition or "",
+                "pages": book.pages or "",
+                "language": book.language,
+                "cover_image_url": book.cover_image_url or "",
+                "category_id": book.category.id if book.category else None,
+                "category_name": book.category.category_name if book.category else "N/A",
+                "publisher_id": book.publisher.id if book.publisher else None,
+                "publisher_name": book.publisher.publisher_name if book.publisher else "N/A",
+                "quantity": book.quantity,
+                "total_copies": book.total_copies,
+                "availability": book.availability,
+                "authors": authors_list,
+                "created_at": book.created_at.strftime('%Y-%m-%d %H:%M:%S') if book.created_at else "",
+                "updated_at": book.updated_at.strftime('%Y-%m-%d %H:%M:%S') if book.updated_at else "",
+            }
+        }
+        return JsonResponse(book_data)
+    
+    except Book.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Book not found"}, status=404)
+    except Exception as e:
+        logger.exception("Error fetching book details: %s", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)

@@ -36,8 +36,9 @@ function updateDateTime() {
   
   // Global variable to store book data for operations
   const currentBookData = {}
-  let deleteBookId = null
   let authorFieldIndex = 1 // Start at 1 since we have one field by default
+  
+  // Note: deleteBookId is now managed in js/action_buttons/delete_button.js
 
   // Add Book Popup Functions
   function openAddModal() {
@@ -173,198 +174,33 @@ function updateDateTime() {
       })
   }
   
-  // View Book Popup Functions
-  function viewBook(bookId) {
-    // Find book data from the table
-    const row = document.querySelector(`tr[data-id="${bookId}"]`)
-    if (row) {
-      const cells = row.querySelectorAll("td")
-      // New schema: Book ID, ISBN, Title, Category, Publisher, Language, Quantity, Availability
-      document.getElementById("view-book-id").textContent = cells[0].textContent
-      document.getElementById("view-isbn").textContent = cells[1].textContent || "-"
-      document.getElementById("view-title").textContent = cells[2].textContent
-      document.getElementById("view-subtitle").textContent = "-" // Not in table
-      document.getElementById("view-description").textContent = "-" // Not in table
-      document.getElementById("view-category").textContent = cells[3].textContent.trim()
-      document.getElementById("view-publisher").textContent = cells[4].textContent
-      document.getElementById("view-language").textContent = cells[5].textContent
-      document.getElementById("view-quantity").textContent = cells[6].textContent
-      document.getElementById("view-availability").textContent = cells[7].textContent.trim()
+  // Note: View, Edit, and Delete book functions have been moved to separate files:
+  // - js/action_buttons/view_button.js
+  // - js/action_buttons/edit_button.js
+  // - js/action_buttons/delete_button.js
   
-      document.getElementById("viewBookPopup").style.display = "block"
-    }
-  }
-  
-  function closeViewPopup() {
-    document.getElementById("viewBookPopup").style.display = "none"
-  }
-  
-  // Edit Book Popup Functions
-  function editBook(bookId) {
-    // Find book data from the table
-    const row = document.querySelector(`tr[data-id="${bookId}"]`)
-    if (row) {
-      const cells = row.querySelectorAll("td")
-      // New schema: Book ID, ISBN, Title, Category, Publisher, Language, Quantity, Availability
-      
-      // Populate update form
-      document.getElementById("update-book-id").value = bookId
-      document.getElementById("update-isbn").value = cells[1].textContent !== "-" ? cells[1].textContent : ""
-      document.getElementById("update-title").value = cells[2].textContent
-      // For category and publisher, we need to get the data attribute or find by text
-      const categoryText = cells[3].textContent.trim()
-      const publisherText = cells[4].textContent.trim()
-      document.getElementById("update-language").value = cells[5].textContent
-      document.getElementById("update-quantity").value = cells[6].textContent
-      const availText = cells[7].textContent.trim().toLowerCase()
-      document.getElementById("update-availability").value = availText
-      
-      // Set category and publisher select values by text matching
-      const categorySelect = document.getElementById("update-category")
-      for (let option of categorySelect.options) {
-        if (option.text === categoryText) {
-          categorySelect.value = option.value
-          break
-        }
-      }
-      
-      const publisherSelect = document.getElementById("update-publisher")
-      for (let option of publisherSelect.options) {
-        if (option.text === publisherText) {
-          publisherSelect.value = option.value
-          break
-        }
-      }
-  
-      document.getElementById("updateBookPopup").style.display = "block"
-    }
-  }
-  
-  function closeUpdatePopup() {
-    document.getElementById("updateBookPopup").style.display = "none"
-    document.getElementById("updateBookForm").reset()
-  }
-  
-  // Update book
-  function updateBook(event) {
-    event.preventDefault()
-    const formData = new FormData(event.target)
-    const data = {
-      action: "edit",
-      book_id: formData.get("book_id"),
-      title: formData.get("title"),
-      isbn: formData.get("isbn"),
-      subtitle: formData.get("subtitle"),
-      description: formData.get("description"),
-      category_id: formData.get("category_id"),
-      publisher_id: formData.get("publisher_id"),
-      language: formData.get("language"),
-      quantity: formData.get("quantity"),
-      total_copies: formData.get("quantity"),
-      availability: formData.get("availability"),
-    }
-  
-    fetch("/admin-panel/books/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
-      },
-      body: new URLSearchParams(data),
-    })
-      .then((response) => {
-        if (response.ok) {
-          closeUpdatePopup()
-          location.reload()
-        } else {
-          alert("Error updating book")
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error)
-        alert("Error updating book")
-      })
-  }
-  
-  // Delete Book Popup Functions
-  function deleteBook(bookId) {
-    deleteBookId = bookId
-    document.getElementById("deleteBookPopup").style.display = "block"
-  }
-  
-  function closeDeletePopup() {
-    document.getElementById("deleteBookPopup").style.display = "none"
-    deleteBookId = null
-  }
-  
-  function confirmDelete() {
-    if (deleteBookId) {
-      // Get CSRF token from the page
-      const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value
-  
-      const formData = new URLSearchParams({
-        action: "delete",
-        book_id: deleteBookId,
-      })
-  
-      fetch("/admin-panel/books/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "X-CSRFToken": csrfToken,
-        },
-        body: formData,
-      })
-        .then((response) => {
-          if (response.ok) {
-            closeDeletePopup()
-            location.reload()
-          } else {
-            alert("Error deleting book")
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error)
-          alert("Error deleting book")
-        })
-    }
-  }
-  
-  // Close popups when clicking outside
+  // Close add popup when clicking outside
   document.addEventListener("click", (event) => {
-    const popups = ["addBookPopup", "updateBookPopup", "viewBookPopup", "deleteBookPopup"]
-  
-    popups.forEach((popupId) => {
-      const popup = document.getElementById(popupId)
-      if (popup && event.target === popup) {
-        popup.style.display = "none"
-        if (popupId === "addBookPopup") {
-          document.getElementById("addBookForm").reset()
-        } else if (popupId === "updateBookPopup") {
-          document.getElementById("updateBookForm").reset()
-        } else if (popupId === "deleteBookPopup") {
-          deleteBookId = null
-        }
-      }
-    })
+    const addPopup = document.getElementById("addBookPopup")
+    
+    if (addPopup && event.target === addPopup) {
+      addPopup.style.display = "none"
+      document.getElementById("addBookForm").reset()
+    }
   })
   
-  // Close popups with Escape key
+  // Close add popup with Escape key
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      const visiblePopups = document.querySelectorAll('.popup-overlay[style*="block"]')
-      visiblePopups.forEach((popup) => {
-        popup.style.display = "none"
-        if (popup.id === "addBookPopup") {
-          document.getElementById("addBookForm").reset()
-        } else if (popup.id === "updateBookPopup") {
-          document.getElementById("updateBookForm").reset()
-        } else if (popup.id === "deleteBookPopup") {
-          deleteBookId = null
-        }
-      })
+      const addPopup = document.getElementById("addBookPopup")
+      if (addPopup && addPopup.style.display === "flex") {
+        addPopup.style.display = "none"
+        document.getElementById("addBookForm").reset()
+      }
     }
   })
+  
+  // Note: Click-outside and ESC handlers for view/edit/delete popups are now in their respective files
 
   // ISBN Validation Function
   async function validateISBN() {
