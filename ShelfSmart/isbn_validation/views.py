@@ -63,9 +63,37 @@ def validate_isbn(request):
                 'error': 'No book found with this ISBN'
             }, status=404)
         
-        # Extract book information
-        book_item = api_data['items'][0]
-        volume_info = book_item.get('volumeInfo', {})
+        # Extract book information with fallback to other items
+        # Google Books API may return multiple items, and the first one might not have complete data
+        # We'll check all items and use the one with the most complete information
+        
+        best_item = None
+        best_score = -1
+        
+        for item in api_data['items']:
+            volume_info = item.get('volumeInfo', {})
+            
+            # Score each item based on completeness
+            score = 0
+            if volume_info.get('title'): score += 1
+            if volume_info.get('authors'): score += 2  # Authors are important
+            if volume_info.get('publisher'): score += 2  # Publisher is important
+            if volume_info.get('categories'): score += 1
+            if volume_info.get('description'): score += 1
+            if volume_info.get('publishedDate'): score += 1
+            if volume_info.get('pageCount'): score += 1
+            if volume_info.get('imageLinks'): score += 1
+            
+            if score > best_score:
+                best_score = score
+                best_item = item
+        
+        # Use the best item found, or fallback to first item if none scored
+        if best_item is None:
+            best_item = api_data['items'][0]
+        
+        volume_info = best_item.get('volumeInfo', {})
+        logger.info(f'Using book item with completeness score: {best_score}')
         
         # Extract relevant fields from API
         api_categories = volume_info.get('categories', [])
