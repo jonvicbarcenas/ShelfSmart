@@ -125,3 +125,68 @@ def borrow_book(request, book_id):
             'success': False,
             'message': 'An error occurred while borrowing the book. Please try again.'
         }, status=500)
+
+@user_required
+@require_http_methods(["GET"])
+def get_book_details(request, book_id):
+    """
+    API endpoint to fetch complete book details for view popup
+    """
+    try:
+        # Fetch book with related data
+        book = Book.objects.select_related('category', 'publisher').prefetch_related(
+            'book_authors__author'
+        ).get(id=book_id)
+        
+        # Get authors for this book
+        authors = []
+        for book_author in book.book_authors.all():
+            authors.append({
+                'id': book_author.author.id,
+                'name': book_author.author.name,
+                'role': book_author.author_role
+            })
+        
+        # Build response data - wrap under 'book' key to match JavaScript expectations
+        response_data = {
+            'success': True,
+            'book': {
+                'id': book.id,
+                'book_id': book.book_id,
+                'isbn': book.isbn or '',
+                'title': book.title,
+                'subtitle': book.subtitle or '',
+                'description': book.description or '',
+                'category_name': book.category.category_name if book.category else 'N/A',
+                'category_id': book.category.id if book.category else None,
+                'publisher_name': book.publisher.publisher_name if book.publisher else 'N/A',
+                'publisher_id': book.publisher.id if book.publisher else None,
+                'authors': authors,
+                'publication_date': book.publication_date.strftime('%Y-%m-%d') if book.publication_date else '',
+                'edition': book.edition or '',
+                'pages': book.pages or 0,
+                'language': book.language,
+                'quantity': book.quantity,
+                'total_copies': book.total_copies,
+                'availability': book.availability,
+                'cover_image_url': book.cover_image_url or '',
+                'created_at': book.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_at': book.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+            }
+        }
+        
+        logger.info(f"Fetched book details for book ID: {book_id}")
+        return JsonResponse(response_data)
+        
+    except Book.DoesNotExist:
+        logger.error(f"Book not found: {book_id}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Book not found.'
+        }, status=404)
+    except Exception as e:
+        logger.error(f"Error fetching book details: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred while fetching book details.'
+        }, status=500)

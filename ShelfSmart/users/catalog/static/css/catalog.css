@@ -216,37 +216,75 @@ table tbody tr:last-child td {
     font-weight: bold;
 }
 
-/* Action Button */
+/* Category Badge - Black Theme */
+.category-badge-black {
+    background: #000000;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* Action Buttons Group - Stacked */
+.action-buttons-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Action Button Base - Circular Icon Only */
 .action-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 32px;
+    height: 32px;
     border: none;
     color: white;
     cursor: pointer;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+    padding: 0;
+    border-radius: 50%;
+    font-size: 14px;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.action-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+}
+
+.action-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+/* View Button - Solid Black */
+.view-btn {
+    background-color: #1a1a1a;
+}
+
+/* Borrow Button - Gradient */
+.borrow-btn {
+    background: #1a1a1a;
+}
+
+/* Unavailable Button */
+.unavailable-btn {
+    background: #e0e0e0;
+    color: #999999;
+    cursor: not-allowed;
+}
+
+.unavailable-btn:hover {
+    transform: none;
 }
 
 .action-btn i {
     font-size: 11px;
 }
 
-.action-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
-}
 
-.action-btn:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-}
 
 .action-btn:disabled {
     opacity: 0.5;
