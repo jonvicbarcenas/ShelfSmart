@@ -56,7 +56,7 @@
                     </button>
                     <div class="search-container">
                         <i class="fas fa-search"></i>
-                        <input type="text" class="search-input" id="searchInput" placeholder="Search by title or type">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search by title, author, publisher, or category">
                     </div>
                 </div>
             </div>
@@ -70,6 +70,7 @@
                             <th>Title</th>
                             <th>Category</th>
                             <th>Publisher</th>
+                            <th>Authors</th>
                             <th>Language</th>
                             <th>Quantity</th>
                             <th>Availability</th>
@@ -84,6 +85,7 @@
                             <td>{{ book.title }}</td>
                             <td><span class="category-badge">{{ book.category_name }}</span></td>
                             <td>{{ book.publisher_name }}</td>
+                            <td>{{ book.authors }}</td>
                             <td>{{ book.language }}</td>
                             <td>{{ book.quantity }}</td>
                             <td>
