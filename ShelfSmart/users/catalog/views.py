@@ -14,10 +14,24 @@ logger = logging.getLogger(__name__)
 @user_required
 def catalog_view(request):
     """
-    User catalog view - displays available books for borrowing with category filtering
+    User catalog view - displays available books for borrowing with category filtering and sorting
     """
     # Get category filter from query params
     category_id = request.GET.get('category', None)
+    
+    # Get sort parameter from query params
+    sort_by = request.GET.get('sort', '-created_at')
+    
+    # Validate sort parameter to prevent injection attacks
+    allowed_sort_fields = [
+        'title', '-title',
+        'created_at', '-created_at',
+        'category__category_name', '-category__category_name',
+        'publisher__publisher_name', '-publisher__publisher_name'
+    ]
+    
+    if sort_by not in allowed_sort_fields:
+        sort_by = '-created_at'  # Default to newest first
     
     # Fetch books with related category, publisher, and author data
     books_query = Book.objects.select_related('category', 'publisher').prefetch_related(
@@ -31,7 +45,8 @@ def catalog_view(request):
         except ValueError:
             pass  # Invalid category ID, show all books
     
-    books = books_query.order_by('-created_at')
+    # Apply sorting
+    books = books_query.order_by(sort_by)
     
     # Fetch all categories for the filter dropdown
     categories = Category.objects.all().order_by('category_name')
@@ -47,6 +62,7 @@ def catalog_view(request):
         'books': books,
         'categories': categories,
         'selected_category': category_id,
+        'selected_sort': sort_by,
     }
     return render(request, 'catalog/catalog.html', context)
 
