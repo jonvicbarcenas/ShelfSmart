@@ -7,6 +7,7 @@
     <title>Book Catalog | ShelfSmart</title>
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
     <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/view_book_popup.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -112,7 +113,7 @@
                             {% for book in books %}
                             <tr data-book-id="{{ book.id }}">
                                 <td>{{ book.title }}</td>
-                                <td><span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500;">{{ book.category.category_name }}</span></td>
+                                <td>{{ book.category.category_name }}</td>
                                 <td>{{ book.publisher.publisher_name }}</td>
                                 <td>
                                     {% if book.book_authors.all %}
@@ -131,15 +132,20 @@
                                     </span>
                                 </td>
                                 <td>
-                                    {% if book.availability == 'available' and book.quantity > 0 %}
-                                        <button class="action-btn borrow-btn" data-book-id="{{ book.id }}" data-book-title="{{ book.title }}">
-                                            <i class="fas fa-book-reader"></i> Borrow
+                                    <div class="action-buttons-group">
+                                        <button class="action-btn view-btn" data-book-id="{{ book.id }}" title="View Details">
+                                            <i class="fas fa-eye"></i>
                                         </button>
-                                    {% else %}
-                                        <button class="action-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
-                                            <i class="fas fa-ban"></i> Unavailable
-                                        </button>
-                                    {% endif %}
+                                        {% if book.availability == 'available' and book.quantity > 0 %}
+                                            <button class="action-btn borrow-btn" data-book-id="{{ book.id }}" data-book-title="{{ book.title }}" title="Borrow Book">
+                                                <i class="fas fa-book-reader"></i>
+                                            </button>
+                                        {% else %}
+                                            <button class="action-btn unavailable-btn" disabled title="Not available">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -155,6 +161,10 @@
     </div>
 </div>
 
+<!-- Include View Book Popup Component -->
+{% include 'components/view_book_popup.html' %}
+
+<script src="{% static 'js/view_book_popup.js' %}"></script>
 <script>
     // Get CSRF token
     function getCookie(name) {
@@ -293,6 +303,25 @@
             buttonElement.innerHTML = '<i class="fas fa-book-reader"></i> Borrow';
         });
     }
+
+    // Configure and initialize view book popup for catalog
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configure the API endpoint for catalog
+        if (typeof ViewBookPopupConfig !== 'undefined') {
+            ViewBookPopupConfig.apiEndpoint = '/user/catalog/api/book/';
+        }
+        
+        // View button event listener
+        const viewButtons = document.querySelectorAll('.view-btn');
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const bookId = this.getAttribute('data-book-id');
+                if (bookId) {
+                    viewBook(bookId);
+                }
+            });
+        });
+    });
 </script>
 </body>
 </html>
