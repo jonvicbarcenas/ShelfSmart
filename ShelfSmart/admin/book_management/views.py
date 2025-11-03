@@ -218,8 +218,10 @@ def book_management(request):
     
     # GET request - fetch all books, categories, publishers, and authors
     try:
-        # Fetch all books via ORM with related data
-        books_qs = Book.objects.select_related('category', 'publisher').all().order_by("id")
+        # Fetch all books via ORM with related data including authors
+        books_qs = Book.objects.select_related('category', 'publisher').prefetch_related(
+            'book_authors__author'
+        ).all().order_by("id")
         # Fetch all categories for dropdown
         categories = Category.objects.all().order_by('category_name')
         # Fetch all publishers for dropdown
@@ -230,6 +232,10 @@ def book_management(request):
         # Format books data with new schema
         books = []
         for b in books_qs:
+            # Get authors for this book
+            authors_list = [ba.author.name for ba in b.book_authors.all()]
+            authors_str = ", ".join(authors_list) if authors_list else "No authors"
+            
             books.append({
                 "id": b.id,
                 "book_id": b.book_id,  # Alias property
@@ -241,6 +247,7 @@ def book_management(request):
                 "category_name": b.category.category_name if b.category else "N/A",
                 "publisher_id": b.publisher.id if b.publisher else None,
                 "publisher_name": b.publisher.publisher_name if b.publisher else "N/A",
+                "authors": authors_str,
                 "language": b.language,
                 "quantity": b.quantity,
                 "total_copies": b.total_copies,

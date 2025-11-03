@@ -19,8 +19,10 @@ def catalog_view(request):
     # Get category filter from query params
     category_id = request.GET.get('category', None)
     
-    # Fetch books with related category and publisher data
-    books_query = Book.objects.select_related('category', 'publisher').all()
+    # Fetch books with related category, publisher, and author data
+    books_query = Book.objects.select_related('category', 'publisher').prefetch_related(
+        'book_authors__author'
+    ).all()
     
     # Apply category filter if provided
     if category_id:
