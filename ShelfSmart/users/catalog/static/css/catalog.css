@@ -137,10 +137,11 @@ body {
 }
 
 .page-title {
-    font-size: 24px;
-    font-weight: 500;
-    color: #000000;
-    margin: 20px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #000;
+    margin: 10px 0;
+    letter-spacing: -0.5px;
 }
 
 /* Search Container */
@@ -216,15 +217,16 @@ table tbody tr:last-child td {
     font-weight: bold;
 }
 
-/* Category Badge - Black Theme */
-.category-badge-black {
-    background: #000000;
+/* Category Badge - Black Pill Shape */
+.category-badge {
+    background: #1a1a1a;
     color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
     font-weight: 500;
     display: inline-block;
+    white-space: nowrap;
 }
 
 /* Action Buttons Group - Stacked */
