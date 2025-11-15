@@ -1,0 +1,458 @@
+:root {
+    --primary-color: #1a1a1a;
+    --secondary-color: #2d2d2d;
+    --text-color: #ffffff;
+    --accent-color: #000000;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --overdue-color: #000000;
+    --due-today-color: #4a4a4a;
+    --due-soon-color: #6a6a6a;
+}
+
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    min-height: 100vh;
+}
+
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: #000000;
+    color: #ffffff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-left: 240px;
+    padding: 24px 32px;
+    background: #f8f9fa;
+}
+
+/* Content */
+.content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Notifications Header */
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.page-title i {
+    font-size: 24px;
+    color: #000000;
+}
+
+.notification-count {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.count-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000000;
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.count-text {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Empty State */
+.empty-notifications {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.empty-notifications i {
+    font-size: 64px;
+    color: #e9ecef;
+    margin-bottom: 24px;
+}
+
+.empty-notifications h3 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 12px 0;
+}
+
+.empty-notifications p {
+    font-size: 16px;
+    color: #6c757d;
+    margin: 0 0 24px 0;
+}
+
+.browse-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #000000;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.browse-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    background: #2d2d2d;
+}
+
+/* Notification Sections */
+.notification-section {
+    margin-bottom: 32px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 16px 0;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.section-title i {
+    font-size: 18px;
+}
+
+.overdue-section .section-title {
+    border-left: 4px solid #000000;
+    color: #000000;
+}
+
+.overdue-section .section-title i {
+    color: #000000;
+}
+
+.due-today-section .section-title {
+    border-left: 4px solid #4a4a4a;
+    color: #2c3e50;
+}
+
+.due-today-section .section-title i {
+    color: #4a4a4a;
+}
+
+.due-soon-section .section-title {
+    border-left: 4px solid #6a6a6a;
+    color: #2c3e50;
+}
+
+.due-soon-section .section-title i {
+    color: #6a6a6a;
+}
+
+.section-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    color: #495057;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* Notifications List */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Notification Card */
+.notification-card {
+    display: flex;
+    gap: 16px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.notification-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.notification-card.overdue {
+    border-left-color: #000000;
+    background: linear-gradient(to right, #f5f5f5 0%, white 5%);
+}
+
+.notification-card.overdue:hover {
+    background: linear-gradient(to right, #ebebeb 0%, white 5%);
+}
+
+.notification-card.due-today {
+    border-left-color: #4a4a4a;
+    background: linear-gradient(to right, #fafafa 0%, white 5%);
+}
+
+.notification-card.due-today:hover {
+    background: linear-gradient(to right, #f0f0f0 0%, white 5%);
+}
+
+.notification-card.due-soon {
+    border-left-color: #6a6a6a;
+    background: linear-gradient(to right, #fcfcfc 0%, white 5%);
+}
+
+.notification-card.due-soon:hover {
+    background: linear-gradient(to right, #f5f5f5 0%, white 5%);
+}
+
+/* Notification Icon */
+.notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.overdue .notification-icon {
+    background: #000000;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.due-today .notification-icon {
+    background: #4a4a4a;
+    color: white;
+    box-shadow: 0 4px 12px rgba(74, 74, 74, 0.3);
+}
+
+.due-soon .notification-icon {
+    background: #6a6a6a;
+    color: white;
+    box-shadow: 0 4px 12px rgba(106, 106, 106, 0.3);
+}
+
+.notification-icon i {
+    font-size: 20px;
+}
+
+/* Notification Content */
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.book-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+    line-height: 1.4;
+    flex: 1;
+}
+
+/* Urgency Badges */
+.urgency-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.urgency-badge.critical {
+    background: #000000;
+    color: white;
+    animation: pulse 2s infinite;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.urgency-badge.high {
+    background: #4a4a4a;
+    color: white;
+    box-shadow: 0 2px 8px rgba(74, 74, 74, 0.4);
+}
+
+.urgency-badge.medium {
+    background: #6a6a6a;
+    color: white;
+    box-shadow: 0 2px 8px rgba(106, 106, 106, 0.4);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Notification Details */
+.notification-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #495057;
+}
+
+.detail-row i {
+    width: 16px;
+    color: #6c757d;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #6c757d;
+    min-width: 80px;
+}
+
+.detail-value {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.days-info {
+    color: #6c757d;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.days-info.overdue-days {
+    color: #000000;
+    font-weight: 600;
+}
+
+/* Notification Action */
+.notification-action {
+    padding-top: 12px;
+    border-top: 1px solid #e9ecef;
+}
+
+.action-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.action-message i {
+    font-size: 14px;
+    color: #000000;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 16px;
+    }
+
+    .notifications-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .notification-card {
+        flex-direction: column;
+    }
+
+    .notification-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

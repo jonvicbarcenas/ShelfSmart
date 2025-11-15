@@ -6,6 +6,9 @@ urlpatterns = [
     # User Dashboard
     path('dashboard/', include('users.user_dashboard.urls')),
     
+    # Notifications
+    path('notifications/', include('users.notifications.urls')),
+    
     # User Profile
     path('profile/', include('users.user_profile.urls')),
     
