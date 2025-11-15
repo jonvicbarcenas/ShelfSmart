@@ -46,6 +46,19 @@
                 <button class="tab-btn" data-tab="overdue" onclick="switchTab('overdue')">Overdue Borrowers</button>
             </div>
 
+            <!-- Notification Actions -->
+            <div class="notification-actions" style="display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap;">
+                <button class="action-btn" onclick="sendDueReminders()" title="Send email reminders for books due within 3 days">
+                    <i class="fas fa-bell"></i> Send Due Reminders
+                </button>
+                <button class="action-btn action-btn-warning" onclick="sendOverdueNotifications()" title="Send email notifications for overdue books">
+                    <i class="fas fa-exclamation-triangle"></i> Send Overdue Notifications
+                </button>
+                <div class="notification-info" style="color: #666; font-size: 14px; padding: 8px 0; flex-basis: 100%;">
+                    <i class="fas fa-info-circle"></i> Email notifications will be sent to users' registered email addresses.
+                </div>
+            </div>
+
             <!-- Search Bar -->
             <div class="search-container">
                 <input type="text" class="search-input" id="searchInput" placeholder="Search by ID or User">
@@ -224,6 +237,69 @@
                 } else {
                     alert('Error marking as returned');
                 }
+            });
+        }
+    }
+
+    // Send due reminders
+    function sendDueReminders() {
+        if (confirm('Send email reminders to all users with books due within 3 days?')) {
+            const button = event.target.closest('button');
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            fetch('/notifications/send-due-reminders/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    days_threshold: 3
+                })
+            }).then(response => {
+                if (response.ok) {
+                    alert('Due reminders sent successfully!');
+                    location.reload();
+                } else {
+                    alert('Error sending due reminders. Please check the logs.');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-bell"></i> Send Due Reminders';
+                }
+            }).catch(error => {
+                alert('Error: ' + error.message);
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-bell"></i> Send Due Reminders';
+            });
+        }
+    }
+
+    // Send overdue notifications
+    function sendOverdueNotifications() {
+        if (confirm('Send email notifications to all users with overdue books?')) {
+            const button = event.target.closest('button');
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            fetch('/notifications/send-overdue-notifications/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('Overdue notifications sent successfully!');
+                    location.reload();
+                } else {
+                    alert('Error sending overdue notifications. Please check the logs.');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Send Overdue Notifications';
+                }
+            }).catch(error => {
+                alert('Error: ' + error.message);
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Send Overdue Notifications';
             });
         }
     }

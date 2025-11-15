@@ -67,6 +67,8 @@ INSTALLED_APPS = [
     'users.user_profile.apps.UserProfileConfig',
     # Search functionality
     'search_history',
+    # Notification service
+    'due_notifications',
 ]
 
 MIDDLEWARE = [

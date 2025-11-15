@@ -33,5 +33,7 @@ urlpatterns = [
     path('user/', include('users.urls')),
     # Search functionality
     path('search-history/', include(('search_history.urls', 'search_history'), namespace='search_history')),
+    # Due/Overdue notifications
+    path('notifications/', include(('due_notifications.urls', 'due_notifications'), namespace='due_notifications')),
     path('', include(('user_auth.urls', 'user_auth'), namespace='user_auth')),
 ]
