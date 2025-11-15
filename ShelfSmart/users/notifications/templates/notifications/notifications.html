@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications | ShelfSmart</title>
+    <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        {% with active_page='notifications' %}
+            {% include 'components/user_sidebar.html' %}
+        {% endwith %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            {% include 'components/user_header.html' %}
+
+            <div class="content">
+                <div class="notifications-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-bell"></i>
+                        Notifications
+                    </h1>
+                    <div class="notification-count">
+                        <span class="count-badge">{{ total_notifications }}</span>
+                        <span class="count-text">Total Notification{{ total_notifications|pluralize }}</span>
+                    </div>
+                </div>
+
+                {% if total_notifications == 0 %}
+                    <div class="empty-notifications">
+                        <i class="fas fa-bell-slash"></i>
+                        <h3>No notifications</h3>
+                        <p>You're all caught up! No overdue or upcoming due dates.</p>
+                        <a href="{% url 'users:catalog:catalog' %}" class="browse-link">
+                            <i class="fas fa-book"></i>
+                            Browse Catalog
+                        </a>
+                    </div>
+                {% else %}
+                    <!-- Overdue Books Section -->
+                    {% if overdue_books %}
+                    <div class="notification-section overdue-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Overdue Books
+                            <span class="section-count">{{ overdue_books.count }}</span>
+                        </h2>
+                        <div class="notifications-list">
+                            {% for record in overdue_books %}
+                            <div class="notification-card overdue">
+                                <div class="notification-icon">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-header">
+                                        <h3 class="book-title">{{ record.book.title }}</h3>
+                                        <span class="urgency-badge critical">OVERDUE</span>
+                                    </div>
+                                    <div class="notification-details">
+                                        <div class="detail-row">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span class="detail-label">Due Date:</span>
+                                            <span class="detail-value">{{ record.due_date|date:"d M Y" }}</span>
+                                            <span class="days-info overdue-days">
+                                                ({{ record.due_date|timesince }} ago)
+                                            </span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-clock"></i>
+                                            <span class="detail-label">Borrowed:</span>
+                                            <span class="detail-value">{{ record.borrowed_date|date:"d M Y" }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="notification-action">
+                                        <p class="action-message">
+                                            <i class="fas fa-info-circle"></i>
+                                            Please return this book as soon as possible to avoid late fees.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Due Today Section -->
+                    {% if due_today_books %}
+                    <div class="notification-section due-today-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-calendar-day"></i>
+                            Due Today
+                            <span class="section-count">{{ due_today_books.count }}</span>
+                        </h2>
+                        <div class="notifications-list">
+                            {% for record in due_today_books %}
+                            <div class="notification-card due-today">
+                                <div class="notification-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-header">
+                                        <h3 class="book-title">{{ record.book.title }}</h3>
+                                        <span class="urgency-badge high">DUE TODAY</span>
+                                    </div>
+                                    <div class="notification-details">
+                                        <div class="detail-row">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span class="detail-label">Due Date:</span>
+                                            <span class="detail-value">{{ record.due_date|date:"d M Y" }}</span>
+                                            <span class="days-info">Today</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-clock"></i>
+                                            <span class="detail-label">Borrowed:</span>
+                                            <span class="detail-value">{{ record.borrowed_date|date:"d M Y" }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="notification-action">
+                                        <p class="action-message">
+                                            <i class="fas fa-info-circle"></i>
+                                            This book is due today. Return it before the end of the day.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Due Soon Section -->
+                    {% if due_soon_books %}
+                    <div class="notification-section due-soon-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-calendar-check"></i>
+                            Due Soon (Next 3 Days)
+                            <span class="section-count">{{ due_soon_books.count }}</span>
+                        </h2>
+                        <div class="notifications-list">
+                            {% for record in due_soon_books %}
+                            <div class="notification-card due-soon">
+                                <div class="notification-icon">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-header">
+                                        <h3 class="book-title">{{ record.book.title }}</h3>
+                                        <span class="urgency-badge medium">DUE SOON</span>
+                                    </div>
+                                    <div class="notification-details">
+                                        <div class="detail-row">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span class="detail-label">Due Date:</span>
+                                            <span class="detail-value">{{ record.due_date|date:"d M Y" }}</span>
+                                            <span class="days-info">
+                                                (in {{ record.due_date|timeuntil }})
+                                            </span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-clock"></i>
+                                            <span class="detail-label">Borrowed:</span>
+                                            <span class="detail-value">{{ record.borrowed_date|date:"d M Y" }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="notification-action">
+                                        <p class="action-message">
+                                            <i class="fas fa-info-circle"></i>
+                                            Remember to return this book by the due date.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update time and date
+        function updateDateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('currentTime');
+            if(timeElement) {
+                timeElement.textContent = now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', minute: '2-digit', hour12: true 
+                });
+            }
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
+</body>
+</html>

@@ -20,6 +20,10 @@
             <i class="fas fa-chart-pie"></i>
             <span>Dashboard</span>
         </a>
+        <a href="{% url 'users:notifications:notifications' %}" class="nav-link {% if active_page == 'notifications' %}active{% endif %}">
+            <i class="fas fa-bell"></i>
+            <span>Notifications</span>
+        </a>
         <a href="{% url 'users:catalog:catalog' %}" class="nav-link {% if active_page == 'catalog' %}active{% endif %}">
             <i class="fas fa-book-open"></i>
             <span>Catalog</span>

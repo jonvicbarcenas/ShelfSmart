@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'admin.catalog_management',
     # User apps
     'users.user_dashboard.apps.UserDashboardConfig',
+    'users.notifications.apps.NotificationsConfig',
     'users.catalog.apps.CatalogConfig',
     'users.user_profile.apps.UserProfileConfig',
     # Search functionality
