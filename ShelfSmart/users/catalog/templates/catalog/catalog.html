@@ -120,8 +120,8 @@
                                 <td>{{ book.language }}</td>
                                 <td class="book-quantity">{{ book.quantity }}</td>
                                 <td>
-                                    <span class="availability-status {% if book.availability == 'available' %}available{% else %}borrowed{% endif %}">
-                                        {{ book.availability|title }}
+                                    <span class="availability-status {% if book.user_availability == 'available' %}available{% elif book.user_availability == 'borrowed' %}borrowed{% else %}unavailable{% endif %}">
+                                        {{ book.user_availability|title }}
                                     </span>
                                 </td>
                                 <td>
@@ -129,7 +129,7 @@
                                         <button class="action-btn view-btn" data-book-id="{{ book.id }}" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        {% if book.availability == 'available' and book.quantity > 0 %}
+                                        {% if book.user_availability == 'available' %}
                                             <button class="action-btn borrow-btn" data-book-id="{{ book.id }}" data-book-title="{{ book.title }}" title="Borrow Book">
                                                 <i class="fas fa-book-reader"></i>
                                             </button>

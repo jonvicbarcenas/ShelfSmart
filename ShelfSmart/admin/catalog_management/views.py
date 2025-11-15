@@ -72,7 +72,7 @@ def catalog_admin(request):
                 book.save()
                 
                 messages.success(request, "Book marked as returned successfully!")
-                logger.info(f"Admin returned book {book.name} for user {borrow_record.user_id}")
+                logger.info(f"Admin returned book {book.title} for user {borrow_record.user_id}")
                 
         except BorrowRecord.DoesNotExist:
             messages.error(request, "Borrow record not found.")

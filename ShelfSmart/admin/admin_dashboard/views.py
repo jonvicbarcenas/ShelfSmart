@@ -98,7 +98,7 @@ def dashboard_view(request):
                 'id': record.id,
                 'user_name': f"{user.first_name} {user.last_name}",
                 'username': user.username,
-                'book_name': record.book.name,
+                'book_name': record.book.title,
                 'due_date': record.due_date,
                 'days_overdue': days_overdue
             })
