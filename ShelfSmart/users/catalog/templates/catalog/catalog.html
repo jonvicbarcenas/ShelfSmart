@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
     <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
     <link rel="stylesheet" href="{% static 'css/view_book_popup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/search_history.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -74,6 +75,14 @@
                         <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #a0aec0; font-size: 14px;"></i>
                         <input type="text" id="searchInput" placeholder="Search by Title, Category, Publisher, Author..." style="width: 100%; padding: 12px 16px 12px 45px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #2d3748; background: white; transition: all 0.3s ease; outline: none;" onfocus="this.style.borderColor='#1a1a1a'; this.style.boxShadow='0 0 0 3px rgba(26, 26, 26, 0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';" />
                     </div>
+                </div>
+                
+                <!-- Search History Button -->
+                <div style="flex: 0 0 auto; margin-left: 60px; padding-left: 10px;">
+                    <label style="display: block; margin-bottom: 8px; opacity: 0; pointer-events: none;">.</label>
+                    <button class="search-history-trigger-btn" onclick="SearchHistory.openPopup()" type="button" title="Search History">
+                        <i class="fas fa-history"></i>
+                    </button>
                 </div>
             </div>
 
@@ -148,7 +157,11 @@
 <!-- Include View Book Popup Component -->
 {% include 'components/view_book_popup.html' %}
 
+<!-- Include Search History Popup Component -->
+{% include 'components/search_history_popup.html' %}
+
 <script src="{% static 'js/view_book_popup.js' %}"></script>
+<script src="{% static 'js/search_history.js' %}"></script>
 <script>
     // Get CSRF token
     function getCookie(name) {

@@ -219,4 +219,3 @@ class Publisher(models.Model):
         db_table = 'publisher'
         verbose_name = 'Publisher'
         verbose_name_plural = 'Publishers'
-        ordering = ['publisher_name']

@@ -31,5 +31,7 @@ urlpatterns = [
     path('admin-panel/', include('admin.urls')),
     # User apps
     path('user/', include('users.urls')),
+    # Search functionality
+    path('search-history/', include(('search_history.urls', 'search_history'), namespace='search_history')),
     path('', include(('user_auth.urls', 'user_auth'), namespace='user_auth')),
 ]
