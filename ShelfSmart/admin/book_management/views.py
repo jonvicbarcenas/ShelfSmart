@@ -251,7 +251,7 @@ def book_management(request):
                 "language": b.language,
                 "quantity": b.quantity,
                 "total_copies": b.total_copies,
-                "availability": b.availability,
+                "availability": b.computed_availability,
                 "created_at": b.created_at,
                 "updated_at": b.updated_at,
             })

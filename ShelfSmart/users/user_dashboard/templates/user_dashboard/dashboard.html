@@ -56,7 +56,7 @@
                                     {% for record in borrowed_books %}
                                     <div class="borrowed-book-item {% if record.due_date < today %}overdue{% endif %}">
                                         <div class="book-main-info">
-                                            <h4 class="book-title">{{ record.book.name }}</h4>
+                                            <h4 class="book-title">{{ record.book.title }}</h4>
                                             <div class="book-meta-row">
                                                 <span class="book-type-badge">
                                                     <i class="fas fa-tag"></i> {{ record.book.type }}

@@ -89,7 +89,7 @@
                             <td>{{ book.language }}</td>
                             <td>{{ book.quantity }}</td>
                             <td>
-                                <span class="status-badge {% if book.availability == 'available' %}status-available{% else %}status-borrowed{% endif %}">
+                                <span class="status-badge {% if book.availability == 'available' %}available{% else %}borrowed{% endif %}">
                                     {{ book.availability|title }}
                                 </span>
                             </td>

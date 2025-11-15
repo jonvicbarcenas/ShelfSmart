@@ -59,6 +59,29 @@ class Book(models.Model):
     def is_available(self):
         """Check if book is available for borrowing"""
         return self.quantity > 0 and self.availability == 'available'
+    
+    @property
+    def computed_availability(self):
+        """Compute availability status based on quantity"""
+        return 'available' if self.quantity > 0 else 'borrowed'
+    
+    def get_user_availability(self, user):
+        """Get availability status for a specific user"""
+        if self.quantity <= 0:
+            return 'unavailable'
+        
+        # Check if this user has already borrowed this book and not returned it
+        if user and user.is_authenticated:
+            has_borrowed = BorrowRecord.objects.filter(
+                user_id=user.id,
+                book=self,
+                is_returned=False
+            ).exists()
+            
+            if has_borrowed:
+                return 'borrowed'
+        
+        return 'available'
 
     class Meta:
         db_table = 'book'

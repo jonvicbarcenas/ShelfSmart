@@ -4,6 +4,7 @@ from user_auth.decorators import user_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from admin.common.models import Book, BorrowRecord, Category
+from settings.models import AppSettings
 from datetime import datetime, timedelta
 import logging
 
@@ -46,7 +47,14 @@ def catalog_view(request):
             pass  # Invalid category ID, show all books
     
     # Apply sorting
-    books = books_query.order_by(sort_by)
+    books_qs = books_query.order_by(sort_by)
+    
+    # Add dynamic availability for each book based on current user
+    books = []
+    for book in books_qs:
+        # Add dynamic availability as an attribute
+        book.user_availability = book.get_user_availability(request.user)
+        books.append(book)
     
     # Fetch all categories for the filter dropdown
     categories = Category.objects.all().order_by('category_name')
@@ -76,36 +84,26 @@ def borrow_book(request, book_id):
         # Get the book
         book = Book.objects.get(id=book_id)
         
-        # Check if book is available
-        if book.availability != 'available':
+        # Check if book is available for this specific user
+        user_availability = book.get_user_availability(request.user)
+        if user_availability != 'available':
+            if user_availability == 'unavailable':
+                message = 'No copies of this book are available.'
+            elif user_availability == 'borrowed':
+                message = 'You have already borrowed this book and not returned it yet.'
+            else:
+                message = 'This book is currently not available for borrowing.'
+            
             return JsonResponse({
                 'success': False,
-                'message': 'This book is currently not available for borrowing.'
-            }, status=400)
-        
-        # Check if book has quantity available
-        if book.quantity <= 0:
-            return JsonResponse({
-                'success': False,
-                'message': 'No copies of this book are available.'
-            }, status=400)
-        
-        # Check if user already has an active borrow record for this book
-        existing_borrow = BorrowRecord.objects.filter(
-            user_id=request.user.id,
-            book=book,
-            is_returned=False
-        ).exists()
-        
-        if existing_borrow:
-            return JsonResponse({
-                'success': False,
-                'message': 'You have already borrowed this book and not returned it yet.'
+                'message': message
             }, status=400)
         
         # Create borrow record
-        # Due date is 14 days from today
-        due_date = datetime.now().date() + timedelta(days=14)
+        # Get default borrow days from settings
+        app_settings = AppSettings.get_settings()
+        borrow_days = app_settings.default_borrow_days
+        due_date = datetime.now().date() + timedelta(days=borrow_days)
         
         borrow_record = BorrowRecord.objects.create(
             user_id=request.user.id,
@@ -127,7 +125,7 @@ def borrow_book(request, book_id):
             'message': f'Successfully borrowed "{book.title}". Due date: {due_date.strftime("%B %d, %Y")}',
             'due_date': due_date.strftime('%Y-%m-%d'),
             'new_quantity': book.quantity,
-            'new_availability': book.availability
+            'new_availability': book.computed_availability
         })
         
     except Book.DoesNotExist:
