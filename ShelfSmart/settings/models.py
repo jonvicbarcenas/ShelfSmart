@@ -37,6 +37,14 @@ class AppSettings(models.Model):
             MaxValueValidator(60, 'Maximum borrow days is 60')
         ]
     )
+    max_renewals = models.IntegerField(
+        default=2,
+        help_text="Maximum number of times a book can be renewed (0-5)",
+        validators=[
+            MinValueValidator(0, 'Minimum renewals is 0'),
+            MaxValueValidator(5, 'Maximum renewals is 5')
+        ]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -57,6 +65,7 @@ class AppSettings(models.Model):
                 'theme': 'default',
                 'email_notifications': True,
                 'default_borrow_days': 14,
+                'max_renewals': 2,
             }
         )
         return settings
