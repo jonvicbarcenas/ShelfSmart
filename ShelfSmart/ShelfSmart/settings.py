@@ -64,6 +64,8 @@ INSTALLED_APPS = [
     'users.user_dashboard.apps.UserDashboardConfig',
     'users.catalog.apps.CatalogConfig',
     'users.user_profile.apps.UserProfileConfig',
+    # Search functionality
+    'search_history',
 ]
 
 MIDDLEWARE = [

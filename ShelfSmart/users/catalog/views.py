@@ -206,3 +206,121 @@ def get_book_details(request, book_id):
             'success': False,
             'error': 'An error occurred while fetching book details.'
         }, status=500)
+
+
+@user_required
+@require_http_methods(["POST"])
+def save_search_history(request):
+    """
+    API endpoint to save user search history
+    """
+    try:
+        import json
+        data = json.loads(request.body)
+        
+        search_query = data.get('search_query', '').strip()
+        search_type = data.get('search_type', 'general')
+        results_count = data.get('results_count', 0)
+        
+        if not search_query:
+            return JsonResponse({
+                'success': False,
+                'message': 'Search query is required.'
+            }, status=400)
+        
+        # Check if this exact search already exists in recent history (last 10 minutes)
+        from django.utils import timezone
+        ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+        
+        recent_duplicate = SearchHistory.objects.filter(
+            user_id=request.user.id,
+            search_query=search_query,
+            created_at__gte=ten_minutes_ago
+        ).exists()
+        
+        # Only save if not a recent duplicate
+        if not recent_duplicate:
+            SearchHistory.objects.create(
+                user_id=request.user.id,
+                search_query=search_query,
+                search_type=search_type,
+                results_count=results_count
+            )
+            logger.info(f"Search history saved for user {request.user.id}: {search_query}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Search history saved successfully.'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error saving search history: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred while saving search history.'
+        }, status=500)
+
+
+@user_required
+@require_http_methods(["GET"])
+def get_search_history(request):
+    """
+    API endpoint to retrieve user search history
+    """
+    try:
+        # Get limit from query params (default to 10)
+        limit = int(request.GET.get('limit', 10))
+        limit = min(limit, 50)  # Cap at 50 to prevent excessive data
+        
+        # Fetch user's search history
+        search_history = SearchHistory.objects.filter(
+            user_id=request.user.id
+        ).order_by('-created_at')[:limit]
+        
+        # Build response data
+        history_data = []
+        for item in search_history:
+            history_data.append({
+                'id': item.id,
+                'search_query': item.search_query,
+                'search_type': item.search_type,
+                'results_count': item.results_count,
+                'created_at': item.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'history': history_data
+        })
+        
+    except Exception as e:
+        logger.error(f"Error fetching search history: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred while fetching search history.'
+        }, status=500)
+
+
+@user_required
+@require_http_methods(["DELETE"])
+def clear_search_history(request):
+    """
+    API endpoint to clear user search history
+    """
+    try:
+        # Delete all search history for the current user
+        deleted_count = SearchHistory.objects.filter(user_id=request.user.id).delete()[0]
+        
+        logger.info(f"Cleared {deleted_count} search history entries for user {request.user.id}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully cleared {deleted_count} search history entries.'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error clearing search history: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred while clearing search history.'
+        }, status=500)

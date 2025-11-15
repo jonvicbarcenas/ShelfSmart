@@ -1,0 +1,344 @@
+/* Search History Popup Styles */
+.search-history-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.search-history-overlay.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-history-popup {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Header */
+.search-history-header {
+    background: #1a1a1a;
+    color: white;
+    padding: 24px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #333333;
+}
+
+.search-history-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-history-header h2 i {
+    font-size: 26px;
+}
+
+.search-history-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.search-history-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* Content */
+.search-history-content {
+    padding: 24px 28px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(80vh - 180px);
+}
+
+/* Empty State */
+.search-history-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+}
+
+.search-history-empty i {
+    font-size: 64px;
+    color: #cbd5e0;
+    margin-bottom: 16px;
+}
+
+.search-history-empty h3 {
+    font-size: 18px;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.search-history-empty p {
+    font-size: 14px;
+    color: #718096;
+}
+
+/* History Items */
+.search-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-history-item {
+    background: white;
+    border: 2px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.search-history-item:hover {
+    background: #f5f5f5;
+    border-color: #333333;
+    transform: translateX(4px);
+}
+
+.search-history-item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.search-history-item-query {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-history-item-query i {
+    color: #667eea;
+    font-size: 14px;
+}
+
+.search-history-item-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #718096;
+}
+
+.search-history-item-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-history-item-meta i {
+    font-size: 12px;
+}
+
+.search-history-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.search-history-item-btn {
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-history-item-btn:hover {
+    background: #333333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.search-history-item-btn i {
+    font-size: 12px;
+}
+
+/* Footer */
+.search-history-footer {
+    padding: 20px 28px;
+    background: #f7fafc;
+    border-top: 2px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-history-info {
+    font-size: 13px;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-history-info i {
+    color: #666666;
+}
+
+.search-history-clear-btn {
+    background: #1a1a1a;
+    color: white;
+    border: 2px solid #333333;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-history-clear-btn:hover {
+    background: #333333;
+    border-color: #555555;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.search-history-clear-btn i {
+    font-size: 14px;
+}
+
+/* Search History Button in Catalog */
+.search-history-trigger-btn {
+    background: #1a1a1a !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.search-history-trigger-btn:hover {
+    background: #2d2d2d !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.search-history-trigger-btn i {
+    font-size: 18px !important;
+    color: white !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search-history-popup {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .search-history-header {
+        padding: 20px;
+    }
+
+    .search-history-header h2 {
+        font-size: 20px;
+    }
+
+    .search-history-content {
+        padding: 20px;
+    }
+
+    .search-history-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .search-history-item-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .search-history-footer {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .search-history-clear-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
