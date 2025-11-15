@@ -136,6 +136,7 @@ class BorrowRecord(models.Model):
     due_date = models.DateField()
     return_date = models.DateField(null=True, blank=True)
     is_returned = models.BooleanField(default=False)
+    renewal_count = models.IntegerField(default=0, help_text="Number of times this book has been renewed")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

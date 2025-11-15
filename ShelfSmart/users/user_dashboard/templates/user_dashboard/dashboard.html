@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShelfSmart User Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=simple">
+    <link rel="stylesheet" href="{% static 'css/user_header.css' %}?v=simple">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -75,13 +75,17 @@
                                             <div class="date-row">
                                                 <i class="fas fa-clock"></i>
                                                 <span class="date-label">Due:</span>
-                                                <span class="date-value">{{ record.due_date|date:"d M Y" }}</span>
+                                                <span class="date-value" id="dueDate-{{ record.id }}">{{ record.due_date|date:"d M Y" }}</span>
                                                 {% if record.due_date < today %}
                                                     <span class="overdue-badge"><i class="fas fa-exclamation-circle"></i> OVERDUE</span>
                                                 {% elif record.due_date == today %}
                                                     <span class="due-today-badge"><i class="fas fa-info-circle"></i> Due Today</span>
                                                 {% endif %}
                                             </div>
+                                        </div>
+                                        <div class="action-row">
+                                            <button class="btn-renew" data-record-id="{{ record.id }}" data-renewal-count="{{ record.renewal_count|default:0 }}" {% if record.renewal_count >= 2 %}disabled{% endif %}>Renew</button>
+                                            <span class="renewal-count" id="renewCount-{{ record.id }}">Renewals: {{ record.renewal_count|default:0 }} / 2</span>
                                         </div>
                                     </div>
                                     {% endfor %}
@@ -115,6 +119,66 @@
         }
         updateDateTime();
         setInterval(updateDateTime, 1000);
+
+        // CSRF helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // Renew button handler
+        document.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.btn-renew');
+            if (!btn) return;
+            const recordId = btn.getAttribute('data-record-id');
+            btn.disabled = true;
+            try {
+                const resp = await fetch(`{% url 'users:user_dashboard:renew_borrowed_book' 0 %}`.replace('/0/', `/${recordId}/`), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    // Update due date and renewal count UI
+                    const dueEl = document.getElementById(`dueDate-${recordId}`);
+                    if (dueEl) {
+                        const d = new Date(data.new_due_date);
+                        const formatted = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                        dueEl.textContent = formatted;
+                    }
+                    const cntEl = document.getElementById(`renewCount-${recordId}`);
+                    if (cntEl) cntEl.textContent = `${data.renewal_count} / 2`;
+                    
+                    // Disable button if max renewals reached
+                    if (data.renewal_count >= 2) {
+                        btn.disabled = true;
+                        btn.title = 'Maximum renewals reached';
+                    }
+                    
+                    alert(data.message);
+                } else {
+                    alert(data.message || 'Renewal failed');
+                }
+            } catch (err) {
+                alert('An error occurred while requesting renewal.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
