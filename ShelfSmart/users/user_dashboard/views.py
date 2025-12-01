@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from user_auth.decorators import user_required
-from admin.common.models import BorrowRecord
+from admin.common.models import BorrowRecord, Book
 from settings.models import AppSettings
 from datetime import date, timedelta
 
@@ -27,6 +27,9 @@ def dashboard_view(request):
     today = date.today()
     overdue_books_count = borrowed_books.filter(due_date__lt=today).count()
     
+    # Fetch new arrivals (recently added books)
+    new_arrivals = Book.objects.order_by('-created_at')[:4]
+    
     user_info = {
         'full_name': f"{request.user.first_name} {request.user.last_name}",
         'role': request.user.get_user_type_display(),
@@ -41,6 +44,7 @@ def dashboard_view(request):
         'borrowed_books': borrowed_books,
         'borrowed_books_count': borrowed_books_count,
         'overdue_books_count': overdue_books_count,
+        'new_arrivals': new_arrivals,
         'today': today,
         'app_settings': app_settings,
     }
