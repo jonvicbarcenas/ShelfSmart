@@ -111,9 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Remove editing class
             profileForm.classList.remove('editing');
-            
-            // Show success message (optional)
-            alert('Profile updated successfully!');
         }, 500);
     });
 });

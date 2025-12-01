@@ -9,12 +9,6 @@
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/user_header.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .alert { padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; }
-        .alert-success { background-color: #d4edda; color: #155724; border-left: 4px solid #28a745; }
-        .alert-error { background-color: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
-        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    </style>
 </head>
 <body>
     <div class="dashboard">
@@ -30,16 +24,6 @@
             <!-- Profile Content -->
             <div class="profile-content">
                 <h1 class="profile-title">User Profile</h1>
-
-                <!-- Success/Error Messages -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">
-                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
 
                 <div class="profile-card">
                     <div class="profile-header">
@@ -134,7 +118,6 @@
             for (const fieldName of requiredFields) {
                 if (!document.getElementById(fieldName).value.trim()) {
                     e.preventDefault();
-                    alert(`${fieldName.replace(/([A-Z])/g, ' $1').trim()} is a required field!`);
                     return;
                 }
             }
