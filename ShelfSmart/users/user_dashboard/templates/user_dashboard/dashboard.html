@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShelfSmart User Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=simple">
+    <link rel="stylesheet" href="{% static 'user_dashboard/css/dashboard.css' %}?v=2.1">
     <link rel="stylesheet" href="{% static 'css/user_header.css' %}?v=simple">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -22,12 +22,13 @@
             {% include 'components/user_header.html' %}
 
             <div class="dashboard-content">
-                <!-- Left Section (User Stats) -->
-                <div class="left-section">
-                    <div class="stats-container vertical">
+                <!-- Main Column -->
+                <div class="main-column">
+                    <!-- Stats Row -->
+                    <div class="stats-row">
                         <div class="stat-card">
                             <div class="stat-content">
-                                <div class="stat-icon"><i class="fas fa-book"></i></div>
+                                <div class="stat-icon icon-blue"><i class="fas fa-book"></i></div>
                                 <div class="stat-text">
                                     <h3>{{ borrowed_books_count|default:"0" }}</h3>
                                     <p>Books Borrowed</p>
@@ -36,7 +37,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-content">
-                                <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                                <div class="stat-icon icon-orange"><i class="fas fa-hourglass-half"></i></div>
                                 <div class="stat-text">
                                     <h3>{{ overdue_books_count|default:"0" }}</h3>
                                     <p>Overdue Books</p>
@@ -44,61 +45,120 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Quick Actions -->
+                    <div class="section-container quick-actions-container">
+                        <h2>Quick Actions</h2>
+                        <div class="actions-grid">
+                            <a href="{% url 'users:catalog:catalog' %}" class="action-card">
+                                <div class="action-icon"><i class="fas fa-search"></i></div>
+                                <div class="action-text">
+                                    <h4>Browse Catalog</h4>
+                                    <p>Find new books to read</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'users:notifications:notifications' %}" class="action-card">
+                                <div class="action-icon"><i class="fas fa-bell"></i></div>
+                                <div class="action-text">
+                                    <h4>Notifications</h4>
+                                    <p>Check your updates</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'users:user_profile:profile' %}" class="action-card">
+                                <div class="action-icon"><i class="fas fa-user-circle"></i></div>
+                                <div class="action-text">
+                                    <h4>My Profile</h4>
+                                    <p>Manage your account</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Currently Borrowed -->
+                    <div class="section-container">
+                        <h2>Currently Borrowed Books</h2>
+                        <div class="list" id="borrowedBooksList">
+                            {% if borrowed_books %}
+                                {% for record in borrowed_books %}
+                                <div class="borrowed-book-item {% if record.due_date < today %}overdue{% endif %}">
+                                    <div class="book-main-info">
+                                        <h4 class="book-title">{{ record.book.title }}</h4>
+                                        <div class="book-meta-row">
+                                            <span class="book-type-badge">
+                                                <i class="fas fa-tag"></i> {{ record.book.category.category_name }}
+                                            </span>
+                                            <span class="book-language-badge">
+                                                <i class="fas fa-language"></i> {{ record.book.language }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="book-dates-info">
+                                        <div class="date-row">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span class="date-label">Borrowed:</span>
+                                            <span class="date-value">{{ record.borrowed_date|date:"d M Y" }}</span>
+                                        </div>
+                                        <div class="date-row">
+                                            <i class="fas fa-clock"></i>
+                                            <span class="date-label">Due:</span>
+                                            <span class="date-value" id="dueDate-{{ record.id }}">{{ record.due_date|date:"d M Y" }}</span>
+                                            {% if record.due_date < today %}
+                                                <span class="overdue-badge"><i class="fas fa-exclamation-circle"></i> OVERDUE</span>
+                                            {% elif record.due_date == today %}
+                                                <span class="due-today-badge"><i class="fas fa-info-circle"></i> Due Today</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="action-row">
+                                        <button class="btn-renew" data-record-id="{{ record.id }}" data-renewal-count="{{ record.renewal_count|default:0 }}" {% if record.renewal_count >= app_settings.max_renewals %}disabled{% endif %}>Renew</button>
+                                        <span class="renewal-count" id="renewCount-{{ record.id }}">Renewals: {{ record.renewal_count|default:0 }} / {{ app_settings.max_renewals }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-book-open" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                                    <p style=\"text-align: center; padding: 20px; color: #666; margin: 0;\">
+                                        You haven't borrowed any books yet.<br>
+                                        <a href="{% url 'users:catalog:catalog' %}" style="color: #667eea; text-decoration: none;">Browse the catalog</a> to get started!
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Right Section (Currently Borrowed) -->
-                <div class="right-section">
-                    <div class="main-sections">
-                        <div class="section-container">
-                            <h2>Currently Borrowed Books</h2>
-                            <div class="list" id="borrowedBooksList">
-                                {% if borrowed_books %}
-                                    {% for record in borrowed_books %}
-                                    <div class="borrowed-book-item {% if record.due_date < today %}overdue{% endif %}">
-                                        <div class="book-main-info">
-                                            <h4 class="book-title">{{ record.book.title }}</h4>
-                                            <div class="book-meta-row">
-                                                <span class="book-type-badge">
-                                                    <i class="fas fa-tag"></i> {{ record.book.type }}
-                                                </span>
-                                                <span class="book-language-badge">
-                                                    <i class="fas fa-language"></i> {{ record.book.language }}
-                                                </span>
-                                            </div>
+                <!-- Side Column -->
+                <div class="side-column">
+                    <!-- New Arrivals -->
+                    <div class="section-container">
+                        <h2>New Arrivals</h2>
+                        <div class="new-arrivals-list">
+                            {% for book in new_arrivals %}
+                            <div class="arrival-item">
+                                <div class="arrival-cover">
+                                    {% if book.cover_image_url %}
+                                        <img src="{{ book.cover_image_url }}" alt="{{ book.title }}">
+                                    {% else %}
+                                        <div class="placeholder-cover">
+                                            <span>{{ book.title|slice:":1" }}</span>
                                         </div>
-                                        <div class="book-dates-info">
-                                            <div class="date-row">
-                                                <i class="fas fa-calendar-alt"></i>
-                                                <span class="date-label">Borrowed:</span>
-                                                <span class="date-value">{{ record.borrowed_date|date:"d M Y" }}</span>
-                                            </div>
-                                            <div class="date-row">
-                                                <i class="fas fa-clock"></i>
-                                                <span class="date-label">Due:</span>
-                                                <span class="date-value" id="dueDate-{{ record.id }}">{{ record.due_date|date:"d M Y" }}</span>
-                                                {% if record.due_date < today %}
-                                                    <span class="overdue-badge"><i class="fas fa-exclamation-circle"></i> OVERDUE</span>
-                                                {% elif record.due_date == today %}
-                                                    <span class="due-today-badge"><i class="fas fa-info-circle"></i> Due Today</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="action-row">
-                                            <button class="btn-renew" data-record-id="{{ record.id }}" data-renewal-count="{{ record.renewal_count|default:0 }}" {% if record.renewal_count >= app_settings.max_renewals %}disabled{% endif %}>Renew</button>
-                                            <span class="renewal-count" id="renewCount-{{ record.id }}">Renewals: {{ record.renewal_count|default:0 }} / {{ app_settings.max_renewals }}</span>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="empty-state">
-                                        <i class="fas fa-book-open" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
-                                        <p style="text-align: center; padding: 20px; color: #666; margin: 0;">
-                                            You haven't borrowed any books yet.<br>
-                                            <a href="{% url 'users:catalog:catalog' %}" style="color: #667eea; text-decoration: none;">Browse the catalog</a> to get started!
-                                        </p>
-                                    </div>
-                                {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="arrival-info">
+                                    <h4 class="arrival-title">{{ book.title }}</h4>
+                                    <p class="arrival-category">{{ book.category.category_name }}</p>
+                                    <span class="arrival-date">Added {{ book.created_at|date:"M d" }}</span>
+                                </div>
                             </div>
+                            {% empty %}
+                            <p class="text-muted">No new arrivals available.</p>
+                            {% endfor %}
+                        </div>
+                        <div class="view-all-container">
+                            <a href="{% url 'users:catalog:catalog' %}" class="view-all-link">
+                                View All Books <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
