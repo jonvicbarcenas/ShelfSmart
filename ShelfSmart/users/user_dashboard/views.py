@@ -33,6 +33,8 @@ def dashboard_view(request):
         'username': request.user.username
     }
     
+    app_settings = AppSettings.get_settings()
+    
     context = {
         'user': request.user,
         'user_info': user_info,
@@ -40,6 +42,7 @@ def dashboard_view(request):
         'borrowed_books_count': borrowed_books_count,
         'overdue_books_count': overdue_books_count,
         'today': today,
+        'app_settings': app_settings,
     }
     return render(request, 'user_dashboard/dashboard.html', context)
 

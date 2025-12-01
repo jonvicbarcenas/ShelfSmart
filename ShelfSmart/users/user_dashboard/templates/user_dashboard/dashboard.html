@@ -84,8 +84,8 @@
                                             </div>
                                         </div>
                                         <div class="action-row">
-                                            <button class="btn-renew" data-record-id="{{ record.id }}" data-renewal-count="{{ record.renewal_count|default:0 }}" {% if record.renewal_count >= 2 %}disabled{% endif %}>Renew</button>
-                                            <span class="renewal-count" id="renewCount-{{ record.id }}">Renewals: {{ record.renewal_count|default:0 }} / 2</span>
+                                            <button class="btn-renew" data-record-id="{{ record.id }}" data-renewal-count="{{ record.renewal_count|default:0 }}" {% if record.renewal_count >= app_settings.max_renewals %}disabled{% endif %}>Renew</button>
+                                            <span class="renewal-count" id="renewCount-{{ record.id }}">Renewals: {{ record.renewal_count|default:0 }} / {{ app_settings.max_renewals }}</span>
                                         </div>
                                     </div>
                                     {% endfor %}
@@ -161,10 +161,10 @@
                         dueEl.textContent = formatted;
                     }
                     const cntEl = document.getElementById(`renewCount-${recordId}`);
-                    if (cntEl) cntEl.textContent = `${data.renewal_count} / 2`;
+                    if (cntEl) cntEl.textContent = `${data.renewal_count} / {{ app_settings.max_renewals }}`;
                     
                     // Disable button if max renewals reached
-                    if (data.renewal_count >= 2) {
+                    if (data.renewal_count >= {{ app_settings.max_renewals }}) {
                         btn.disabled = true;
                         btn.title = 'Maximum renewals reached';
                     }
