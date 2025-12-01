@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from user_auth.decorators import admin_required
 import logging
 
@@ -107,6 +108,17 @@ def dashboard_view(request):
     
     logger.info(f"Overdue borrowers found: {len(overdue_borrowers)}")
     
+    # Paginate overdue borrowers (10 items per page)
+    paginator = Paginator(overdue_borrowers, 10)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        overdue_borrowers_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        overdue_borrowers_page = paginator.page(1)
+    except EmptyPage:
+        overdue_borrowers_page = paginator.page(paginator.num_pages)
+    
     # Calculate monthly borrow and return statistics for the current year
     current_year = datetime.now().year
     
@@ -148,7 +160,7 @@ def dashboard_view(request):
         "user_info": get_current_user_info(request),
         "total_users": total_users,
         "total_books": total_books,
-        "overdue_borrowers": overdue_borrowers,
+        "overdue_borrowers": overdue_borrowers_page,
         "total_borrowed": total_borrowed,
         "total_returned": total_returned,
         "monthly_borrowed": json.dumps(monthly_borrowed),
