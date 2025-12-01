@@ -129,96 +129,17 @@
                     <form id="settings-form" method="POST" action="{% url 'settings_app:settings' %}">
                         {% csrf_token %}
 
-                        <!-- Profile Information -->
-                        <h2 style="margin-top:0; margin-bottom:12px; font-size:1rem; font-weight:600;">Profile Information</h2>
-                        <p style="margin:0 0 12px; color:#6b7280;">Update your personal details</p>
+                        <!-- Borrowing Settings -->
+                        <h2 style="margin-top:0; margin-bottom:12px; font-size:1rem; font-weight:600;">Borrowing Settings</h2>
+                        <p style="margin:0 0 12px; color:#6b7280;">Configure borrowing rules for the library</p>
                         <div class="form-row" style="margin-bottom:16px;">
                             <div class="form-group">
-                                <label for="first_name">First Name</label>
-                                <input type="text" id="first_name" name="first_name" value="{{ request.user.first_name|default:'' }}" placeholder="First name">
+                                <label for="default_borrow_days">Default Borrow Days</label>
+                                <input type="number" id="default_borrow_days" name="default_borrow_days" value="{{ settings.default_borrow_days|default:14 }}" placeholder="e.g., 14">
                             </div>
                             <div class="form-group">
-                                <label for="last_name">Last Name</label>
-                                <input type="text" id="last_name" name="last_name" value="{{ request.user.last_name|default:'' }}" placeholder="Last name">
-                            </div>
-                        </div>
-
-                        <div class="form-row" style="margin-bottom:16px;">
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" value="{{ request.user.email|default:'' }}" placeholder="you@domain.com">
-                            </div>
-                        </div>
-
-                        <div class="form-row" style="margin-bottom:18px;">
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" value="{% if request.user.profile %}{{ request.user.profile.phone|default:'' }}{% endif %}" placeholder="+1 (555) 123-4567">
-                            </div>
-                        </div>
-
-                        <!-- Notifications -->
-                        <h2 style="margin-top:8px; margin-bottom:12px; font-size:1rem; font-weight:600;">Notifications</h2>
-                        <p style="margin:0 0 12px; color:#6b7280;">Manage how you receive updates about your borrowed books</p>
-                        <div class="settings-card" style="padding:14px; margin-bottom:12px; border-radius:8px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                <div>
-                                    <strong>Email Notifications</strong>
-                                    <div style="color:#6b7280; font-size:0.9rem;">Receive notifications via email</div>
-                                </div>
-                                <div>
-                                    <label for="email_notifications" style="display:inline-flex; align-items:center; gap:8px;">
-                                        <input type="checkbox" id="email_notifications" name="email_notifications" {% if settings.email_notifications %}checked{% endif %}>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                <div>
-                                    <strong>Due Date Reminders</strong>
-                                    <div style="color:#6b7280; font-size:0.9rem;">Get notified 3 days before books are due</div>
-                                </div>
-                                <div>
-                                    <label for="due_date_reminders" style="display:inline-flex; align-items:center; gap:8px;">
-                                        <input type="checkbox" id="due_date_reminders" name="due_date_reminders" {% if settings.due_date_reminders %}checked{% endif %}>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <strong>Overdue Alerts</strong>
-                                    <div style="color:#6b7280; font-size:0.9rem;">Receive alerts for overdue books</div>
-                                </div>
-                                <div>
-                                    <label for="overdue_alerts" style="display:inline-flex; align-items:center; gap:8px;">
-                                        <input type="checkbox" id="overdue_alerts" name="overdue_alerts" {% if settings.overdue_alerts %}checked{% endif %}>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Display Preferences -->
-                        <h2 style="margin-top:8px; margin-bottom:12px; font-size:1rem; font-weight:600;">Display Preferences</h2>
-                        <p style="margin:0 0 12px; color:#6b7280;">Customize how information is displayed</p>
-                        <div class="settings-card" style="padding:14px; margin-bottom:18px; border-radius:8px;">
-                            <div class="form-row" style="margin-bottom:12px;">
-                                <div class="form-group">
-                                    <label for="items_per_page">Items Per Page</label>
-                                    <select id="items_per_page" name="items_per_page" class="form-select">
-                                        <option value="10">10</option>
-                                        <option value="20">20</option>
-                                        <option value="50">50</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="date_format">Date Format</label>
-                                    <select id="date_format" name="date_format" class="form-select">
-                                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                                    </select>
-                                </div>
+                                <label for="max_renewals">Max Renewals</label>
+                                <input type="number" id="max_renewals" name="max_renewals" value="{{ settings.max_renewals|default:2 }}" placeholder="e.g., 2">
                             </div>
                         </div>
 
