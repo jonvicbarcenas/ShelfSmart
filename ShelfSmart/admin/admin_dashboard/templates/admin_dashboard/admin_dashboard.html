@@ -132,19 +132,19 @@
                             
                             <!-- Pagination Controls -->
                             {% if overdue_borrowers.has_other_pages %}
-                            <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; padding: 15px;">
+                            <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 15px; padding: 10px;">
                                 {% if overdue_borrowers.has_previous %}
-                                    <a href="?page=1" class="pagination-btn" style="padding: 8px 12px; background: #4CAF50; color: white; border-radius: 5px; text-decoration: none;">First</a>
-                                    <a href="?page={{ overdue_borrowers.previous_page_number }}" class="pagination-btn" style="padding: 8px 12px; background: #4CAF50; color: white; border-radius: 5px; text-decoration: none;">Previous</a>
+                                    <a href="?page=1" class="pagination-btn" style="padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size: 12px; transition: opacity 0.2s;">&laquo; First</a>
+                                    <a href="?page={{ overdue_borrowers.previous_page_number }}" class="pagination-btn" style="padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size: 12px; transition: opacity 0.2s;">&lsaquo; Prev</a>
                                 {% endif %}
                                 
-                                <span style="padding: 8px 15px; background: #f5f5f5; border-radius: 5px; font-weight: bold;">
+                                <span style="font-size: 12px; font-weight: 600; color: #000; margin: 0 5px;">
                                     Page {{ overdue_borrowers.number }} of {{ overdue_borrowers.paginator.num_pages }}
                                 </span>
                                 
                                 {% if overdue_borrowers.has_next %}
-                                    <a href="?page={{ overdue_borrowers.next_page_number }}" class="pagination-btn" style="padding: 8px 12px; background: #4CAF50; color: white; border-radius: 5px; text-decoration: none;">Next</a>
-                                    <a href="?page={{ overdue_borrowers.paginator.num_pages }}" class="pagination-btn" style="padding: 8px 12px; background: #4CAF50; color: white; border-radius: 5px; text-decoration: none;">Last</a>
+                                    <a href="?page={{ overdue_borrowers.next_page_number }}" class="pagination-btn" style="padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size: 12px; transition: opacity 0.2s;">Next &rsaquo;</a>
+                                    <a href="?page={{ overdue_borrowers.paginator.num_pages }}" class="pagination-btn" style="padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size: 12px; transition: opacity 0.2s;">Last &raquo;</a>
                                 {% endif %}
                             </div>
                             {% endif %}

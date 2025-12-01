@@ -108,8 +108,8 @@ def dashboard_view(request):
     
     logger.info(f"Overdue borrowers found: {len(overdue_borrowers)}")
     
-    # Paginate overdue borrowers (10 items per page)
-    paginator = Paginator(overdue_borrowers, 10)
+    # Paginate overdue borrowers (3 items per page)
+    paginator = Paginator(overdue_borrowers, 3)
     page_number = request.GET.get('page', 1)
     
     try:
