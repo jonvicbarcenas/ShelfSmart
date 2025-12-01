@@ -129,6 +129,25 @@
                                 <p style="text-align: center; padding: 20px; color: #666;">No overdue borrowers</p>
                                 {% endfor %}
                             </div>
+                            
+                            <!-- Pagination Controls -->
+                            {% if overdue_borrowers.has_other_pages %}
+                            <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 15px; padding: 10px;">
+                                {% if overdue_borrowers.has_previous %}
+                                    <a href="?page=1" class="pagination-btn" style="padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size: 12px; transition: opacity 0.2s;">&laquo; First</a>
+                                    <a href="?page={{ overdue_borrowers.previous_page_number }}" class="pagination-btn" style="padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size: 12px; transition: opacity 0.2s;">&lsaquo; Prev</a>
+                                {% endif %}
+                                
+                                <span style="font-size: 12px; font-weight: 600; color: #000; margin: 0 5px;">
+                                    Page {{ overdue_borrowers.number }} of {{ overdue_borrowers.paginator.num_pages }}
+                                </span>
+                                
+                                {% if overdue_borrowers.has_next %}
+                                    <a href="?page={{ overdue_borrowers.next_page_number }}" class="pagination-btn" style="padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size: 12px; transition: opacity 0.2s;">Next &rsaquo;</a>
+                                    <a href="?page={{ overdue_borrowers.paginator.num_pages }}" class="pagination-btn" style="padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size: 12px; transition: opacity 0.2s;">Last &raquo;</a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         </div>
 
                         <!-- BookWorm Admins -->
