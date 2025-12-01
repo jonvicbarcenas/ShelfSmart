@@ -54,9 +54,58 @@
                         <i class="fas fa-plus"></i>
                         Add Book
                     </button>
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input type="text" class="search-input" id="searchInput" placeholder="Search by title, author, publisher, or category">
+                </div>
+            </div>
+
+            <!-- Filter, Sort, and Search Bar (Admin) -->
+            <div style="display: flex; gap: 20px; margin-bottom: 30px; align-items: flex-end; flex-wrap: wrap;">
+                <!-- Category Filter -->
+                <div style="flex: 0 0 280px;">
+                    <label for="categoryFilter" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">
+                        <i class="fas fa-filter" style="color: #1a1a1a;"></i>
+                        Filter by Category
+                    </label>
+                    <div style="position: relative;">
+                        <select id="categoryFilter" onchange="filterByCategory(this.value)" style="width: 100%; padding: 12px 16px; padding-right: 40px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #2d3748; background: white; cursor: pointer; transition: all 0.3s ease; outline: none; appearance: none;">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ category.category_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sort Control -->
+                <div style="flex: 0 0 240px;">
+                    <label for="sortSelect" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">
+                        <i class="fas fa-sort" style="color: #1a1a1a;"></i>
+                        Sort Results
+                    </label>
+                    <div style="position: relative;">
+                        <select id="sortSelect" onchange="sortResults(this.value)" style="width: 100%; padding: 12px 16px; padding-right: 40px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #2d3748; background: white; cursor: pointer; transition: all 0.3s ease; outline: none; appearance: none;">
+                            <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                            <option value="created_at" {% if selected_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                            <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>Title (A-Z)</option>
+                            <option value="-title" {% if selected_sort == '-title' %}selected{% endif %}>Title (Z-A)</option>
+                            <option value="category__category_name" {% if selected_sort == 'category__category_name' %}selected{% endif %}>Category (A-Z)</option>
+                            <option value="-category__category_name" {% if selected_sort == '-category__category_name' %}selected{% endif %}>Category (Z-A)</option>
+                            <option value="publisher__publisher_name" {% if selected_sort == 'publisher__publisher_name' %}selected{% endif %}>Publisher (A-Z)</option>
+                            <option value="-publisher__publisher_name" {% if selected_sort == '-publisher__publisher_name' %}selected{% endif %}>Publisher (Z-A)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div style="flex: 0 0 360px;">
+                    <label for="searchInput" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">
+                        <i class="fas fa-search" style="color: #1a1a1a;"></i>
+                        Search Books
+                    </label>
+                    <div style="position: relative;">
+                        <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #a0aec0; font-size: 14px;"></i>
+                        <input type="text" id="searchInput" placeholder="Search by Title, Category, Publisher, Author..." style="width: 100%; padding: 12px 16px 12px 45px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #2d3748; background: white; transition: all 0.3s ease; outline: none;" />
                     </div>
                 </div>
             </div>
@@ -460,5 +509,52 @@
 <!-- Action Button Scripts -->
 <script src="{% static 'js/action_buttons/edit_button.js' %}?v=2.0"></script>
 <script src="{% static 'js/action_buttons/delete_button.js' %}?v=1.1"></script>
+<script>
+    // Category filter functionality
+    function filterByCategory(categoryId) {
+        const currentUrl = new URL(window.location.href);
+        if (categoryId) {
+            currentUrl.searchParams.set('category', categoryId);
+        } else {
+            currentUrl.searchParams.delete('category');
+        }
+        window.location.href = currentUrl.toString();
+    }
+
+    // Sort results functionality
+    function sortResults(sortValue) {
+        const currentUrl = new URL(window.location.href);
+        if (sortValue) {
+            currentUrl.searchParams.set('sort', sortValue);
+        } else {
+            currentUrl.searchParams.delete('sort');
+        }
+        window.location.href = currentUrl.toString();
+    }
+
+    // Basic client-side search within the current table
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        if (!searchInput) return;
+
+        searchInput.addEventListener('keyup', function() {
+            const filter = this.value.toUpperCase();
+            const table = document.querySelector('.table-container table');
+            if (!table) return;
+            const tr = table.getElementsByTagName('tr');
+            for (let i = 1; i < tr.length; i++) { // skip header
+                let rowVisible = false;
+                const td = tr[i].getElementsByTagName('td');
+                for (let j = 0; j < td.length - 1; j++) { // exclude actions column
+                    if (td[j] && td[j].innerText.toUpperCase().indexOf(filter) > -1) {
+                        rowVisible = true;
+                        break;
+                    }
+                }
+                tr[i].style.display = rowVisible ? '' : 'none';
+            }
+        });
+    });
+</script>
 </body>
 </html>

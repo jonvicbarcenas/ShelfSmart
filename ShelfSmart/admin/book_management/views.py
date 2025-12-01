@@ -218,10 +218,35 @@ def book_management(request):
     
     # GET request - fetch all books, categories, publishers, and authors
     try:
-        # Fetch all books via ORM with related data including authors
-        books_qs = Book.objects.select_related('category', 'publisher').prefetch_related(
+        # Read filters from query params
+        category_id = request.GET.get('category')
+        sort_by = request.GET.get('sort', '-created_at')
+
+        # Validate sort parameter to prevent injection attacks
+        allowed_sort_fields = [
+            'title', '-title',
+            'created_at', '-created_at',
+            'category__category_name', '-category__category_name',
+            'publisher__publisher_name', '-publisher__publisher_name'
+        ]
+        if sort_by not in allowed_sort_fields:
+            sort_by = '-created_at'
+
+        # Base queryset with related data
+        books_query = Book.objects.select_related('category', 'publisher').prefetch_related(
             'book_authors__author'
-        ).all().order_by("id")
+        ).all()
+
+        # Apply category filter if provided
+        if category_id:
+            try:
+                books_query = books_query.filter(category_id=category_id)
+            except ValueError:
+                pass
+
+        # Apply sorting
+        books_qs = books_query.order_by(sort_by)
+
         # Fetch all categories for dropdown
         categories = Category.objects.all().order_by('category_name')
         # Fetch all publishers for dropdown
@@ -262,6 +287,8 @@ def book_management(request):
             "categories": categories,
             "publishers": publishers,
             "authors": authors,
+            "selected_category": category_id,
+            "selected_sort": sort_by,
         }
         return render(request, "book_management/book_management.html", context)
     
